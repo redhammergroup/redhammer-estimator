@@ -1836,7 +1836,7 @@ tbody tr:hover .note-input,.note-input:focus{border-bottom-color:var(--border-st
         <span class="sk-upload-icon">&#128196;</span>
         <div class="sk-upload-title">Drop PDF here or click to browse</div>
         <div class="sk-upload-sub">GAF Measure &middot; EagleView &middot; Hover &middot; Xactimate</div>
-        <input type="file" id="sk-file-input" accept=".pdf" style="display:none" onchange="skHandleFile(this.files[0])">
+        <input type="file" id="sk-file-input" accept=".pdf" style="display:none" onchange="skHandleFile(this.files[0]);this.value=''">
       </div>
 
       <div id="sk-pdf-status" class="sk-pdf-status" style="display:none">Reading&#8230;</div>
@@ -1845,11 +1845,14 @@ tbody tr:hover .note-input,.note-input:focus{border-bottom-color:var(--border-st
         <div style="font-size:.72rem;font-weight:700;color:var(--text-2);margin-bottom:10px">Extracted Measurements &#8212; Review &amp; Adjust Before Applying</div>
         <div class="sk-pgrid">
           <div class="sk-pf"><label>Total SQ</label><input type="number" id="sk-pdf-sq" min="0" step="0.01" placeholder="0.00"></div>
-          <div class="sk-pf"><label>Perimeter LF</label><input type="number" id="sk-pdf-perim" min="0" placeholder="0"></div>
+          <div class="sk-pf"><label>Perimeter LF (eave + rake)</label><input type="number" id="sk-pdf-perim" min="0" placeholder="0"></div>
+          <div class="sk-pf"><label>Eave LF</label><input type="number" id="sk-pdf-eave" min="0" placeholder="0"></div>
+          <div class="sk-pf"><label>Rake LF</label><input type="number" id="sk-pdf-rake" min="0" placeholder="0"></div>
           <div class="sk-pf"><label>Ridge LF</label><input type="number" id="sk-pdf-ridge" min="0" placeholder="0"></div>
           <div class="sk-pf"><label>Hip LF</label><input type="number" id="sk-pdf-hip" min="0" placeholder="0"></div>
           <div class="sk-pf"><label>Valley LF</label><input type="number" id="sk-pdf-valley" min="0" placeholder="0"></div>
           <div class="sk-pf"><label>Step Flash LF</label><input type="number" id="sk-pdf-stepflash" min="0" placeholder="0"></div>
+          <div class="sk-pf"><label>Predominant pitch (/12)</label><input type="number" id="sk-pdf-pitch" min="0" max="24" placeholder="e.g. 6"></div>
           <div class="sk-pf"><label>Waste %</label><input type="number" id="sk-pdf-waste" value="12" min="0" max="50"></div>
           <div class="sk-pf"><label>Stories</label>
             <select id="sk-pdf-story" style="background:var(--surface-2);border:1px solid var(--border);border-radius:5px;padding:6px 8px;font-size:.82rem;color:var(--text-1);outline:none;width:100%">
@@ -5682,6 +5685,9 @@ Report:
     const s=(id,v)=>{ const el=document.getElementById(id); if(el) el.value=v||''; };
     s('sk-pdf-sq', parsed.sq?parsed.sq.toFixed(2):'');
     s('sk-pdf-perim', parsed.perim?Math.round(parsed.perim):'');
+    s('sk-pdf-eave', parsed.eave?Math.round(parsed.eave):'');
+    s('sk-pdf-rake', parsed.rake?Math.round(parsed.rake):'');
+    s('sk-pdf-pitch', parsed.pitch||'');
     s('sk-pdf-ridge', parsed.ridge?Math.round(parsed.ridge):'');
     s('sk-pdf-hip', parsed.hip?Math.round(parsed.hip):'');
     s('sk-pdf-valley', parsed.valley?Math.round(parsed.valley):'');
@@ -5695,17 +5701,42 @@ Report:
   }
 }
 
-function skParseRegex(text){
-  const num=p=>{const m=text.match(p);return m?parseFloat(m[1]):0;};
+// Reads the summary numbers out of a measurement report's text. Handles
+//  · Nearmap / GAF reports:  "Roof Area 4,699 sq ft", "Hips 84 ft", "Drip Edge 440 ft", "Predominant Pitch 4 / 12"
+//  · EagleView-style:        "Total Roof Area = 4,381 sq ft", "Ridges = 113 ft"
+//  · Xactimate roof totals:  "43.81 Number of Squares", "113.78 Total Ridge Length"
+// The first match wins (summary pages come before per-building and materials pages), and
+// look-alikes such as "Ridges/Hips 219 ft" or "Pen. Perimeter 47 ft" are skipped.
+function skParseRegex(raw){
+  const t=String(raw).replace(/\s+/g,' ');
+  const n=s=>parseFloat(String(s).replace(/,/g,''))||0;
+  const NUM='([0-9][0-9,]*(?:\\.[0-9]+)?)';
+  const pick=res=>{ for(const re of res){ const m=t.match(re); if(m) return n(m[1]); } return 0; };
+  // "Label 123 ft" / "Label = 123 LF" — label not glued to a "/" or word before it, and not a penetration measurement
+  const len=(label, after)=>pick([
+    new RegExp('(?<![/\\w])(?<!Pen\\. )'+label+'\\s*(?:[:=]\\s*)?'+NUM+"\\s*(?:ft|lf|l\\.f\\.|feet|')(?![\\w])",'i'),
+    ...(after ? [new RegExp(NUM+'\\s*'+after,'i')] : []),
+  ]);
+  const sqft=pick([new RegExp('(?<![\\w.])(?:Total\\s+)?Roof\\s+Area\\s*(?:[:=]\\s*)?'+NUM+'\\s*(?:sq\\.?\\s*ft|sf|square\\s+feet)','i')]);
+  const sq = sqft ? sqft/100 : pick([
+    /total\s+(?:roof\s+)?area[:\s=]+([0-9.]+)\s*(?:sq|squares)\b/i,
+    /([0-9.]+)\s*squares?\s+total/i,
+    /([0-9][0-9,]*\.[0-9]+)\s*Number of Squares/i,
+  ]);
+  const eave=len('Eaves?'), rake=len('Rakes?');
+  const drip=len('Drip\\s+Edge');
+  const perimLabel=len('(?:Total\\s+)?Perimeter(?:\\s+Length)?', 'Total Perimeter Length');
+  const pitch=pick([/Predominant\s+Pitch\s*(?:[:=]\s*)?([0-9]{1,2})\s*\/\s*12/i]);
   return {
-    sq: num(/total\s+(?:roof\s+)?area[:\s=]+([0-9]+(?:\.[0-9]+)?)\s*(?:sq|squares)/i)||
-        num(/([0-9]+(?:\.[0-9]+)?)\s*squares?\s+total/i),
-    perim: num(/(?:perimeter|eave[s]?\s+length|eave[s]?\s+\+\s+rake[s]?)[:\s=]+([0-9]+(?:\.[0-9]+)?)/i),
-    ridge: num(/ridge[s]?[:\s=]+([0-9]+(?:\.[0-9]+)?)\s*(?:lf|ft|l\.f\.)/i),
-    hip: num(/hip[s]?[:\s=]+([0-9]+(?:\.[0-9]+)?)\s*(?:lf|ft|l\.f\.)/i),
-    valley: num(/valley[s]?[:\s=]+([0-9]+(?:\.[0-9]+)?)\s*(?:lf|ft|l\.f\.)/i),
-    stepflash: num(/step\s+flash(?:ing)?[:\s=]+([0-9]+(?:\.[0-9]+)?)/i),
-    waste: num(/waste[:\s=]+([0-9]+(?:\.[0-9]+)?)\s*%/i)||12,
+    sq: Math.round(sq*100)/100,
+    perim: drip || (eave+rake) || perimLabel,
+    eave, rake,
+    ridge: len('Ridges?', 'Total Ridge Length'),
+    hip: len('Hips?', 'Total Hip Length'),
+    valley: len('Valleys?', 'Total Valley Length'),
+    stepflash: len('Step(?:\\s+Flash(?:ing)?)?'),
+    pitch,
+    waste: pick([/waste[:\s=]+([0-9]+(?:\.[0-9]+)?)\s*%/i]) || 12,
   };
 }
 
@@ -5713,7 +5744,13 @@ function applyPDFMeasurements(){
   const g=id=>parseFloat(document.getElementById(id)?.value)||0;
   const s=(id,v)=>{ const el=document.getElementById(id); if(el) el.value=v; };
   s('m-sq',g('sk-pdf-sq').toFixed(2));
-  s('m-perim',Math.round(g('sk-pdf-perim')));
+  // Metal trades: eaves -> eave trim, rakes -> gable trim (when the report splits them)
+  const hasGable=!!document.getElementById('m-gable'), eave=g('sk-pdf-eave'), rake=g('sk-pdf-rake');
+  s('m-perim',Math.round(hasGable && (eave||rake) ? eave : g('sk-pdf-perim')));
+  s('m-gable',Math.round(rake));
+  // Predominant pitch -> the steep-roof charge
+  const p=g('sk-pdf-pitch');
+  if(p && typeof selectPitch==='function') selectPitch(p<7?'standard':p<=9?'7-9':p<=12?'10-12':p<=14?'12-14':p<=16?'14-16':'16-18');
   s('m-ridgehip',Math.round(g('sk-pdf-ridge')+g('sk-pdf-hip')));
   s('m-ridge',Math.round(g('sk-pdf-ridge')));
   s('m-valley',Math.round(g('sk-pdf-valley')));
