@@ -352,6 +352,17 @@ tbody tr:hover .note-input,.note-input:focus{border-bottom-color:var(--border-st
 .sk-pick .sk-tag-key{margin-left:auto}
 .sk-pick-auto{grid-column:1/-1;justify-content:center;font-size:.76rem;font-weight:600;color:var(--text-2);background:none}
 .sk-pick-auto:disabled{opacity:.45;cursor:default}
+.sk-addr-wrap{position:relative}
+.sk-addr-dd{position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:1300;background:var(--surface);border:1px solid var(--border);border-radius:9px;box-shadow:var(--shadow-pop);padding:4px;max-height:260px;overflow-y:auto}
+.sk-addr-dd[hidden]{display:none}
+.sk-addr-opt{padding:8px 9px;border-radius:6px;font-size:.8rem;color:var(--text-1);cursor:pointer;line-height:1.35}
+.sk-addr-opt:hover,.sk-addr-opt.on{background:var(--brand-lt)}
+.sk-pin{background:none;border:none}
+.sk-pick-len{grid-column:1/-1;display:flex;align-items:center;gap:6px;padding:2px 2px 6px;border-bottom:1px solid var(--border);margin-bottom:2px}
+.sk-pick-len label{font-size:.76rem;font-weight:700;color:var(--text-2)}
+.sk-pick-len input{flex:1;min-width:0;border:1px solid var(--border-strong);border-radius:6px;padding:6px 8px;font-size:.88rem;font-weight:600;background:var(--surface);color:var(--text-1);font-variant-numeric:tabular-nums}
+.sk-pick-len input:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px color-mix(in srgb,var(--brand) 16%,transparent)}
+.sk-pick-len button{background:var(--brand);color:#fff;border:none;border-radius:6px;padding:7px 12px;font-size:.8rem;font-weight:700;cursor:pointer;font-family:inherit}
 .sk-pick-del{color:#DC2626;border-color:transparent}
 .sk-pick-del:hover{background:var(--danger-bg);border-color:#DC2626}
 .sk-linetools{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}
@@ -1705,11 +1716,14 @@ tbody tr:hover .note-input,.note-input:focus{border-bottom-color:var(--border-st
       <div class="sk-panel">
         <div>
           <div class="sk-sec-lbl" style="margin-bottom:5px">Job Address</div>
-          <div class="sk-row">
-            <input type="text" id="sk-addr-input" placeholder="Enter address&#8230;"
-              onkeydown="if(event.key==='Enter')skSearch()"
-              oninput="skUpdateGMapsBtn()">
+          <div class="sk-row sk-addr-wrap">
+            <input type="text" id="sk-addr-input" placeholder="Start typing an address&#8230;" autocomplete="off"
+              role="combobox" aria-expanded="false" aria-controls="sk-addr-dd"
+              onkeydown="skAddrKey(event)"
+              oninput="skUpdateGMapsBtn();skAddrInput()"
+              onblur="setTimeout(()=>skAddrShow([]),150)">
             <button class="sk-go-btn" onclick="skSearch()">Go</button>
+            <div id="sk-addr-dd" class="sk-addr-dd" role="listbox" hidden></div>
           </div>
           <a id="sk-gmaps-btn" href="#" target="_blank" rel="noopener"
             style="display:flex;align-items:center;gap:6px;margin-top:8px;padding:7px 10px;background:var(--brand);color:#fff;border-radius:7px;font-size:.75rem;font-weight:600;text-decoration:none;opacity:.35;pointer-events:none;transition:opacity .15s">
@@ -4656,7 +4670,7 @@ function skCreateMap(space){
   // Layer objects belong to the old map; they are rebuilt by skRefresh()
   SK.facets.forEach(f=>f.poly=null);
   SK.lines.forEach(l=>{ l.line=null; l.hit=null; });
-  SK.edges={}; SK.vmarkers={}; SK.preview=null; SK.rubber=null; SK.rubberTip=null; SK.scaleLine=null;
+  SK.edges={}; SK.vmarkers={}; SK.preview=null; SK.rubber=null; SK.rubberTip=null; SK.scaleLine=null; SK.pin=null;
   SK.space=space;
   if(space==='image'){
     SK.map=L.map('sk-map',{crs:L.CRS.Simple,minZoom:-5,maxZoom:5,zoomSnap:0.25,zoomControl:true,doubleClickZoom:false,attributionControl:false});
@@ -4681,6 +4695,7 @@ function skCreateMap(space){
   SK.map.on('mousemove', skMapMove);
   SK.map.on('mouseout', ()=>skClearRubber());
   skRefresh(); skRenderTags(); skRenderLineTools(); skRenderImageControls();
+  if(space==='geo' && SK.pinLL) skPlacePin(...SK.pinLL);
 }
 
 function skShowImagePrompt(show){
@@ -4792,6 +4807,77 @@ function skSetGMapsCoords(lat,lng){
   a.style.pointerEvents='auto';
 }
 
+// ── House pin: shows where the address lookup landed (clicks pass through it) ──
+function skPlacePin(lat,lng){
+  SK.pinLL=[lat,lng];
+  if(!SK.map || SK.space!=='geo') return;
+  if(SK.pin) SK.map.removeLayer(SK.pin);
+  SK.pin=L.marker([lat,lng],{interactive:false, keyboard:false, zIndexOffset:500,
+    icon:L.divIcon({className:'sk-pin', iconSize:[30,40], iconAnchor:[15,39],
+      html:'<svg viewBox="0 0 30 40" width="30" height="40" aria-hidden="true"><path d="M15 39C15 39 28 23.5 28 14A13 13 0 0 0 2 14C2 23.5 15 39 15 39Z" fill="#DC2626" stroke="#fff" stroke-width="2"/><circle cx="15" cy="14" r="5" fill="#fff"/></svg>'})
+  }).addTo(SK.map);
+}
+
+// ── Address lookup: Esri's geocoder (same source as the satellite imagery) knows US house points ──
+const SK_GEO='https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/';
+async function skGeocode(q, magicKey){
+  const r=await fetch(SK_GEO+'findAddressCandidates?f=json&maxLocations=1&countryCode=USA&SingleLine='+encodeURIComponent(q)+(magicKey?'&magicKey='+encodeURIComponent(magicKey):''));
+  if(!r.ok) return null;
+  const c=(await r.json()).candidates?.[0];
+  return c && c.score>=80 ? {lat:c.location.y, lng:c.location.x, label:c.address} : null;
+}
+
+// ── Address suggestions while typing ──
+let skAddrTimer=null, skAddrSeq=0, skAddrList=[], skAddrAct=-1;
+function skAddrInput(){
+  clearTimeout(skAddrTimer);
+  const q=document.getElementById('sk-addr-input').value.trim();
+  if(q.length<4){ skAddrShow([]); return; }
+  skAddrTimer=setTimeout(()=>skAddrFetch(q), 300);
+}
+async function skAddrFetch(q){
+  const seq=++skAddrSeq;
+  const c = SK.map && SK.space==='geo' ? SK.map.getCenter() : {lat:32.45, lng:-99.73}; // favor addresses near the map (default: Abilene)
+  try{
+    const r=await fetch(`${SK_GEO}suggest?f=json&countryCode=USA&maxSuggestions=6&location=${c.lng.toFixed(4)},${c.lat.toFixed(4)}&text=${encodeURIComponent(q)}`);
+    if(!r.ok || seq!==skAddrSeq) return;
+    const js=await r.json();
+    if(seq!==skAddrSeq) return;
+    skAddrShow((js.suggestions||[]).filter(s=>!s.isCollection).map(s=>({label:s.text.replace(/, USA$/,''), key:s.magicKey})));
+  }catch(e){ skAddrShow([]); } // offline, or blocked inside claude.ai
+}
+function skAddrShow(list){
+  skAddrList=list; skAddrAct=-1;
+  const dd=document.getElementById('sk-addr-dd'), inp=document.getElementById('sk-addr-input');
+  dd.hidden=!list.length; inp.setAttribute('aria-expanded', String(!!list.length));
+  dd.innerHTML=list.map((s,i)=>`<div class="sk-addr-opt" role="option" data-i="${i}" onmousedown="event.preventDefault();skAddrPick(${i})">${skEsc(s.label)}</div>`).join('');
+}
+function skAddrKey(e){
+  const n=skAddrList.length;
+  if(e.key==='ArrowDown' && n){ e.preventDefault(); skAddrAct=(skAddrAct+1)%n; }
+  else if(e.key==='ArrowUp' && n){ e.preventDefault(); skAddrAct=(skAddrAct-1+n)%n; }
+  else if(e.key==='Escape' && n){ e.stopPropagation(); skAddrShow([]); return; }
+  else if(e.key==='Enter'){ e.preventDefault(); if(n && skAddrAct>=0) skAddrPick(skAddrAct); else { skAddrShow([]); skSearch(); } return; }
+  else return;
+  document.querySelectorAll('.sk-addr-opt').forEach((o,i)=>o.classList.toggle('on', i===skAddrAct));
+}
+async function skAddrPick(i){
+  const s=skAddrList[i]; if(!s) return;
+  document.getElementById('sk-addr-input').value=s.label;
+  skAddrShow([]); clearTimeout(skAddrTimer); skAddrSeq++;
+  skUpdateGMapsBtn();
+  if(!SK.map || SK.space!=='geo') return;
+  let hit=null;
+  try{ hit=await skGeocode(s.label, s.key); }catch(e){}
+  if(hit) skGoTo(hit.lat, hit.lng, 20);
+  else skSearch();
+}
+function skGoTo(lat,lng,zoom){
+  SK.map.setView([lat,lng], zoom);
+  skSetGMapsCoords(lat,lng);
+  skPlacePin(lat,lng);
+}
+
 async function skSearch(){
   const q = document.getElementById('sk-addr-input').value.trim();
   if(!q) return;
@@ -4801,6 +4887,11 @@ async function skSearch(){
   const btn = document.querySelector('.sk-go-btn');
   if(btn){btn._orig=btn.textContent; btn.textContent='…'; btn.disabled=true;}
   const done=()=>{ if(btn){btn.textContent=btn._orig||'Go'; btn.disabled=false;} };
+  // Esri geocoder first: lands on the house itself for most US addresses
+  try {
+    const hit = await skGeocode(q);
+    if(hit){ skGoTo(hit.lat, hit.lng, 20); showToast('Found '+hit.label); done(); return; }
+  } catch(e){ /* blocked (inside claude.ai) or offline */ }
   // Use Claude sample API — works inside artifact (bypasses CSP)
   try {
     const samp = await window.claude?.use('sample');
@@ -4813,6 +4904,7 @@ async function skSearch(){
         SK.map.setView([res.lat,res.lng],19);
         setTimeout(()=>SK.map.invalidateSize(),300);
         skSetGMapsCoords(res.lat,res.lng);
+        skPlacePin(res.lat,res.lng);
         showToast('&#128205; Navigated to '+q);
         done(); return;
       }
@@ -4826,6 +4918,7 @@ async function skSearch(){
       const lat=parseFloat(hits[0].lat), lng=parseFloat(hits[0].lon);
       SK.map.setView([lat,lng],19);
       skSetGMapsCoords(lat,lng);
+      skPlacePin(lat,lng);
       showToast('Found '+q);
       done(); return;
     }
@@ -5243,10 +5336,16 @@ function skRenderLineTools(){
 // Small menu at the clicked line: pick its type in one tap (or keys 1–6)
 function skOpenTagPicker(k, latlng){
   const el=document.getElementById('sk-tagpick');
-  SK.pickKey=k;
+  SK.pickKey=k; SK.pickLatLng=latlng;
   const drawn=skLineByKey(k);
   const cur=drawn ? drawn.tag : SK.tags[k]?.tag, manual=SK.tags[k]?.manual;
-  el.innerHTML=Object.entries(SK_TAGS).map(([t,d])=>
+  const curLen = drawn ? skLineTrueLen(drawn) : skEdgeTrueLen(SK.edges[k]);
+  el.innerHTML=`<form class="sk-pick-len" onsubmit="event.preventDefault();skSetLineLength()">
+      <label for="sk-len-in">Length</label>
+      <input id="sk-len-in" inputmode="decimal" autocomplete="off" value="${skFmtFtIn(curLen)}" aria-label="Exact length in feet">
+      <button type="submit">Set</button>
+    </form>`
+    + Object.entries(SK_TAGS).map(([t,d])=>
     `<button class="sk-pick${cur===t?' on':''}" onclick="skPickTag('${t}')"><span class="sk-tag-sw" style="background:${d.color}"></span>${d.label}<span class="sk-tag-key">${d.key}</span></button>`).join('')
     + (drawn ? `<button class="sk-pick sk-pick-auto sk-pick-del" onclick="skDeleteLine()">Delete line</button>`
              : `<button class="sk-pick sk-pick-auto" onclick="skPickTag(null)" ${manual?'':'disabled'}>Back to automatic</button>`);
@@ -5256,6 +5355,39 @@ function skOpenTagPicker(k, latlng){
   el.style.left=Math.max(8, Math.min(p.x+12, wrap.clientWidth-w-8))+'px';
   el.style.top=Math.max(8, Math.min(p.y-h/2, wrap.clientHeight-h-8))+'px';
   const e=SK.edges[k]||drawn; if(e?.line) e.line.setStyle({weight:8});
+}
+
+// 42.5 -> 42' 6"
+function skFmtFtIn(ft){
+  let f=Math.floor(ft), i=Math.round((ft-f)*12);
+  if(i===12){ f++; i=0; }
+  return i ? `${f}' ${i}"` : `${f}'`;
+}
+// Accepts 42.5, 42, 42'6", 42' 6", 42 6, 42ft 6in -> feet (or NaN)
+function skParseFtIn(s){
+  const m=String(s).trim().match(/^(\d+(?:\.\d+)?)\s*(?:'|ft|feet)?\s*(?:(\d+(?:\.\d+)?)\s*(?:"|in|inch|inches)?)?$/i);
+  return m ? parseFloat(m[1]) + (m[2] ? parseFloat(m[2])/12 : 0) : NaN;
+}
+
+// Type the real length of the clicked line: the end nearer the click moves along the line to match.
+// The typed length is the length shown on the line (pitch-adjusted for rakes, hips and valleys).
+function skSetLineLength(){
+  const k=SK.pickKey; if(!k) return;
+  const want=skParseFtIn(document.getElementById('sk-len-in').value);
+  if(!(want>0)){ showToast('Type a length like 42, 42.5 or 42\' 6"'); return; }
+  const drawn=skLineByKey(k), e=drawn||SK.edges[k];
+  const a=e.a, b=e.b, plan=skEdgeLenFt(skLL(a),skLL(b)); if(!plan) return;
+  const shown = drawn ? skLineTrueLen(drawn) : skEdgeTrueLen(e);
+  const targetPlan = want * plan / shown;              // same pitch adjustment as the label
+  const click=SK.map.latLngToContainerPoint(SK.pickLatLng);
+  const da=click.distanceTo(SK.map.latLngToContainerPoint(SK.verts[a])), db=click.distanceTo(SK.map.latLngToContainerPoint(SK.verts[b]));
+  const [fixed, moving] = da<db ? [b,a] : [a,b];
+  const F=SK.verts[fixed], Mv=SK.verts[moving], r=targetPlan/plan;
+  SK.verts[moving]={lat:F.lat+(Mv.lat-F.lat)*r, lng:F.lng+(Mv.lng-F.lng)*r};
+  skCloseTagPicker();
+  skRefresh();
+  if(SK.vmarkers[moving]) SK.vmarkers[moving].setLatLng(SK.verts[moving]);
+  showToast('Line set to '+skFmtFtIn(want));
 }
 
 function skCloseTagPicker(){
@@ -5367,6 +5499,7 @@ function skSerialize(){
     facets: SK.facets.map(f=>({vids:[...f.vids], pitch:f.pitch, g:f.g})),
     lines: SK.lines.map(l=>({a:l.a, b:l.b, tag:l.tag, g:l.g})),
     groups: SK.groups.map(g=>({id:g.id, name:g.name, kind:g.kind, story:g.story})),
+    pin: SK.pinLL || null,
     tags: JSON.parse(JSON.stringify(SK.tags)),
     waste: document.getElementById('sk-waste')?.value,
   };
@@ -5382,6 +5515,10 @@ function skLoad(s){
     SK.lines.forEach(l=>{ if(l.line) SK.map.removeLayer(l.line); if(l.hit) SK.map.removeLayer(l.hit); });
   }
   SK.lineTool=null; SK.lineFrom=null; SK.lines=[]; SK.nextLineId=1;
+  // House pin from the address lookup
+  if(SK.map && SK.pin){ SK.map.removeLayer(SK.pin); SK.pin=null; }
+  SK.pinLL = Array.isArray(s?.pin) && s.pin.length===2 ? [+s.pin[0], +s.pin[1]] : null;
+  if(SK.map && SK.space==='geo' && SK.pinLL) skPlacePin(...SK.pinLL);
   // Structures: saved ones, or a single "Main roof" (older saves had one story setting for the whole roof)
   SK.groups = s?.groups?.length ? s.groups.map(g=>({id:+g.id, name:g.name||'Structure', kind:g.kind==='flat'?'flat':'roof', story:SK_STORIES[g.story]?g.story:'1'}))
                                 : [{id:1, name:'Main roof', kind:'roof', story:SK_STORIES[s?.story]?s.story:'1'}];
