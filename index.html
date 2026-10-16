@@ -1732,7 +1732,7 @@ tbody tr:hover .note-input,.note-input:focus{border-bottom-color:var(--border-st
 
         <div>
           <div class="sk-sec-lbl" style="margin-bottom:5px">2 &middot; Draw Ridge, Hip &amp; Valley Lines</div>
-          <div style="font-size:.68rem;color:var(--text-3);line-height:1.45;margin-bottom:6px">Pick a line type, click the start point, then the end point. It keeps going from the last point until you press Esc. Points snap to corners and onto lines.</div>
+          <div style="font-size:.68rem;color:var(--text-3);line-height:1.45;margin-bottom:6px">Pick a line type, then click the start point and the end point. Each two clicks make one line; click two more points for the next one. Press Esc when done. Points snap to corners and onto lines.</div>
           <div id="sk-linetools" class="sk-linetools"></div>
         </div>
 
@@ -5138,7 +5138,7 @@ function skLinePoint(latlng, vid){
     const same=SK.lines.find(l=>skEdgeKey(l.a,l.b)===key);
     if(same) same.tag=tag; else SK.lines.push({id:SK.nextLineId++, a, b, tag, line:null, hit:null});
   }
-  SK.lineFrom=b;                                                 // keep going from here
+  SK.lineFrom=null;                                              // one line per two clicks; the next click starts a new line
   skClearRubber(); skRefresh();
 }
 
@@ -5409,7 +5409,7 @@ function skUpdateMode(){
     html = SK.scalePts?.length===2 ? 'Enter that line&rsquo;s length in feet on the left' : 'Set the scale to start drawing';
   } else if(SK.lineTool){
     const lbl=SK_TAGS[SK.lineTool].label;
-    html = SK.lineFrom==null ? `Drawing <b>${lbl}</b> &middot; click the start point` : `Drawing <b>${lbl}</b> &middot; click the end point &middot; Esc or Enter to stop`;
+    html = SK.lineFrom==null ? `Drawing <b>${lbl}</b> &middot; click the start point &middot; Esc when done` : `Drawing <b>${lbl}</b> &middot; click the end point`;
   } else if(SK.drawing){
     const n=SK.curVids.length;
     html = n<3 ? `Drawing &middot; click corner ${n+1}` : `Drawing &middot; click the <b>first corner</b> or press Enter to close`;
