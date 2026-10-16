@@ -344,6 +344,14 @@ tbody tr:hover .note-input,.note-input:focus{border-bottom-color:var(--border-st
 .leaflet-tooltip.sk-len-tip{background:rgba(17,17,17,.8);color:#fff;border:none;box-shadow:none;font-size:11px;font-weight:700;padding:1px 5px;border-radius:4px}
 .sk-mode{position:absolute;top:10px;left:50%;transform:translateX(-50%);z-index:1000;background:rgba(17,17,17,.82);color:#fff;font-size:.75rem;font-weight:600;padding:6px 12px;border-radius:20px;pointer-events:none;white-space:nowrap;max-width:calc(100% - 100px);overflow:hidden;text-overflow:ellipsis}
 .sk-mode b{color:#FACC15}
+.sk-tagpick{position:absolute;z-index:1200;background:var(--surface);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow-pop);padding:6px;display:grid;grid-template-columns:1fr 1fr;gap:4px;width:250px}
+.sk-tagpick[hidden]{display:none}
+.sk-pick{display:flex;align-items:center;gap:7px;background:var(--surface-2);border:1.5px solid var(--border);border-radius:8px;padding:9px 9px;font-size:.84rem;font-weight:600;color:var(--text-1);cursor:pointer;text-align:left;font-family:inherit}
+.sk-pick:hover{border-color:var(--text-3)}
+.sk-pick.on{border-color:var(--brand);background:var(--brand-lt)}
+.sk-pick .sk-tag-key{margin-left:auto}
+.sk-pick-auto{grid-column:1/-1;justify-content:center;font-size:.76rem;font-weight:600;color:var(--text-2);background:none}
+.sk-pick-auto:disabled{opacity:.45;cursor:default}
 .sk-clear-btn.sk-clear-armed{border-color:#DC2626;color:#DC2626;background:var(--danger-bg)}
 .sk-img-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .sk-upload-btn{display:inline-flex;align-items:center;background:var(--brand);color:#fff;border-radius:7px;padding:7px 12px;font-size:.78rem;font-weight:600;cursor:pointer}
@@ -1717,7 +1725,7 @@ tbody tr:hover .note-input,.note-input:focus{border-bottom-color:var(--border-st
 
         <div>
           <div class="sk-sec-lbl" style="margin-bottom:5px">2 &middot; Tag Lines</div>
-          <div style="font-size:.68rem;color:var(--text-3);line-height:1.45;margin-bottom:6px">Pick a line type, then click lines on the map to tag them. Keys 1&ndash;6 switch type; click a tagged line again to clear it. Outside edges start as Eave.</div>
+          <div style="font-size:.68rem;color:var(--text-3);line-height:1.45;margin-bottom:6px">Lines are tagged automatically from the roof&rsquo;s shape. Click any line on the map to change its type; keys 1&ndash;6 work while the menu is open.</div>
           <div id="sk-tags" class="sk-tags"></div>
           <div id="sk-untagged" class="sk-hint" style="margin-top:6px"></div>
         </div>
@@ -1749,6 +1757,7 @@ tbody tr:hover .note-input,.note-input:focus{border-bottom-color:var(--border-st
       <div id="sk-map-wrap">
         <div id="sk-map"></div>
         <div id="sk-mode" class="sk-mode"></div>
+        <div id="sk-tagpick" class="sk-tagpick" role="menu" aria-label="Line type" hidden></div>
         <div id="sk-noimg" class="sk-noimg" hidden>
           <div class="sk-noimg-card">
             <div class="sk-noimg-title">Live satellite imagery can&rsquo;t load here</div>
@@ -4541,7 +4550,8 @@ function closeSketcher(){
 function skKeyHandler(e){
   const key = e.key || '';
   if(key==='Escape') {
-    if(SK.drawing) skCancelDraw();
+    if(SK.pickKey) skCloseTagPicker();
+    else if(SK.drawing) skCancelDraw();
     else if(SK.scaling){ SK.scaling=false; SK.map.getContainer().style.cursor=''; if(SK.scaleLine){ SK.map.removeLayer(SK.scaleLine); SK.scaleLine=null; } skUpdateMode(); skRenderImageControls(); }
     else closeSketcher();
     return;
@@ -4552,7 +4562,7 @@ function skKeyHandler(e){
   if(SK.drawing && (key==='Backspace' || (key.toLowerCase()==='z' && (e.ctrlKey||e.metaKey)))){ e.preventDefault(); skUndoPoint(); return; }
   if(key.toLowerCase()==='d' && !e.ctrlKey && !e.metaKey){ skToggleDraw(); return; }
   const tag = Object.keys(SK_TAGS).find(t=>SK_TAGS[t].key===key);
-  if(tag) skSetActiveTag(tag);
+  if(tag && SK.pickKey) skPickTag(tag);
 }
 
 function skSwitchTab(tab){
@@ -4590,13 +4600,16 @@ function skCreateMap(space){
   } else {
     SK.map=L.map('sk-map',{center:[32.78,-96.80],zoom:18,zoomControl:true,doubleClickZoom:false});
     SK.tileLoaded=false;
-    const satLayer=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{attribution:'Tiles &copy; Esri',maxZoom:22});
+    // Esri's imagery ends at zoom 19 in much of Texas (deeper tiles are a gray "no data" image),
+    // so zoom 20–21 enlarges the zoom-19 imagery instead of going blank
+    const satLayer=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{attribution:'Tiles &copy; Esri',maxNativeZoom:19,maxZoom:21});
     satLayer.on('tileload',()=>{ SK.tileLoaded=true; skShowImagePrompt(false); });
     satLayer.on('tileerror',()=>{ if(!SK.tileLoaded) skShowImagePrompt(true); });
     satLayer.addTo(SK.map);
-    L.tileLayer('https://services.arcgisonline.com/arcgis/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}',{opacity:0.6,maxZoom:22}).addTo(SK.map);
+    L.tileLayer('https://services.arcgisonline.com/arcgis/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}',{opacity:0.6,maxNativeZoom:19,maxZoom:21}).addTo(SK.map);
   }
   SK.map.on('click', skMapClick);
+  SK.map.on('movestart zoomstart', skCloseTagPicker);
   SK.map.on('dblclick', skMapDblClick);
   SK.map.on('mousemove', skMapMove);
   SK.map.on('mouseout', ()=>skClearRubber());
@@ -4882,6 +4895,7 @@ function skUndoPoint(){
 }
 
 function skMapClick(e){
+  if(SK.pickKey){ skCloseTagPicker(); return; }
   if(SK.scaling){ skScaleClick(e.latlng); return; }
   if(!SK.drawing) return;
   const snap=skSnapVertex(e.latlng);
@@ -4959,6 +4973,7 @@ function skRenderVertices(){
 
 // ── Edges ──
 function skBuildEdges(){
+  skCloseTagPicker(); // its line is about to be rebuilt
   const next={};
   SK.facets.forEach((f,fi)=>{
     f.vids.forEach((a,i)=>{
@@ -4968,11 +4983,11 @@ function skBuildEdges(){
       next[key].facets.push(fi);
     });
   });
-  // Auto-tag: an outside edge (one facet) starts as Eave; a shared edge starts untagged.
-  // Anything the user tagged by hand is kept.
+  // Auto-tag every line from the roof's shape; anything the user tagged by hand is kept.
   for(const k in SK.tags){ if(!next[k]) delete SK.tags[k]; }
+  const auto=skAutoTags(next);
   for(const k in next){
-    if(!SK.tags[k]?.manual) SK.tags[k]={tag: next[k].facets.length===1 ? 'eave' : null, manual:false};
+    if(!SK.tags[k]?.manual) SK.tags[k]={tag: auto[k]||null, manual:false};
   }
   for(const k in SK.edges){ SK.map.removeLayer(SK.edges[k].line); SK.map.removeLayer(SK.edges[k].hit); }
   SK.edges=next;
@@ -4989,6 +5004,50 @@ function skBuildEdges(){
   }
 }
 
+// Plan-view x/y in feet (image space: pixels — only angles are used, so units don't matter)
+function skXY(id){
+  const v=SK.verts[id];
+  if(SK.space==='image') return [v.lng, v.lat];
+  const o=SK.verts[Object.keys(SK.verts)[0]];
+  const mPerDeg=111319.9, c=Math.cos(o.lat*Math.PI/180);
+  return [(v.lng-o.lng)*mPerDeg*c, (v.lat-o.lat)*mPerDeg];
+}
+
+// Guess each line's type from the roof outline:
+//  · a shared line that touches an outside corner pointing out is a Hip, pointing in is a Valley;
+//    otherwise (inside the roof, or ending on a straight gable end) it is a Ridge
+//  · an outside line is a Rake when it runs up to a gable peak (where a ridge meets a straight edge), else an Eave
+function skAutoTags(edges){
+  const tags={}, onBoundary=new Set();
+  for(const k in edges) if(edges[k].facets.length===1){ onBoundary.add(edges[k].a); onBoundary.add(edges[k].b); }
+  // Roof's inside angle at each outline corner = sum of the facet angles that meet there
+  const angle={};
+  SK.facets.forEach(f=>{
+    const pts=f.vids.map(skXY), n=pts.length;
+    let area=0; for(let i=0;i<n;i++){ const p=pts[i], q=pts[(i+1)%n]; area+=p[0]*q[1]-q[0]*p[1]; }
+    f.vids.forEach((vid,i)=>{
+      if(!onBoundary.has(vid)) return;
+      const v=pts[i], a=pts[(i-1+n)%n], b=pts[(i+1)%n];
+      const ax=a[0]-v[0], ay=a[1]-v[1], bx=b[0]-v[0], by=b[1]-v[1];
+      let t=Math.atan2(bx*ay-by*ax, bx*ax+by*ay); if(t<0) t+=2*Math.PI;
+      angle[vid]=(angle[vid]||0)+(area>0 ? t : 2*Math.PI-t)*180/Math.PI;
+    });
+  });
+  const corner=vid=>!onBoundary.has(vid) ? 'in' : angle[vid]<168 ? 'out' : angle[vid]>192 ? 'reflex' : 'straight';
+  const peaks=new Set();
+  for(const k in edges){
+    const e=edges[k]; if(e.facets.length<2) continue;
+    const ca=corner(e.a), cb=corner(e.b);
+    tags[k] = (ca==='reflex'||cb==='reflex') ? 'valley' : (ca==='out'||cb==='out') ? 'hip' : 'ridge';
+    if(tags[k]==='ridge'){ if(ca==='straight') peaks.add(e.a); if(cb==='straight') peaks.add(e.b); }
+  }
+  for(const k in edges){
+    const e=edges[k]; if(e.facets.length!==1) continue;
+    tags[k] = (peaks.has(e.a)||peaks.has(e.b)) ? 'rake' : 'eave';
+  }
+  return tags;
+}
+
 function skEdgeClick(ev,k){
   if(SK.drawing){
     // While drawing, a click on a line lands on its nearest corner if close, else a new point
@@ -4996,14 +5055,37 @@ function skEdgeClick(ev,k){
     skAddPoint(snap!=null ? snap : skNewVertex(ev.latlng));
     return;
   }
-  const cur=SK.tags[k]?.tag;
-  SK.tags[k]={tag: cur===SK.activeTag ? null : SK.activeTag, manual:true};
-  skRedrawGeometry(); skCalc();
+  skOpenTagPicker(k, ev.latlng);
 }
 
-function skSetActiveTag(t){
-  SK.activeTag=t;
-  skRenderTags(); skUpdateMode();
+// Small menu at the clicked line: pick its type in one tap (or keys 1–6)
+function skOpenTagPicker(k, latlng){
+  const el=document.getElementById('sk-tagpick');
+  SK.pickKey=k;
+  const cur=SK.tags[k]?.tag, manual=SK.tags[k]?.manual;
+  el.innerHTML=Object.entries(SK_TAGS).map(([t,d])=>
+    `<button class="sk-pick${cur===t?' on':''}" onclick="skPickTag('${t}')"><span class="sk-tag-sw" style="background:${d.color}"></span>${d.label}<span class="sk-tag-key">${d.key}</span></button>`).join('')
+    + `<button class="sk-pick sk-pick-auto" onclick="skPickTag(null)" ${manual?'':'disabled'}>Back to automatic</button>`;
+  const p=SK.map.latLngToContainerPoint(latlng), wrap=document.getElementById('sk-map-wrap');
+  el.hidden=false;
+  const w=el.offsetWidth, h=el.offsetHeight;
+  el.style.left=Math.max(8, Math.min(p.x+12, wrap.clientWidth-w-8))+'px';
+  el.style.top=Math.max(8, Math.min(p.y-h/2, wrap.clientHeight-h-8))+'px';
+  const e=SK.edges[k]; if(e) e.line.setStyle({weight:8});
+}
+
+function skCloseTagPicker(){
+  const el=document.getElementById('sk-tagpick');
+  if(el) el.hidden=true;
+  const e=SK.edges[SK.pickKey]; if(e) e.line.setStyle({weight:4});
+  SK.pickKey=null;
+}
+
+function skPickTag(t){
+  const k=SK.pickKey; if(!k) return;
+  if(t===null){ SK.tags[k]={tag:null, manual:false}; skCloseTagPicker(); skRefresh(); return; } // re-run automatic
+  SK.tags[k]={tag:t, manual:true};
+  skCloseTagPicker(); skRedrawGeometry(); skCalc();
 }
 
 // Updates positions/styles in place (cheap enough to run while dragging a corner)
@@ -5023,6 +5105,9 @@ function skRedrawGeometry(){
     e.line.setStyle({color: t ? SK_TAGS[t].color : SK_UNTAGGED, dashArray: t ? null : '6,5'});
     e.line.setTooltipContent(Math.round(skEdgeTrueLen(e))+"'");
     e.line.openTooltip([(ll[0][0]+ll[1][0])/2,(ll[0][1]+ll[1][1])/2]);
+    // Length label in the line's color, so tagged types read at a glance
+    const tip=e.line.getTooltip()?.getElement();
+    if(tip) tip.style.background = t ? SK_TAGS[t].color : 'rgba(17,17,17,.8)';
   }
 }
 
@@ -5154,11 +5239,10 @@ function skRenderTags(){
   const el=document.getElementById('sk-tags');
   if(!el) return;
   el.innerHTML=Object.entries(SK_TAGS).map(([k,t])=>`
-    <button class="sk-tag-btn${SK.activeTag===k?' sk-tag-active':''}" onclick="skSetActiveTag('${k}')" title="Key ${t.key}">
+    <div class="sk-tag-btn">
       <span class="sk-tag-sw" style="background:${t.color}"></span>${t.label}
       <span class="sk-tag-lf">${Math.round(SK.totals[k]||0)}'</span>
-      <span class="sk-tag-key">${t.key}</span>
-    </button>`).join('');
+    </div>`).join('');
 }
 
 function skUpdateMode(){
@@ -5176,7 +5260,7 @@ function skUpdateMode(){
   } else if(!SK.facets.length){
     html = 'Press <b>D</b> or &ldquo;+ Draw Facet&rdquo; to start';
   } else {
-    html = `Click lines to tag as <b>${SK_TAGS[SK.activeTag].label}</b> &middot; drag corners to adjust`;
+    html = 'Lines are tagged automatically &middot; <b>click a line</b> to change its type &middot; drag corners to adjust';
   }
   el.innerHTML=html;
 }
