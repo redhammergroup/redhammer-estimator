@@ -1,0 +1,6 @@
+# Public repo: publish only the app itself. Backups, SQL setup files and
+# anything else in this folder stay on this computer.
+*
+!index.html
+!.nojekyll
+!.gitignore
