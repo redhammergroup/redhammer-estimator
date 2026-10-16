@@ -359,6 +359,31 @@ tbody tr:hover .note-input,.note-input:focus{border-bottom-color:var(--border-st
 .sk-lt:hover{border-color:var(--text-3)}
 .sk-lt.on{border-color:var(--brand);background:var(--brand-lt);color:var(--brand-ink)}
 .sk-tags .sk-tag-btn{cursor:default}
+.sk-plane-row{flex-wrap:wrap}
+.sk-prow-sel{flex-basis:100%;display:flex;gap:6px;padding-left:17px}
+.sk-prow-sel select{flex:1;min-width:0}
+.sk-groups{display:flex;flex-direction:column;gap:6px}
+.sk-group{border:1.5px solid var(--border);border-radius:9px;padding:8px 9px;background:var(--surface-2);cursor:pointer;display:flex;flex-direction:column;gap:6px}
+.sk-group.on{border-color:var(--brand);background:var(--brand-lt)}
+.sk-group-top{display:flex;align-items:center;gap:7px}
+.sk-group-top input{flex:1;min-width:0;border:1px solid transparent;background:transparent;font-weight:700;font-size:.84rem;color:var(--text-1);padding:2px 4px;border-radius:5px;font-family:inherit}
+.sk-group-top input:hover,.sk-group-top input:focus{border-color:var(--border-strong);background:var(--surface);outline:none}
+.sk-group-sel{display:flex;gap:6px}
+.sk-group-sel select{flex:1;min-width:0;font-size:.74rem;border:1px solid var(--border-strong);border-radius:5px;padding:3px 5px;background:var(--surface);color:var(--text-1)}
+.sk-group .sk-gsq{font-size:.72rem;color:var(--text-3);white-space:nowrap}
+.sk-addgroup{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;margin-top:6px}
+.sk-addgroup button{background:var(--surface);border:1px dashed var(--border-strong);border-radius:7px;padding:6px 4px;font-size:.72rem;font-weight:600;color:var(--text-2);cursor:pointer;font-family:inherit}
+.sk-addgroup button:hover{border-style:solid;border-color:var(--brand);color:var(--brand-ink)}
+.sk-drawinto{font-size:.74rem;color:var(--text-2);margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.sk-drawinto b{color:var(--text-1)}
+.sk-gsub{font-size:.66rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);display:flex;align-items:center;gap:6px;margin-top:4px}
+.sk-breakdown{display:flex;flex-direction:column;gap:8px}
+.sk-bcard{border:1px solid var(--border);border-radius:9px;padding:9px 10px;background:var(--surface-2)}
+.sk-bcard h4{margin:0 0 6px;font-size:.8rem;display:flex;align-items:center;gap:6px}
+.sk-bcard h4 span{font-weight:500;color:var(--text-3);font-size:.72rem}
+.sk-bgrid{display:grid;grid-template-columns:1fr auto 1fr auto;gap:3px 8px;font-size:.74rem;font-variant-numeric:tabular-nums}
+.sk-bgrid .k{color:var(--text-2)}
+.sk-bgrid .v{text-align:right;font-weight:600}
 .sk-clear-btn.sk-clear-armed{border-color:#DC2626;color:#DC2626;background:var(--danger-bg)}
 .sk-img-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .sk-upload-btn{display:inline-flex;align-items:center;background:var(--brand);color:#fff;border-radius:7px;padding:7px 12px;font-size:.78rem;font-weight:600;cursor:pointer}
@@ -1716,7 +1741,18 @@ tbody tr:hover .note-input,.note-input:focus{border-bottom-color:var(--border-st
         </div>
 
         <div>
+          <div class="sk-sec-lbl" style="margin-bottom:5px">Structures</div>
+          <div id="sk-groups" class="sk-groups"></div>
+          <div class="sk-addgroup">
+            <button onclick="skAddGroup('story')">+ Second story</button>
+            <button onclick="skAddGroup('flat')">+ Flat section</button>
+            <button onclick="skAddGroup('other')">+ Other structure</button>
+          </div>
+        </div>
+
+        <div>
           <div class="sk-sec-lbl" style="margin-bottom:5px">1 &middot; Draw Facets</div>
+          <div class="sk-drawinto" id="sk-drawinto"></div>
           <button id="sk-draw-btn" class="sk-draw-btn" onclick="skToggleDraw()">+ Draw Facet</button>
           <div id="sk-hint" class="sk-hint" style="margin-top:6px">Click each corner. Click the first corner (yellow ring) to close the facet &mdash; or double-click / Enter. Backspace undoes the last point. Corners snap together, and you can drag any corner to fine-tune it.</div>
         </div>
@@ -1751,14 +1787,17 @@ tbody tr:hover .note-input,.note-input:focus{border-bottom-color:var(--border-st
           <div style="font-size:.64rem;color:var(--text-3);margin-top:4px;line-height:1.4">Rake, hip, valley and step flash lengths are pitch-adjusted from the facets they touch.</div>
         </div>
 
+        <div id="sk-breakdown-wrap" hidden>
+          <div class="sk-sec-lbl" style="margin-bottom:5px">Measurements by Structure</div>
+          <div id="sk-breakdown" class="sk-breakdown"></div>
+        </div>
+
         <div>
           <div class="sk-sec-lbl" style="margin-bottom:5px">Options</div>
           <div class="sk-fgrid">
-            <div class="sk-mf"><label>Waste %</label><input type="number" id="sk-waste" value="12" min="0" max="50" oninput="skCalc()"></div>
-            <div class="sk-mf"><label>Stories</label>
-              <select id="sk-story" class="sk-pitch-sel" style="width:100%;padding:5px 7px;font-size:.8rem">
-                <option value="1">1 Story</option><option value="2">2 Story</option><option value="3+">3+ Story</option>
-              </select>
+            <div class="sk-mf"><label for="sk-waste">Waste %</label><input type="number" id="sk-waste" value="12" min="0" max="50" oninput="skCalc()"></div>
+            <div class="sk-mf"><label for="sk-apply-scope">Apply to estimate</label>
+              <select id="sk-apply-scope" class="sk-pitch-sel" style="width:100%;padding:5px 7px;font-size:.8rem"></select>
             </div>
           </div>
         </div>
@@ -4513,6 +4552,11 @@ const SK = {
   nextLineId: 1,
   lineTool: null,     // line type being drawn, or null
   lineFrom: null,     // vertex id the next line starts from
+  // Structures (main roof, 2nd story, flat section, garage…): facets and drawn lines carry a group id `g`
+  groups: [{id:1, name:'Main roof', kind:'roof', story:'1'}],
+  activeGroup: 1,
+  nextGroupId: 2,
+  groupTotals: {},
   space: 'geo',       // 'geo' (satellite tiles) or 'image' (roof screenshot)
   image: null,        // {src, w, h} when space is 'image'
   ftPerUnit: null,    // image space: feet per image pixel, set by the scale tool
@@ -4964,9 +5008,12 @@ function skUpdatePreview(){
 function skFinishDraw(){
   if(!SK.drawing) return;
   if(SK.curVids.length<3){ showToast('Need at least 3 corners'); return; }
-  const idx=SK.facets.length;
-  const pitch=idx ? SK.facets[idx-1].pitch : 6; // new facets start at the last facet's pitch
-  SK.facets.push({vids:[...SK.curVids], pitch, color:SK.COLORS[idx%SK.COLORS.length], label:`Facet ${idx+1}`, poly:null});
+  const idx=SK.facets.length, g=SK.activeGroup;
+  // New facets start at the pitch of the last facet in the same structure; flat structures are 0
+  const prev=[...SK.facets].reverse().find(f=>f.g===g)
+          || [...SK.facets].reverse().find(f=>skGroup(f.g).kind!=='flat');   // else the last steep facet anywhere
+  const pitch=skGroup(g).kind==='flat' ? 0 : prev ? prev.pitch : 6;
+  SK.facets.push({vids:[...SK.curVids], pitch, g, color:skGroupColor(g), label:`Facet ${idx+1}`, poly:null});
   skEndDraw();
   SK.selectedIdx=idx;
   skRefresh();
@@ -5136,7 +5183,7 @@ function skLinePoint(latlng, vid){
   if(SK.edges[key]) SK.tags[key]={tag, manual:true};            // along a facet edge: tag that edge, no duplicate
   else {
     const same=SK.lines.find(l=>skEdgeKey(l.a,l.b)===key);
-    if(same) same.tag=tag; else SK.lines.push({id:SK.nextLineId++, a, b, tag, line:null, hit:null});
+    if(same) same.tag=tag; else SK.lines.push({id:SK.nextLineId++, a, b, tag, g:SK.activeGroup, line:null, hit:null});
   }
   SK.lineFrom=null;                                              // one line per two clicks; the next click starts a new line
   skClearRubber(); skRefresh();
@@ -5234,6 +5281,7 @@ function skRedrawGeometry(){
       f.poly.on('click',()=>{ if(!SK.drawing) skSelectPlane(SK.facets.indexOf(f)); });
       f.poly.bringToBack();
     } else f.poly.setLatLngs(ll);
+    f.color=skGroupColor(f.g);
     f.poly.setStyle({fillColor:f.color, fillOpacity: SK.selectedIdx===i ? .4 : .22});
   });
   for(const k in SK.edges){
@@ -5274,7 +5322,7 @@ function skDeletePlane(i){
   const f=SK.facets[i];
   if(f.poly) SK.map.removeLayer(f.poly);
   SK.facets.splice(i,1);
-  SK.facets.forEach((f,j)=>{ f.color=SK.COLORS[j%SK.COLORS.length]; f.label=`Facet ${j+1}`; });
+  SK.facets.forEach((f,j)=>{ f.label=`Facet ${j+1}`; });
   SK.selectedIdx=null;
   skGcVerts(); skRefresh();
 }
@@ -5313,11 +5361,11 @@ function skSerialize(){
   SK.lines.forEach(l=>[l.a,l.b].forEach(id=>{ verts[id]=[SK.verts[id].lat,SK.verts[id].lng]; }));
   const out={
     v:1, verts,
-    facets: SK.facets.map(f=>({vids:[...f.vids], pitch:f.pitch})),
-    lines: SK.lines.map(l=>({a:l.a, b:l.b, tag:l.tag})),
+    facets: SK.facets.map(f=>({vids:[...f.vids], pitch:f.pitch, g:f.g})),
+    lines: SK.lines.map(l=>({a:l.a, b:l.b, tag:l.tag, g:l.g})),
+    groups: SK.groups.map(g=>({id:g.id, name:g.name, kind:g.kind, story:g.story})),
     tags: JSON.parse(JSON.stringify(SK.tags)),
     waste: document.getElementById('sk-waste')?.value,
-    story: document.getElementById('sk-story')?.value,
   };
   if(hasImage){ out.space='image'; out.image={...SK.image}; out.ftPerUnit=SK.ftPerUnit; }
   return out;
@@ -5331,6 +5379,12 @@ function skLoad(s){
     SK.lines.forEach(l=>{ if(l.line) SK.map.removeLayer(l.line); if(l.hit) SK.map.removeLayer(l.hit); });
   }
   SK.lineTool=null; SK.lineFrom=null; SK.lines=[]; SK.nextLineId=1;
+  // Structures: saved ones, or a single "Main roof" (older saves had one story setting for the whole roof)
+  SK.groups = s?.groups?.length ? s.groups.map(g=>({id:+g.id, name:g.name||'Structure', kind:g.kind==='flat'?'flat':'roof', story:SK_STORIES[g.story]?g.story:'1'}))
+                                : [{id:1, name:'Main roof', kind:'roof', story:SK_STORIES[s?.story]?s.story:'1'}];
+  SK.nextGroupId=Math.max(...SK.groups.map(g=>g.id))+1;
+  SK.activeGroup=SK.groups[0].id;
+  const gid=v=>SK.groups.some(g=>g.id===+v)?+v:SK.groups[0].id;
   SK.facets=[]; SK.tags={}; SK.verts={}; SK.selectedIdx=null; SK.nextVid=1;
   SK.totals={eave:0,rake:0,ridge:0,hip:0,valley:0,step:0,sq:0};
   // Which drawing surface this sketch belongs to (older sketches are satellite-based)
@@ -5346,13 +5400,12 @@ function skLoad(s){
       SK.nextVid=Math.max(SK.nextVid, +id+1);
     }
     SK.facets=s.facets.filter(f=>f.vids.every(v=>SK.verts[v])).map((f,i)=>({
-      vids:f.vids.map(Number), pitch:f.pitch||0, color:SK.COLORS[i%SK.COLORS.length], label:`Facet ${i+1}`, poly:null
+      vids:f.vids.map(Number), pitch:f.pitch||0, g:gid(f.g), color:skGroupColor(gid(f.g)), label:`Facet ${i+1}`, poly:null
     }));
     SK.tags=JSON.parse(JSON.stringify(s.tags||{}));
     SK.lines=(s.lines||[]).filter(l=>SK.verts[l.a]&&SK.verts[l.b]&&SK_TAGS[l.tag])
-      .map(l=>({id:SK.nextLineId++, a:+l.a, b:+l.b, tag:l.tag, line:null, hit:null}));
+      .map(l=>({id:SK.nextLineId++, a:+l.a, b:+l.b, tag:l.tag, g:gid(l.g), line:null, hit:null}));
     if(s.waste!=null){ const el=document.getElementById('sk-waste'); if(el) el.value=s.waste; }
-    if(s.story){ const el=document.getElementById('sk-story'); if(el) el.value=s.story; }
     SK.needsFit=true;
   }
   if(SK.map){
@@ -5372,15 +5425,19 @@ function skFitSketch(){
 }
 
 function skCalc(){
-  const t={eave:0,rake:0,ridge:0,hip:0,valley:0,step:0};
+  const blank=()=>({eave:0,rake:0,ridge:0,hip:0,valley:0,step:0,sq:0});
+  const t=blank(), G={};
+  SK.groups.forEach(g=>G[g.id]=blank());
+  const add=(gid,key,v)=>{ t[key]+=v; (G[gid]||G[SK.groups[0].id])[key]+=v; };
   let untagged=0;
   for(const k in SK.edges){
-    const tag=SK.tags[k]?.tag;
-    if(tag) t[tag]+=skEdgeTrueLen(SK.edges[k]); else untagged++;
+    const e=SK.edges[k], tag=SK.tags[k]?.tag;
+    if(tag) add(SK.facets[e.facets[0]]?.g, tag, skEdgeTrueLen(e)); else untagged++;  // an edge belongs to its first facet's structure
   }
-  for(const l of SK.lines) t[l.tag]+=skLineTrueLen(l);
-  t.sq=SK.facets.reduce((a,f)=>a+skPlaneAreaSQ(f),0);
-  SK.totals=t;
+  for(const l of SK.lines) add(l.g, l.tag, skLineTrueLen(l));
+  SK.facets.forEach(f=>add(f.g,'sq',skPlaneAreaSQ(f)));
+  SK.totals=t; SK.groupTotals=G;
+  skRenderGroups(); skRenderBreakdown();
   document.getElementById('sk-sq-nw').textContent=t.sq.toFixed(2);
   document.getElementById('sk-perim').textContent=Math.round(t.eave+t.rake);
   const warn=document.getElementById('sk-untagged');
@@ -5422,36 +5479,134 @@ function skUpdateMode(){
   el.innerHTML=html;
 }
 
+// ── Structures ──
+const SK_GROUP_COLORS=['#E74C3C','#3498DB','#2ECC71','#F39C12','#9B59B6','#1ABC9C','#E67E22','#E91E63'];
+const SK_STORIES={'1':'1 story','2':'2 stories','3+':'3+ stories'};
+function skGroup(id){ return SK.groups.find(g=>g.id===id) || SK.groups[0]; }
+function skGroupColor(id){ const i=SK.groups.findIndex(g=>g.id===id); return SK_GROUP_COLORS[(i<0?0:i)%SK_GROUP_COLORS.length]; }
+const skEsc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+function skAddGroup(type){
+  const id=SK.nextGroupId++;
+  const n=SK.groups.filter(g=>g.kind===(type==='flat'?'flat':'roof')).length;
+  const g = type==='flat' ? {id, name: n?`Flat section ${n+1}`:'Flat section', kind:'flat', story:'1'}
+          : type==='story' ? {id, name:'Second story', kind:'roof', story:'2'}
+          : {id, name:'Garage / other', kind:'roof', story:'1'};
+  SK.groups.push(g); SK.activeGroup=id;
+  skRenderPlanes(); skCalc();
+  showToast(`Added “${g.name}” — new facets and lines now go there`);
+}
+
+function skSetActiveGroup(id){ SK.activeGroup=id; skRenderPlanes(); }
+
+function skUpdateGroup(id, field, value){
+  const g=skGroup(id); if(!g) return;
+  if(field==='name'){ g.name=value.trim()||g.name; skRenderBreakdown(); skRenderApplyScope(); return; }
+  g[field]=value;
+  if(field==='kind' && value==='flat') SK.facets.forEach(f=>{ if(f.g===id) f.pitch=0; }); // flat roofs have no pitch
+  if(SK.map) skRedrawGeometry();
+  skRenderPlanes(); skCalc();
+}
+
+function skDeleteGroup(id){
+  if(SK.groups.length<2) return;
+  if(SK.facets.some(f=>f.g===id) || SK.lines.some(l=>l.g===id)){ showToast('Delete or move this structure’s facets and lines first'); return; }
+  SK.groups=SK.groups.filter(g=>g.id!==id);
+  if(SK.activeGroup===id) SK.activeGroup=SK.groups[0].id;
+  skRenderPlanes(); skCalc();
+}
+
+function skMoveFacet(i, gid){
+  const f=SK.facets[i]; if(!f) return;
+  f.g=+gid;
+  if(skGroup(f.g).kind==='flat') f.pitch=0;
+  if(SK.map) skRefresh(); else { skRenderPlanes(); skCalc(); }
+}
+
+function skRenderGroups(){
+  const el=document.getElementById('sk-groups'); if(!el) return;
+  el.innerHTML=SK.groups.map(g=>{
+    const t=SK.groupTotals[g.id]||{sq:0};
+    return `<div class="sk-group${SK.activeGroup===g.id?' on':''}" onclick="skSetActiveGroup(${g.id})" title="Click to draw into this structure">
+      <div class="sk-group-top"><span class="sk-swatch" style="background:${skGroupColor(g.id)}"></span>
+        <input value="${skEsc(g.name)}" aria-label="Structure name" onclick="event.stopPropagation()" onchange="skUpdateGroup(${g.id},'name',this.value)">
+        <span class="sk-gsq">${t.sq.toFixed(2)} SQ</span>
+        ${SK.groups.length>1?`<button class="sk-del-p" title="Remove structure" onclick="event.stopPropagation();skDeleteGroup(${g.id})">&#10005;</button>`:''}</div>
+      <div class="sk-group-sel" onclick="event.stopPropagation()">
+        <select aria-label="Roof type" onchange="skUpdateGroup(${g.id},'kind',this.value)"><option value="roof"${g.kind==='roof'?' selected':''}>Steep roof</option><option value="flat"${g.kind==='flat'?' selected':''}>Flat roof</option></select>
+        <select aria-label="Stories" onchange="skUpdateGroup(${g.id},'story',this.value)">${Object.entries(SK_STORIES).map(([v,l])=>`<option value="${v}"${g.story===v?' selected':''}>${l}</option>`).join('')}</select>
+      </div></div>`;
+  }).join('');
+  const into=document.getElementById('sk-drawinto');
+  if(into){ const g=skGroup(SK.activeGroup); into.innerHTML=`<span class="sk-swatch" style="background:${skGroupColor(g.id)}"></span>New facets and lines go into <b>${skEsc(g.name)}</b>`; }
+}
+
+function skRenderApplyScope(){
+  const sel=document.getElementById('sk-apply-scope'); if(!sel) return;
+  const cur=sel.value||'all';
+  sel.innerHTML=`<option value="all">All structures</option>`+SK.groups.map(g=>`<option value="${g.id}">${skEsc(g.name)} only</option>`).join('');
+  sel.value=[...sel.options].some(o=>o.value===cur)?cur:'all';
+}
+
+function skRenderBreakdown(){
+  const wrap=document.getElementById('sk-breakdown-wrap'), el=document.getElementById('sk-breakdown'); if(!el) return;
+  const used=SK.groups.filter(g=>SK.facets.some(f=>f.g===g.id)||SK.lines.some(l=>l.g===g.id));
+  wrap.hidden = SK.groups.length<2 || !used.length;
+  const r=v=>Math.round(v||0);
+  el.innerHTML=used.map(g=>{ const t=SK.groupTotals[g.id];
+    return `<div class="sk-bcard"><h4><span class="sk-swatch" style="background:${skGroupColor(g.id)}"></span>${skEsc(g.name)} <span>${g.kind==='flat'?'Flat':'Steep'} · ${SK_STORIES[g.story]}</span></h4>
+      <div class="sk-bgrid">
+        <span class="k">Squares</span><span class="v">${t.sq.toFixed(2)}</span><span class="k">Drip edge</span><span class="v">${r(t.eave+t.rake)}'</span>
+        <span class="k">Eave</span><span class="v">${r(t.eave)}'</span><span class="k">Rake</span><span class="v">${r(t.rake)}'</span>
+        <span class="k">Ridge</span><span class="v">${r(t.ridge)}'</span><span class="k">Hip</span><span class="v">${r(t.hip)}'</span>
+        <span class="k">Valley</span><span class="v">${r(t.valley)}'</span><span class="k">Step flash</span><span class="v">${r(t.step)}'</span>
+      </div></div>`; }).join('');
+}
+
 function skRenderPlanes(){
   const opts=sel=>SK_PITCHES.map(p=>`<option value="${p}"${sel===p?' selected':''}>${skPitchLabel(p)}</option>`).join('');
   const all=document.getElementById('sk-pitch-all');
   if(all) all.innerHTML='<option value="">All pitch…</option>'+opts(null);
+  skRenderGroups(); skRenderApplyScope();
   const el=document.getElementById('sk-plane-list');
   if(!SK.facets.length){
     el.innerHTML='<div class="sk-plane-empty">Draw facets on the map &#8594;</div>';
     return;
   }
-  el.innerHTML=SK.facets.map((f,i)=>`
+  const multi=SK.groups.length>1;
+  const row=(f,i)=>`
     <div class="sk-plane-row${SK.selectedIdx===i?' sk-sel':''}" onclick="skSelectPlane(${i})">
-      <div class="sk-swatch" style="background:${f.color}"></div>
+      <div class="sk-swatch" style="background:${skGroupColor(f.g)}"></div>
       <div style="flex:1;min-width:0">
         <div class="sk-pname">${f.label}</div>
         <div class="sk-psq">${skPlaneAreaSQ(f).toFixed(2)} SQ &middot; ${skPitchLabel(f.pitch)}</div>
       </div>
       <div class="sk-prow-right">
-        <select class="sk-pitch-sel" onchange="skSetPitch(${i},this.value)" onclick="event.stopPropagation()">${opts(f.pitch)}</select>
+        ${multi?'':`<select class="sk-pitch-sel" aria-label="Pitch" onchange="skSetPitch(${i},this.value)" onclick="event.stopPropagation()">${opts(f.pitch)}</select>`}
         <button class="sk-del-p" onclick="event.stopPropagation();skDeletePlane(${i})" title="Delete facet">&#10005;</button>
       </div>
-    </div>`).join('');
+      ${multi?`<div class="sk-prow-sel" onclick="event.stopPropagation()">
+        <select class="sk-pitch-sel" title="Move to another structure" aria-label="Structure" onchange="skMoveFacet(${i},this.value)">${SK.groups.map(g=>`<option value="${g.id}"${g.id===f.g?' selected':''}>${skEsc(g.name)}</option>`).join('')}</select>
+        <select class="sk-pitch-sel" aria-label="Pitch" onchange="skSetPitch(${i},this.value)">${opts(f.pitch)}</select>
+      </div>`:''}
+    </div>`;
+  el.innerHTML = multi
+    ? SK.groups.map(g=>{ const fs=SK.facets.map((f,i)=>[f,i]).filter(([f])=>f.g===g.id); return fs.length ? `<div class="sk-gsub"><span class="sk-swatch" style="background:${skGroupColor(g.id)}"></span>${skEsc(g.name)}</div>`+fs.map(([f,i])=>row(f,i)).join('') : ''; }).join('')
+    : SK.facets.map(row).join('');
 }
 
 function applySketchMeasurements(){
   if(SK.drawing && SK.curVids.length>=3) skFinishDraw();
   else if(SK.drawing) skCancelDraw();
-  const t=SK.totals;
+  // All structures together, or one structure on its own (e.g. only the flat section for a flat-roof estimate)
+  const scope=document.getElementById('sk-apply-scope')?.value||'all';
+  const one = scope==='all' ? null : skGroup(+scope);
+  const t = one ? SK.groupTotals[one.id] : SK.totals;
   const r=v=>Math.round(v||0);
   const waste=parseFloat(document.getElementById('sk-waste').value)||12;
-  const story=document.getElementById('sk-story').value;
+  // Stories: the chosen structure's, or the one with the most squares when applying all
+  const biggest=[...SK.groups].sort((a,b)=>(SK.groupTotals[b.id]?.sq||0)-(SK.groupTotals[a.id]?.sq||0))[0];
+  const story=(one||biggest).story;
   const setF=(id,v)=>{ const el=document.getElementById(id); if(el){el.value=v;} };
   // Metal trades take rakes as gable trim and eaves as eave trim; shingle trades
   // run drip edge + starter off the full eave + rake perimeter.
@@ -5469,7 +5624,8 @@ function applySketchMeasurements(){
   if(typeof recalc==='function') recalc();
   const untagged=Object.values(SK.tags).filter(x=>!x.tag).length;
   closeSketcher();
-  showToast(untagged ? `Measurements applied — ${untagged} untagged line${untagged>1?'s':''} left out` : 'Measurements applied!');
+  const what = one ? `${one.name} measurements applied` : 'Measurements applied';
+  showToast(untagged ? `${what} — ${untagged} untagged line${untagged>1?'s':''} left out` : what+'!');
 }
 
 // ── PDF UPLOAD ────────────────────────────────────────────────────────────────
