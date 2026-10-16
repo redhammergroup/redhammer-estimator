@@ -352,6 +352,13 @@ tbody tr:hover .note-input,.note-input:focus{border-bottom-color:var(--border-st
 .sk-pick .sk-tag-key{margin-left:auto}
 .sk-pick-auto{grid-column:1/-1;justify-content:center;font-size:.76rem;font-weight:600;color:var(--text-2);background:none}
 .sk-pick-auto:disabled{opacity:.45;cursor:default}
+.sk-pick-del{color:#DC2626;border-color:transparent}
+.sk-pick-del:hover{background:var(--danger-bg);border-color:#DC2626}
+.sk-linetools{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}
+.sk-lt{display:flex;align-items:center;gap:6px;background:var(--surface);border:1.5px solid var(--border-strong);border-radius:7px;padding:8px 8px;font-size:.78rem;font-weight:600;color:var(--text-1);cursor:pointer;font-family:inherit;white-space:nowrap}
+.sk-lt:hover{border-color:var(--text-3)}
+.sk-lt.on{border-color:var(--brand);background:var(--brand-lt);color:var(--brand-ink)}
+.sk-tags .sk-tag-btn{cursor:default}
 .sk-clear-btn.sk-clear-armed{border-color:#DC2626;color:#DC2626;background:var(--danger-bg)}
 .sk-img-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .sk-upload-btn{display:inline-flex;align-items:center;background:var(--brand);color:#fff;border-radius:7px;padding:7px 12px;font-size:.78rem;font-weight:600;cursor:pointer}
@@ -1724,8 +1731,14 @@ tbody tr:hover .note-input,.note-input:focus{border-bottom-color:var(--border-st
         </div>
 
         <div>
-          <div class="sk-sec-lbl" style="margin-bottom:5px">2 &middot; Tag Lines</div>
-          <div style="font-size:.68rem;color:var(--text-3);line-height:1.45;margin-bottom:6px">Lines are tagged automatically from the roof&rsquo;s shape. Click any line on the map to change its type; keys 1&ndash;6 work while the menu is open.</div>
+          <div class="sk-sec-lbl" style="margin-bottom:5px">2 &middot; Draw Ridge, Hip &amp; Valley Lines</div>
+          <div style="font-size:.68rem;color:var(--text-3);line-height:1.45;margin-bottom:6px">Pick a line type, click the start point, then the end point. It keeps going from the last point until you press Esc. Points snap to corners and onto lines.</div>
+          <div id="sk-linetools" class="sk-linetools"></div>
+        </div>
+
+        <div>
+          <div class="sk-sec-lbl" style="margin-bottom:5px">3 &middot; Line Totals</div>
+          <div style="font-size:.68rem;color:var(--text-3);line-height:1.45;margin-bottom:6px">Facet edges are tagged automatically from the roof&rsquo;s shape. Click any line on the map to change its type or delete a drawn line.</div>
           <div id="sk-tags" class="sk-tags"></div>
           <div id="sk-untagged" class="sk-hint" style="margin-top:6px"></div>
         </div>
@@ -4495,8 +4508,11 @@ const SK = {
   preview: null,
   rubber: null,
   rubberTip: null,
-  activeTag: 'eave',
   selectedIdx: null,
+  lines: [],          // drawn lines (ridge, valley…): [{id, a, b, tag, line, hit}] — a/b are vertex ids
+  nextLineId: 1,
+  lineTool: null,     // line type being drawn, or null
+  lineFrom: null,     // vertex id the next line starts from
   space: 'geo',       // 'geo' (satellite tiles) or 'image' (roof screenshot)
   image: null,        // {src, w, h} when space is 'image'
   ftPerUnit: null,    // image space: feet per image pixel, set by the scale tool
@@ -4543,6 +4559,7 @@ function openSketcher(){
 function closeSketcher(){
   document.getElementById('sk-overlay').classList.remove('sk-open');
   if(SK.drawing) skCancelDraw();
+  if(SK.lineTool) skEndLine();
   if(SK.scaling && SK.map){ SK.scaling=false; SK.map.getContainer().style.cursor=''; }
   document.removeEventListener('keydown', skKeyHandler);
 }
@@ -4551,6 +4568,7 @@ function skKeyHandler(e){
   const key = e.key || '';
   if(key==='Escape') {
     if(SK.pickKey) skCloseTagPicker();
+    else if(SK.lineTool) skEndLine();
     else if(SK.drawing) skCancelDraw();
     else if(SK.scaling){ SK.scaling=false; SK.map.getContainer().style.cursor=''; if(SK.scaleLine){ SK.map.removeLayer(SK.scaleLine); SK.scaleLine=null; } skUpdateMode(); skRenderImageControls(); }
     else closeSketcher();
@@ -4559,6 +4577,7 @@ function skKeyHandler(e){
   if(e.target.matches?.('input,select,textarea')) return;
   if(document.getElementById('sk-draw-tab').style.display==='none') return;
   if(key==='Enter' && SK.drawing){ e.preventDefault(); skFinishDraw(); return; }
+  if(key==='Enter' && SK.lineTool){ e.preventDefault(); skEndLine(); return; }
   if(SK.drawing && (key==='Backspace' || (key.toLowerCase()==='z' && (e.ctrlKey||e.metaKey)))){ e.preventDefault(); skUndoPoint(); return; }
   if(key.toLowerCase()==='d' && !e.ctrlKey && !e.metaKey){ skToggleDraw(); return; }
   const tag = Object.keys(SK_TAGS).find(t=>SK_TAGS[t].key===key);
@@ -4589,6 +4608,7 @@ function skCreateMap(space){
   if(SK.map){ SK.map.remove(); SK.map=null; }
   // Layer objects belong to the old map; they are rebuilt by skRefresh()
   SK.facets.forEach(f=>f.poly=null);
+  SK.lines.forEach(l=>{ l.line=null; l.hit=null; });
   SK.edges={}; SK.vmarkers={}; SK.preview=null; SK.rubber=null; SK.rubberTip=null; SK.scaleLine=null;
   SK.space=space;
   if(space==='image'){
@@ -4613,7 +4633,7 @@ function skCreateMap(space){
   SK.map.on('dblclick', skMapDblClick);
   SK.map.on('mousemove', skMapMove);
   SK.map.on('mouseout', ()=>skClearRubber());
-  skRefresh(); skRenderTags(); skRenderImageControls();
+  skRefresh(); skRenderTags(); skRenderLineTools(); skRenderImageControls();
 }
 
 function skShowImagePrompt(show){
@@ -4778,6 +4798,7 @@ function skToggleDraw(){
 function skStartDraw(){
   if(SK.space==='image' && !SK.ftPerUnit){ showToast('Set the scale first'); skStartScale(); return; }
   if(SK.scaling){ SK.scaling=false; SK.map.getContainer().style.cursor=''; }
+  if(SK.lineTool) skEndLine();
   SK.drawing = true;
   SK.curVids = [];
   SK.map.getContainer().style.cursor='crosshair';
@@ -4871,10 +4892,12 @@ function skNewVertex(ll){
   return id;
 }
 
-// Drop corners that no facet (or the facet in progress) uses
+// Drop corners that no facet, drawn line (or the shape in progress) uses
 function skGcVerts(){
   const used=new Set(SK.curVids);
   SK.facets.forEach(f=>f.vids.forEach(v=>used.add(v)));
+  SK.lines.forEach(l=>{ used.add(l.a); used.add(l.b); });
+  if(SK.lineFrom!=null) used.add(SK.lineFrom);
   for(const id in SK.verts){ if(!used.has(+id)) delete SK.verts[id]; }
 }
 
@@ -4897,20 +4920,24 @@ function skUndoPoint(){
 function skMapClick(e){
   if(SK.pickKey){ skCloseTagPicker(); return; }
   if(SK.scaling){ skScaleClick(e.latlng); return; }
+  if(SK.lineTool){ skLinePoint(e.latlng); return; }
   if(!SK.drawing) return;
   const snap=skSnapVertex(e.latlng);
   skAddPoint(snap!=null ? snap : skNewVertex(e.latlng));
 }
 
 function skMapDblClick(){
+  if(SK.lineTool){ skEndLine(); return; }
   if(SK.drawing && SK.curVids.length>=3) skFinishDraw();
 }
 
 function skMapMove(e){
-  if(!SK.drawing || !SK.curVids.length){ skClearRubber(); return; }
-  const from=skLL(SK.curVids[SK.curVids.length-1]);
+  const fromVid = SK.drawing ? SK.curVids[SK.curVids.length-1] : (SK.lineTool ? SK.lineFrom : null);
+  if(fromVid==null){ skClearRubber(); return; }
+  const from=skLL(fromVid);
   const snap=skSnapVertex(e.latlng);
-  const to=snap!=null ? skLL(snap) : [e.latlng.lat,e.latlng.lng];
+  const onEdge=snap==null && SK.lineTool ? skEdgeSnapPoint(e.latlng) : null;
+  const to=snap!=null ? skLL(snap) : onEdge ? [onEdge.lat,onEdge.lng] : [e.latlng.lat,e.latlng.lng];
   const mid=[(from[0]+to[0])/2,(from[1]+to[1])/2];
   const txt=Math.round(skEdgeLenFt(from,to))+"'";
   if(!SK.rubber){
@@ -4960,8 +4987,8 @@ function skRenderVertices(){
     if(!m){
       m=L.marker(SK.verts[id],{icon:skVertexIcon(false),draggable:true,autoPan:true,zIndexOffset:1000,keyboard:false}).addTo(SK.map);
       m._skFirst=false;
-      m.on('click',()=>{ if(SK.drawing) skAddPoint(vid); });
-      m.on('dblclick',()=>{ if(SK.drawing && SK.curVids.length>=3) skFinishDraw(); });
+      m.on('click',()=>{ if(SK.lineTool) skLinePoint(null, vid); else if(SK.drawing) skAddPoint(vid); });
+      m.on('dblclick',()=>{ if(SK.lineTool) skEndLine(); else if(SK.drawing && SK.curVids.length>=3) skFinishDraw(); });
       m.on('drag',ev=>{ const ll=ev.target.getLatLng(); SK.verts[vid]={lat:ll.lat,lng:ll.lng}; skRedrawGeometry(); });
       m.on('dragend',()=>{ skRefresh(); });
       SK.vmarkers[id]=m;
@@ -5049,6 +5076,7 @@ function skAutoTags(edges){
 }
 
 function skEdgeClick(ev,k){
+  if(SK.lineTool){ skLinePoint(ev.latlng, skSnapVertex(ev.latlng,20)); return; }
   if(SK.drawing){
     // While drawing, a click on a line lands on its nearest corner if close, else a new point
     const snap=skSnapVertex(ev.latlng,20);
@@ -5058,31 +5086,140 @@ function skEdgeClick(ev,k){
   skOpenTagPicker(k, ev.latlng);
 }
 
+// ── Drawn lines: pick a type, then click point to point (ridges, valleys, hips…) ──
+function skStartLine(tag){
+  if(!SK.map) return;
+  if(SK.space==='image' && !SK.ftPerUnit){ showToast('Set the scale first'); skStartScale(); return; }
+  if(SK.lineTool===tag){ skEndLine(); return; }   // clicking the active tool again stops it
+  if(SK.drawing) skCancelDraw();
+  skCloseTagPicker();
+  SK.lineTool=tag; SK.lineFrom=null;
+  SK.map.getContainer().style.cursor='crosshair';
+  SK.map.getContainer().classList.add('sk-drawing-map');
+  skRenderLineTools(); skUpdateMode();
+}
+
+function skEndLine(){
+  SK.lineTool=null; SK.lineFrom=null;
+  if(SK.map){
+    skClearRubber();
+    SK.map.getContainer().style.cursor='';
+    SK.map.getContainer().classList.remove('sk-drawing-map');
+    skGcVerts(); skRenderVertices();
+  }
+  skRenderLineTools(); skUpdateMode();
+}
+
+// Closest point on any line (facet edge or drawn line) within px pixels, as a latlng — or null
+function skEdgeSnapPoint(latlng, px=10){
+  const P=SK.map.latLngToContainerPoint(latlng);
+  let best=null, bestD=px;
+  const segs=[...Object.values(SK.edges), ...SK.lines].map(e=>[e.a,e.b]);
+  for(const [a,b] of segs){
+    const A=SK.map.latLngToContainerPoint(SK.verts[a]), B=SK.map.latLngToContainerPoint(SK.verts[b]);
+    const dx=B.x-A.x, dy=B.y-A.y, len2=dx*dx+dy*dy; if(!len2) continue;
+    const t=Math.max(0,Math.min(1,((P.x-A.x)*dx+(P.y-A.y)*dy)/len2));
+    const d=Math.hypot(A.x+t*dx-P.x, A.y+t*dy-P.y);
+    if(d<bestD){ bestD=d; const va=SK.verts[a], vb=SK.verts[b]; best={lat:va.lat+t*(vb.lat-va.lat), lng:va.lng+t*(vb.lng-va.lng)}; }
+  }
+  return best;
+}
+
+function skLinePoint(latlng, vid){
+  if(vid==null){
+    vid=skSnapVertex(latlng);
+    if(vid==null){ const on=skEdgeSnapPoint(latlng); vid=skNewVertex(on||latlng); }
+  }
+  if(SK.lineFrom==null){ SK.lineFrom=vid; skRenderVertices(); skUpdateMode(); return; }
+  if(vid===SK.lineFrom) return; // same spot (double-click)
+  const a=SK.lineFrom, b=vid, key=skEdgeKey(a,b), tag=SK.lineTool;
+  if(SK.edges[key]) SK.tags[key]={tag, manual:true};            // along a facet edge: tag that edge, no duplicate
+  else {
+    const same=SK.lines.find(l=>skEdgeKey(l.a,l.b)===key);
+    if(same) same.tag=tag; else SK.lines.push({id:SK.nextLineId++, a, b, tag, line:null, hit:null});
+  }
+  SK.lineFrom=b;                                                 // keep going from here
+  skClearRubber(); skRefresh();
+}
+
+// Pitch under a drawn line: the facet its midpoint sits on, else a facet sharing one of its corners
+function skLinePitch(l){
+  const va=SK.verts[l.a], vb=SK.verts[l.b], m={lat:(va.lat+vb.lat)/2, lng:(va.lng+vb.lng)/2};
+  const inside=f=>{ const p=f.vids.map(id=>SK.verts[id]); let c=false;
+    for(let i=0,j=p.length-1;i<p.length;j=i++){ if((p[i].lat>m.lat)!==(p[j].lat>m.lat) && m.lng<(p[j].lng-p[i].lng)*(m.lat-p[i].lat)/(p[j].lat-p[i].lat)+p[i].lng) c=!c; }
+    return c; };
+  const f=SK.facets.find(inside) || SK.facets.find(f=>f.vids.includes(l.a)||f.vids.includes(l.b));
+  return f ? f.pitch : (SK.facets.length ? Math.max(...SK.facets.map(f=>f.pitch)) : 0);
+}
+
+function skLineTrueLen(l){
+  const plan=skEdgeLenFt(skLL(l.a),skLL(l.b)), p=skLinePitch(l);
+  if(l.tag==='rake'||l.tag==='step') return plan*skPitchFactor(p);
+  if(l.tag==='hip'||l.tag==='valley') return plan*Math.sqrt(1+p*p/288);
+  return plan;
+}
+
+function skBuildLines(){
+  SK.lines.forEach(l=>{
+    if(l.line) SK.map.removeLayer(l.line);
+    if(l.hit) SK.map.removeLayer(l.hit);
+    const ll=[skLL(l.a),skLL(l.b)], key='L'+l.id;
+    l.line=L.polyline(ll,{weight:5,interactive:false}).addTo(SK.map);
+    l.line.bindTooltip('',{permanent:true,direction:'center',className:'sk-len-tip',interactive:false});
+    l.hit=L.polyline(ll,{weight:18,opacity:0.001,bubblingMouseEvents:false}).addTo(SK.map);
+    l.hit.on('click',ev=>{ if(SK.lineTool) skLinePoint(ev.latlng, skSnapVertex(ev.latlng,20)); else if(!SK.drawing) skOpenTagPicker(key, ev.latlng); });
+    l.hit.on('dblclick',()=>{ if(SK.lineTool) skEndLine(); });
+    l.hit.on('mouseover',()=>{ if(!SK.drawing && !SK.lineTool) l.line.setStyle({weight:8}); });
+    l.hit.on('mouseout',()=>{ if(SK.pickKey!==key) l.line.setStyle({weight:5}); });
+  });
+}
+
+function skLineByKey(k){ return typeof k==='string' && k[0]==='L' ? SK.lines.find(l=>'L'+l.id===k) : null; }
+
+function skDeleteLine(){
+  const l=skLineByKey(SK.pickKey); if(!l) return;
+  if(l.line) SK.map.removeLayer(l.line);
+  if(l.hit) SK.map.removeLayer(l.hit);
+  SK.lines=SK.lines.filter(x=>x!==l);
+  skCloseTagPicker(); skGcVerts(); skRefresh();
+}
+
+function skRenderLineTools(){
+  const el=document.getElementById('sk-linetools'); if(!el) return;
+  el.innerHTML=['ridge','hip','valley','rake','eave','step'].map(t=>
+    `<button class="sk-lt${SK.lineTool===t?' on':''}" onclick="skStartLine('${t}')"><span class="sk-tag-sw" style="background:${SK_TAGS[t].color}"></span>${SK.lineTool===t?'Stop':'+ '+SK_TAGS[t].label}</button>`).join('');
+}
+
 // Small menu at the clicked line: pick its type in one tap (or keys 1–6)
 function skOpenTagPicker(k, latlng){
   const el=document.getElementById('sk-tagpick');
   SK.pickKey=k;
-  const cur=SK.tags[k]?.tag, manual=SK.tags[k]?.manual;
+  const drawn=skLineByKey(k);
+  const cur=drawn ? drawn.tag : SK.tags[k]?.tag, manual=SK.tags[k]?.manual;
   el.innerHTML=Object.entries(SK_TAGS).map(([t,d])=>
     `<button class="sk-pick${cur===t?' on':''}" onclick="skPickTag('${t}')"><span class="sk-tag-sw" style="background:${d.color}"></span>${d.label}<span class="sk-tag-key">${d.key}</span></button>`).join('')
-    + `<button class="sk-pick sk-pick-auto" onclick="skPickTag(null)" ${manual?'':'disabled'}>Back to automatic</button>`;
+    + (drawn ? `<button class="sk-pick sk-pick-auto sk-pick-del" onclick="skDeleteLine()">Delete line</button>`
+             : `<button class="sk-pick sk-pick-auto" onclick="skPickTag(null)" ${manual?'':'disabled'}>Back to automatic</button>`);
   const p=SK.map.latLngToContainerPoint(latlng), wrap=document.getElementById('sk-map-wrap');
   el.hidden=false;
   const w=el.offsetWidth, h=el.offsetHeight;
   el.style.left=Math.max(8, Math.min(p.x+12, wrap.clientWidth-w-8))+'px';
   el.style.top=Math.max(8, Math.min(p.y-h/2, wrap.clientHeight-h-8))+'px';
-  const e=SK.edges[k]; if(e) e.line.setStyle({weight:8});
+  const e=SK.edges[k]||drawn; if(e?.line) e.line.setStyle({weight:8});
 }
 
 function skCloseTagPicker(){
   const el=document.getElementById('sk-tagpick');
   if(el) el.hidden=true;
   const e=SK.edges[SK.pickKey]; if(e) e.line.setStyle({weight:4});
+  const d=skLineByKey(SK.pickKey); if(d?.line) d.line.setStyle({weight:5});
   SK.pickKey=null;
 }
 
 function skPickTag(t){
   const k=SK.pickKey; if(!k) return;
+  const drawn=skLineByKey(k);
+  if(drawn){ if(t) drawn.tag=t; skCloseTagPicker(); skRedrawGeometry(); skCalc(); return; }
   if(t===null){ SK.tags[k]={tag:null, manual:false}; skCloseTagPicker(); skRefresh(); return; } // re-run automatic
   SK.tags[k]={tag:t, manual:true};
   skCloseTagPicker(); skRedrawGeometry(); skCalc();
@@ -5109,11 +5246,21 @@ function skRedrawGeometry(){
     const tip=e.line.getTooltip()?.getElement();
     if(tip) tip.style.background = t ? SK_TAGS[t].color : 'rgba(17,17,17,.8)';
   }
+  for(const l of SK.lines){
+    if(!l.line) continue;
+    const ll=[skLL(l.a),skLL(l.b)];
+    l.line.setLatLngs(ll); l.hit.setLatLngs(ll);
+    l.line.setStyle({color: SK_TAGS[l.tag].color});
+    l.line.setTooltipContent(Math.round(skLineTrueLen(l))+"'");
+    l.line.openTooltip([(ll[0][0]+ll[1][0])/2,(ll[0][1]+ll[1][1])/2]);
+    const tip=l.line.getTooltip()?.getElement();
+    if(tip) tip.style.background=SK_TAGS[l.tag].color;
+  }
 }
 
 function skRefresh(){
   if(!SK.map) return;
-  skBuildEdges(); skRedrawGeometry(); skRenderVertices();
+  skBuildEdges(); skBuildLines(); skRedrawGeometry(); skRenderVertices();
   skRenderPlanes(); skCalc(); skUpdateMode();
 }
 
@@ -5146,7 +5293,7 @@ function skSetAllPitch(v){
 // Two-step clear (browser confirm dialogs are blocked inside claude.ai)
 function skClearAll(){
   const btn=document.querySelector('.sk-clear-btn');
-  if(SK.facets.length && !btn.dataset.armed){
+  if((SK.facets.length||SK.lines.length) && !btn.dataset.armed){
     btn.dataset.armed='1'; btn.textContent='Click again to clear the sketch'; btn.classList.add('sk-clear-armed');
     clearTimeout(btn._t);
     btn._t=setTimeout(()=>{ delete btn.dataset.armed; btn.textContent='Clear sketch'; btn.classList.remove('sk-clear-armed'); },3500);
@@ -5160,12 +5307,14 @@ function skClearAll(){
 // ── Save / load with the job (stored inside the estimate's data column) ──
 function skSerialize(){
   const hasImage = SK.space==='image' && SK.image;
-  if(!SK.facets.length && !hasImage) return null;
+  if(!SK.facets.length && !SK.lines.length && !hasImage) return null;
   const verts={};
   SK.facets.forEach(f=>f.vids.forEach(id=>{ verts[id]=[SK.verts[id].lat,SK.verts[id].lng]; }));
+  SK.lines.forEach(l=>[l.a,l.b].forEach(id=>{ verts[id]=[SK.verts[id].lat,SK.verts[id].lng]; }));
   const out={
     v:1, verts,
     facets: SK.facets.map(f=>({vids:[...f.vids], pitch:f.pitch})),
+    lines: SK.lines.map(l=>({a:l.a, b:l.b, tag:l.tag})),
     tags: JSON.parse(JSON.stringify(SK.tags)),
     waste: document.getElementById('sk-waste')?.value,
     story: document.getElementById('sk-story')?.value,
@@ -5179,7 +5328,9 @@ function skLoad(s){
   if(SK.map){
     if(SK.drawing) skEndDraw();
     SK.facets.forEach(f=>f.poly && SK.map.removeLayer(f.poly));
+    SK.lines.forEach(l=>{ if(l.line) SK.map.removeLayer(l.line); if(l.hit) SK.map.removeLayer(l.hit); });
   }
+  SK.lineTool=null; SK.lineFrom=null; SK.lines=[]; SK.nextLineId=1;
   SK.facets=[]; SK.tags={}; SK.verts={}; SK.selectedIdx=null; SK.nextVid=1;
   SK.totals={eave:0,rake:0,ridge:0,hip:0,valley:0,step:0,sq:0};
   // Which drawing surface this sketch belongs to (older sketches are satellite-based)
@@ -5198,6 +5349,8 @@ function skLoad(s){
       vids:f.vids.map(Number), pitch:f.pitch||0, color:SK.COLORS[i%SK.COLORS.length], label:`Facet ${i+1}`, poly:null
     }));
     SK.tags=JSON.parse(JSON.stringify(s.tags||{}));
+    SK.lines=(s.lines||[]).filter(l=>SK.verts[l.a]&&SK.verts[l.b]&&SK_TAGS[l.tag])
+      .map(l=>({id:SK.nextLineId++, a:+l.a, b:+l.b, tag:l.tag, line:null, hit:null}));
     if(s.waste!=null){ const el=document.getElementById('sk-waste'); if(el) el.value=s.waste; }
     if(s.story){ const el=document.getElementById('sk-story'); if(el) el.value=s.story; }
     SK.needsFit=true;
@@ -5225,6 +5378,7 @@ function skCalc(){
     const tag=SK.tags[k]?.tag;
     if(tag) t[tag]+=skEdgeTrueLen(SK.edges[k]); else untagged++;
   }
+  for(const l of SK.lines) t[l.tag]+=skLineTrueLen(l);
   t.sq=SK.facets.reduce((a,f)=>a+skPlaneAreaSQ(f),0);
   SK.totals=t;
   document.getElementById('sk-sq-nw').textContent=t.sq.toFixed(2);
@@ -5253,6 +5407,9 @@ function skUpdateMode(){
     html = SK.scalePts.length ? 'Scale &middot; click the <b>other end</b>' : 'Scale &middot; click one end of something you know the length of (the Google Maps scale bar works)';
   } else if(SK.space==='image' && !SK.ftPerUnit){
     html = SK.scalePts?.length===2 ? 'Enter that line&rsquo;s length in feet on the left' : 'Set the scale to start drawing';
+  } else if(SK.lineTool){
+    const lbl=SK_TAGS[SK.lineTool].label;
+    html = SK.lineFrom==null ? `Drawing <b>${lbl}</b> &middot; click the start point` : `Drawing <b>${lbl}</b> &middot; click the end point &middot; Esc or Enter to stop`;
   } else if(SK.drawing){
     const n=SK.curVids.length;
     html = n<3 ? `Drawing &middot; click corner ${n+1}` : `Drawing &middot; click the <b>first corner</b> or press Enter to close`;
@@ -5260,7 +5417,7 @@ function skUpdateMode(){
   } else if(!SK.facets.length){
     html = 'Press <b>D</b> or &ldquo;+ Draw Facet&rdquo; to start';
   } else {
-    html = 'Lines are tagged automatically &middot; <b>click a line</b> to change its type &middot; drag corners to adjust';
+    html = 'Draw ridges and valleys with the line buttons &middot; <b>click a line</b> to change its type &middot; drag corners to adjust';
   }
   el.innerHTML=html;
 }
