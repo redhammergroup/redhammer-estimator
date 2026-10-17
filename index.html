@@ -407,6 +407,9 @@ tbody tr:hover .note-input,.note-input:focus{border-bottom-color:var(--border-st
 .sk-scale-btn:hover{border-color:var(--brand);color:var(--brand-ink)}
 .sk-scale-form{margin-top:8px;display:flex;flex-direction:column;gap:5px;background:var(--warn-bg);border-radius:7px;padding:8px 10px}
 .sk-scale-form label{font-size:.72rem;font-weight:600;color:var(--text-1)}
+.sk-photo{position:absolute;left:10px;bottom:10px;z-index:1000;max-width:min(360px,calc(100% - 140px));background:rgba(17,17,17,.82);color:#fff;font-size:.72rem;line-height:1.35;padding:6px 10px;border-radius:8px;pointer-events:none}
+.sk-photo b{font-weight:700}
+.sk-photo .warn{display:block;color:#FCD34D;margin-top:2px}
 .sk-noimg{position:absolute;inset:0;z-index:1100;display:flex;align-items:center;justify-content:center;padding:16px;background:color-mix(in srgb,var(--bg) 88%,transparent)}
 .sk-noimg[hidden]{display:none}
 .sk-noimg-card{max-width:440px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px 22px;box-shadow:var(--shadow-pop);display:flex;flex-direction:column;gap:10px;font-size:.84rem;color:var(--text-2);line-height:1.5}
@@ -1823,6 +1826,7 @@ tbody tr:hover .note-input,.note-input:focus{border-bottom-color:var(--border-st
       <div id="sk-map-wrap">
         <div id="sk-map"></div>
         <div id="sk-mode" class="sk-mode"></div>
+        <div id="sk-photo" class="sk-photo" hidden></div>
         <div id="sk-tagpick" class="sk-tagpick" role="menu" aria-label="Line type" hidden></div>
         <div id="sk-noimg" class="sk-noimg" hidden>
           <div class="sk-noimg-card">
@@ -4696,6 +4700,35 @@ function skCreateMap(space){
   SK.map.on('mouseout', ()=>skClearRubber());
   skRefresh(); skRenderTags(); skRenderLineTools(); skRenderImageControls();
   if(space==='geo' && SK.pinLL) skPlacePin(...SK.pinLL);
+  skPhotoInfo();
+  if(space==='geo') SK.map.on('moveend', ()=>{ clearTimeout(skPhotoTimer); skPhotoTimer=setTimeout(skPhotoInfo, 500); });
+}
+
+// ── Photo note: date and sharpness of the satellite photo under the map center (Esri's imagery metadata) ──
+let skPhotoTimer=null, skPhotoSeq=0;
+const skPhotoCache={};
+async function skPhotoInfo(){
+  const el=document.getElementById('sk-photo');
+  if(!el) return;
+  if(!SK.map || SK.space!=='geo' || SK.map.getZoom()<17){ el.hidden=true; return; }
+  const c=SK.map.getCenter(), key=c.lat.toFixed(3)+','+c.lng.toFixed(3), seq=++skPhotoSeq;
+  let info=skPhotoCache[key];
+  if(info===undefined){
+    try{
+      const d=0.0005, r=await fetch('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/identify?f=json&geometryType=esriGeometryPoint&sr=4326&tolerance=0&returnGeometry=false&layers=all&imageDisplay=400,400,96'
+        +`&geometry=${c.lng},${c.lat}&mapExtent=${c.lng-d},${c.lat-d},${c.lng+d},${c.lat+d}`);
+      const a=r.ok ? ((await r.json()).results||[]).map(x=>x.attributes).find(a=>parseFloat(a['RESOLUTION (M)'])<5 && a['SRC_DATE2']) : null;
+      info = a ? {m:parseFloat(a['RESOLUTION (M)']), date:a['SRC_DATE2']} : null;
+    }catch(e){ info=null; } // offline, or blocked inside claude.ai
+    skPhotoCache[key]=info;
+  }
+  if(seq!==skPhotoSeq) return;
+  if(!info){ el.hidden=true; return; }
+  const ft=info.m*3.28084, dt=new Date(info.date);
+  const when=isNaN(dt) ? info.date : dt.toLocaleDateString('en-US',{month:'short',year:'numeric'});
+  el.innerHTML=`Photo: <b>${skEsc(when)}</b> &middot; ${ft.toFixed(1)} ft per pixel`
+    +(ft>1.2 ? '<span class="warn">Blurry photo: trace the inside edge of the roof (the dark band beside it is shadow). For a bid, check against a report.</span>' : '');
+  el.hidden=false;
 }
 
 function skShowImagePrompt(show){
