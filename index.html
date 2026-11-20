@@ -771,6 +771,71 @@ tbody td{padding:7px 10px}
   .main{padding:12px 16px 28px}
   .custom-inputs{width:100%}
 }
+
+/* Photo report (TrueFrame photos) + Good / Better / Best proposal options */
+.pr-head{display:flex;align-items:baseline;gap:6px 14px;flex-wrap:wrap;margin-bottom:10px}
+.pr-sub{font-size:.76rem;color:var(--text-3)}
+.pr-link{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.pr-input,.pr-sel,.pr-ta{background:var(--surface);border:1px solid var(--border-strong);border-radius:4px;padding:6px 9px;font-size:.82rem;color:var(--text-1);font-family:inherit;outline:none;min-width:0}
+.pr-input:focus,.pr-sel:focus,.pr-ta:focus{border-color:var(--brand)}
+.pr-link .pr-input{flex:1;min-width:200px}
+.pr-ta{width:100%;resize:vertical;line-height:1.5;display:block}
+.pr-status{font-size:.76rem;color:var(--text-3)}
+.pr-status.err{color:var(--danger)}
+.pr-cover{display:grid;grid-template-columns:220px minmax(0,1fr);gap:10px;margin-bottom:12px}
+.po-lbl{font-size:.72rem;font-weight:600;color:var(--text-2);display:flex;flex-direction:column;gap:4px}
+.pr-grid{display:grid;grid-template-columns:minmax(200px,290px) minmax(0,1fr);gap:14px;align-items:start}
+.pr-tray{border:1px solid var(--border);background:var(--surface);padding:8px;position:sticky;top:128px;max-height:calc(100vh - 140px);overflow:auto}
+.pr-tray-hd{display:flex;justify-content:space-between;align-items:center;font-size:.72rem;font-weight:600;color:var(--text-2);margin-bottom:6px;gap:6px}
+.pr-tray-hd label{font-weight:500;display:flex;gap:4px;align-items:center}
+.pr-thumbs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}
+.pr-th{position:relative;aspect-ratio:1;background:var(--surface-2);border:2px solid transparent;cursor:grab;padding:0;overflow:hidden;border-radius:3px}
+.pr-th img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}
+.pr-th.picked{border-color:var(--brand);box-shadow:0 0 0 2px var(--brand-lt)}
+.pr-used{position:absolute;top:2px;right:2px;background:var(--brand);color:#fff;font-size:.6rem;font-weight:700;border-radius:2px;padding:0 4px;line-height:1.5}
+.pr-areas{display:flex;flex-direction:column;gap:10px;min-width:0}
+.pr-area{border:1px solid var(--border);background:var(--surface);padding:10px}
+.pr-area-hd{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:6px}
+.pr-area-hd .pr-input{flex:1;min-width:140px;font-weight:600}
+.pr-icon{background:none;border:1px solid transparent;border-radius:4px;color:var(--text-3);cursor:pointer;padding:3px 7px;font-size:.8rem;line-height:1.2;font-family:inherit}
+.pr-icon:hover:not(:disabled){border-color:var(--border-strong);color:var(--text-1)}
+.pr-icon:disabled{opacity:.35;cursor:default}
+.pr-drop{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;min-height:84px;border:1.5px dashed var(--border-strong);border-radius:4px;padding:8px;margin-top:8px}
+.pr-drop.over,.pr-drop.can-tap{border-color:var(--brand);background:var(--brand-lt);cursor:copy}
+.pr-drop-empty{grid-column:1/-1;align-self:center;text-align:center;font-size:.76rem;color:var(--text-3)}
+.pr-ph{display:flex;flex-direction:column;gap:4px;background:var(--surface-2);padding:4px;border-radius:3px;cursor:grab;min-width:0}
+.pr-ph-img{position:relative;aspect-ratio:4/3;background:var(--border);overflow:hidden;border-radius:2px}
+.pr-ph-img img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}
+.pr-ph-n{position:absolute;top:3px;left:3px;background:#fff;color:#111;font-size:.66rem;font-weight:700;border-radius:3px;padding:0 5px}
+.pr-ph-tools{position:absolute;top:3px;right:3px;display:flex;gap:2px}
+.pr-ph-tools button{background:rgba(0,0,0,.62);color:#fff;border:none;border-radius:3px;font-size:.7rem;padding:2px 5px;cursor:pointer;line-height:1.2}
+.pr-ph-tools button.on{background:var(--brand)}
+.pr-ph .pr-input{font-size:.74rem;padding:4px 6px;width:100%}
+.pr-missing{display:flex;align-items:center;justify-content:center;height:100%;font-size:.68rem;color:var(--text-3);text-align:center;padding:4px}
+.pr-add{display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:.76rem;color:var(--text-3)}
+.pr-chip{background:var(--surface);border:1px solid var(--border-strong);border-radius:999px;padding:3px 10px;font-size:.76rem;cursor:pointer;color:var(--text-1);font-family:inherit}
+.pr-chip:hover{border-color:var(--brand);color:var(--brand-ink)}
+.po-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.po-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:10px 0}
+.po-opt{border:1px solid var(--border);border-top:3px solid var(--text-1);background:var(--surface);padding:10px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.po-opt.badged{border-top-color:var(--brand)}
+.po-k{font-size:.66rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-2);display:flex;justify-content:space-between;align-items:center;gap:6px}
+.po-k label{font-weight:500;text-transform:none;letter-spacing:0;display:flex;gap:4px;align-items:center;color:var(--text-3)}
+.po-price{font-size:.78rem;color:var(--text-2);display:flex;flex-direction:column;gap:4px}
+.po-price b{font-size:1rem;color:var(--text-1);font-variant-numeric:tabular-nums}
+.po-cmp-wrap{overflow:auto;border:1px solid var(--border)}
+.po-cmp{min-width:560px}
+.po-cmp td input+input{margin-top:2px}
+.lib-item{border:1px solid var(--border);background:var(--surface);padding:10px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr) auto;gap:8px;align-items:start;margin-bottom:8px}
+.lib-item .pr-input,.lib-item .pr-sel{width:100%}
+@media(max-width:900px){
+  .pr-grid{grid-template-columns:minmax(0,1fr)}
+  .pr-tray{position:static;max-height:none}
+  .pr-thumbs{grid-template-columns:repeat(auto-fill,minmax(72px,1fr))}
+  .po-cards{grid-template-columns:minmax(0,1fr)}
+  .pr-cover{grid-template-columns:minmax(0,1fr)}
+  .lib-item{grid-template-columns:minmax(0,1fr)}
+}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -795,6 +860,7 @@ tbody td{padding:7px 10px}
         <button class="ovf-item" role="menuitem" onclick="saveTemplate()">Save as template</button>
         <div class="ovf-sep"></div>
         <button class="ovf-item" role="menuitem" onclick="openMaterials()">Materials order sheet</button>
+        <button class="ovf-item" role="menuitem" onclick="openDownloadPdf('inspection')">Inspection &amp; proposal</button>
         <button class="ovf-item" role="menuitem" onclick="printProposal()">Customer proposal</button>
         <button class="ovf-item" role="menuitem" onclick="openInsuranceBid()">Insurance bid</button>
         <button class="ovf-item" role="menuitem" onclick="printEstimate()">Internal estimate</button>
@@ -1065,6 +1131,21 @@ tbody td{padding:7px 10px}
         placeholder="Upon completion, your property will be fully restored. Red Hammer Construction Group warranties all labor and workmanship…"
         style="width:100%;background:var(--surface-2);border:1px solid var(--border);border-radius:7px;padding:8px 10px;font-size:.82rem;color:var(--text-1);font-family:inherit;resize:vertical;outline:none;transition:border-color .15s;line-height:1.5"
         onfocus="this.style.borderColor='var(--brand)'" onblur="this.style.borderColor='var(--border)'"></textarea>
+    </div>
+
+    <!-- Photo report: findings by area with photos from TrueFrame (filled by renderPhotoReport) -->
+    <div class="card-main" id="pr-card">
+      <div class="pr-head">
+        <span class="main-section-title">Photo Report &amp; Findings</span>
+        <span class="pr-sub">Photos come from the TrueFrame job. Drag them into an area, or tap a photo and then tap an area.</span>
+      </div>
+      <div id="pr-body"></div>
+    </div>
+
+    <!-- Good / Better / Best options for the proposal (filled by renderProposalOptions) -->
+    <div class="card-main" id="po-card">
+      <div class="pr-head"><span class="main-section-title">Proposal Options</span></div>
+      <div id="po-body"></div>
     </div>
 
     <!-- Job Cost Summary (internal only — roofing trades) -->
@@ -1616,6 +1697,7 @@ tbody td{padding:7px 10px}
         <button class="settings-nav-item" id="stab-materials" onclick="openSettingsTab('materials')"><span class="sni-icon">&#127959;</span><span class="sni-label">Materials</span></button>
         <button class="settings-nav-item" id="stab-labor" onclick="openSettingsTab('labor')"><span class="sni-icon">&#128295;</span><span class="sni-label">Labor Rates</span></button>
         <button class="settings-nav-item" id="stab-xact" onclick="openSettingsTab('xact')"><span class="sni-icon">&#128196;</span><span class="sni-label">Xactimate</span></button>
+        <button class="settings-nav-item" id="stab-library" onclick="openSettingsTab('library')"><span class="sni-icon">&#128203;</span><span class="sni-label">Option Library</span></button>
         <div class="settings-nav-sep"></div>
         <button class="settings-nav-item" id="stab-aiscan" onclick="openSettingsTab('aiscan')"><span class="sni-icon">&#129302;</span><span class="sni-label">AI Scan</span></button>
         <button class="settings-nav-item" id="stab-company" onclick="openSettingsTab('company')"><span class="sni-icon">&#127981;</span><span class="sni-label">Company</span></button>
@@ -1773,6 +1855,17 @@ tbody td{padding:7px 10px}
       </div>
     </div>
 
+    <!-- TAB: Option Library (products for the Good / Better / Best options) -->
+    <div class="stab-panel" id="stab-panel-library">
+      <div style="font-size:.78rem;color:var(--text-2);margin-bottom:10px">Products and packages you offer. Each one shows up in the <b>Choose from library…</b> list on the Good, Better and Best options, and fills in its name and bullet points.</div>
+      <div id="lib-list"></div>
+      <div class="po-row" style="margin-top:10px">
+        <button class="tpl-btn" onclick="libAdd()">+ Add product</button>
+        <span style="flex:1"></span>
+        <button class="dl-go" onclick="poSaveLib()">Save library</button>
+      </div>
+    </div>
+
           </div><!-- end settings-content -->
     </div><!-- end settings-body -->
     <!-- Footer -->
@@ -1805,6 +1898,9 @@ tbody td{padding:7px 10px}
     <div class="modal-msg" style="margin-bottom:0">Pick the version to save.</div>
     <div class="dl-opts" id="dl-opts"></div>
     <div class="dl-claim" id="dl-claim" hidden><span id="dl-claim-txt"></span><button type="button" onclick="dlEditClaim()">Edit claim info</button></div>
+    <label class="dl-claim" id="dl-ppp" hidden>Photos per page
+      <select class="pr-sel" id="dl-ppp-sel" onchange="rhReport.perPage=+this.value"><option value="1">1 (large)</option><option value="2">2</option><option value="4">4 (grid)</option></select>
+    </label>
     <label class="dl-field">File name<input class="modal-input" id="dl-fname" type="text" autocomplete="off"></label>
     <div class="dl-how">
       <b>Download PDF</b> saves the file to your Downloads folder. On a phone, open it from the notification to text or email it.<br>
@@ -3181,11 +3277,13 @@ function renderTable(){
   tbody.innerHTML=rows;
 }
 
-function computeTotals(){
+function computeTotals(){ return rhTotalsFor(lineItems); }
+// Totals for any list of line items (a tier that isn't on screen, for example).
+function rhTotalsFor(items){
   const markup = (parseFloat(document.getElementById('markup-pct')?.value)||0)/100;
   const taxPct = (parseFloat(document.getElementById('tax-pct')?.value)||0)/100;
   let mat=0, lab=0;
-  lineItems.forEach(li=>{
+  items.forEach(li=>{
     if(li.type==='section') return;
     const tot = li.qty*li.price;
     lab += tot*(li.laborPct||0.5);
@@ -3199,6 +3297,8 @@ function computeTotals(){
 
 function recalcSummary(){
   const {markup, taxPct, sub, oop, tax, grand} = computeTotals();
+  // Option prices follow their tier's line items; skip while someone is typing in the options
+  if(rhOpts.on && !document.getElementById('po-body')?.contains(document.activeElement)) renderProposalOptions();
   document.getElementById('summary-rows').innerHTML = `
     <div class="summary-label">Subtotal</div><div class="summary-val">$${fmtMoney(sub)}</div>
     <div class="summary-label">O&amp;P (${Math.round(markup*100)}%)</div><div class="summary-val">$${fmtMoney(oop)}</div>
@@ -3328,6 +3428,409 @@ function rhTierSections(){
 function rhTierHeading(label,color='#8B1A1A',rule='#B8893B'){
   return `<div style="font-family:'Playfair Display',serif;font-size:14pt;font-weight:700;color:${color};padding:4px 0 5px;margin:14px 0 8px;border-bottom:2px solid ${rule}">${escHtml(label)}</div>`;
 }
+
+// ─── PHOTO REPORT (photos from TrueFrame) ───
+// TrueFrame's public share link (…/s/<token>) answers with the job's photos as signed URLs
+// that last an hour. Only photo ids and captions are saved with the estimate; the URLs are
+// fetched again from the token whenever the job is opened.
+const TF_URL='https://tcrboqjpacuwgapcakil.supabase.co';
+const TF_KEY='sb_publishable_abwSgNPjp16wWxIEnQY7-g_jHmU8Wre'; // publishable key: made to sit in public pages
+const RH_RATINGS={'':'No rating',good:'Good',fair:'Fair',poor:'Poor',urgent:'Needs immediate attention'};
+const RH_AREA_PRESETS=['Roof','Chimney','Gutters & downspouts','Siding & trim','Windows & doors','Fascia & soffit','Attic / ventilation','Interior (ceilings, walls)','Other'];
+function prKey(){ return 'a'+Math.random().toString(36).slice(2,9); }
+function prBlank(){ return {tfLink:'',tfToken:'',overall:'',summary:'',coverId:'',perPage:2,areas:[{key:prKey(),name:'Roof',rating:'',notes:'',photos:[]}]}; }
+const prRating=v=>Object.prototype.hasOwnProperty.call(RH_RATINGS,v)?v:'';
+const prId=v=>/^[\w-]{1,80}$/.test(String(v||''))?String(v):'';
+let rhReport=prBlank();
+let tfPhotos=[], tfById=new Map(), tfLoadedAt=0, tfState={msg:'',err:false,busy:false}, tfPicked=null, prHideUsed=false, prDrag=null;
+const tfImgCache=new Map();
+
+function prNormalize(r){
+  const b=prBlank();
+  if(!r||typeof r!=='object') return b;
+  const areas=Array.isArray(r.areas)?r.areas.map(a=>({
+    key:a.key||prKey(), name:String(a.name||''), rating:prRating(a.rating), notes:String(a.notes||''),
+    photos:Array.isArray(a.photos)?a.photos.filter(p=>p&&prId(p.id)).map(p=>({id:prId(p.id),caption:String(p.caption||'')})):[]
+  })):b.areas;
+  return {tfLink:String(r.tfLink||''),tfToken:String(r.tfToken||''),overall:prRating(r.overall),summary:String(r.summary||''),
+    coverId:prId(r.coverId),perPage:[1,2,4].includes(+r.perPage)?+r.perPage:2,areas};
+}
+function prHasContent(){ return !!(rhReport.summary.trim()||rhReport.overall||rhReport.areas.some(a=>a.notes.trim()||a.rating||a.photos.length)); }
+function prUsedIds(){ return new Set(rhReport.areas.flatMap(a=>a.photos.map(p=>p.id))); }
+
+function tfParseToken(s){
+  s=(s||'').trim(); if(!s) return '';
+  const m=s.match(/\/s\/([A-Za-z0-9_-]+)/); if(m) return m[1];
+  return /^[A-Za-z0-9_-]{6,}$/.test(s)?s:'';
+}
+async function tfFetch(token){
+  let res;
+  try{ res=await fetch(`${TF_URL}/functions/v1/share?token=${encodeURIComponent(token)}`,{headers:{apikey:TF_KEY}}); }
+  catch(e){ throw new Error('Could not reach TrueFrame. Check your signal and try again.'); }
+  if(res.status===404) throw new Error('This TrueFrame link is switched off or wrong. Make a new share link in TrueFrame and paste it here.');
+  if(!res.ok) throw new Error(`TrueFrame could not send the photos (error ${res.status}).`);
+  return res.json();
+}
+function prSetState(msg,err=false,busy=false){
+  tfState={msg,err,busy};
+  const el=document.getElementById('pr-status'); if(el){ el.textContent=msg; el.className='pr-status'+(err?' err':''); }
+  const b=document.getElementById('pr-load'); if(b) b.disabled=busy;
+}
+// fromInput: the Load button (offers to fill in from a report link). Otherwise a quiet reload of the saved link.
+async function tfLoad(fromInput=true){
+  const link=fromInput?(document.getElementById('pr-link')?.value||'').trim():rhReport.tfLink;
+  const token=tfParseToken(link);
+  if(!token){ if(fromInput) prSetState('Paste a TrueFrame share link. It looks like …/s/abc123',true); return; }
+  prSetState('Loading photos from TrueFrame…',false,true);
+  try{
+    const g=await tfFetch(token);
+    const rep=g.kind==='report'&&g.report?g.report:null;
+    const list=(rep
+      ? (rep.photos||[]).map(p=>({id:p.id,caption:p.caption||'',url:p.url,thumbUrl:p.url}))
+      : (g.items||[]).filter(i=>i.type!=='video').map(i=>({id:i.id,caption:i.caption||'',url:i.url,thumbUrl:i.thumbUrl||i.url}))
+    ).filter(p=>prId(p.id)&&p.url);
+    tfPhotos=list; tfById=new Map(list.map(p=>[p.id,p])); tfLoadedAt=Date.now();
+    rhReport.tfLink=link; rhReport.tfToken=token;
+    const where=g.project?.address||g.project?.name||'';
+    prSetState(`${list.length} photo${list.length===1?'':'s'} from TrueFrame${where?' · '+where:''}`);
+    if(fromInput) prFillCustomer(g.project);
+    renderPhotoReport();
+    if(rep&&fromInput) prOfferReport(rep);
+  }catch(e){ prSetState(e?.message||String(e),true); renderPhotoReport(); }
+}
+// A brand-new estimate takes the customer's name and address from the TrueFrame job.
+function prFillCustomer(p){
+  if(!p) return;
+  const nameEl=document.getElementById('f-name'), addrEl=document.getElementById('f-addr');
+  if(!nameEl||!addrEl||nameEl.value.trim()||addrEl.value.trim()) return;
+  if(p.name) nameEl.value=p.name;
+  const parts=String(p.address||'').split(',').map(s=>s.trim()).filter(Boolean);
+  if(parts.length){
+    addrEl.value=parts[0];
+    const zip=(String(p.address).match(/\b\d{5}(?:-\d{4})?\b/)||[''])[0];
+    const city=parts.slice(1).filter(s=>!/^USA?$/i.test(s)).join(', ').replace(/\s*\b\d{5}(?:-\d{4})?\b/,'').trim();
+    const cityEl=document.getElementById('f-city'), zipEl=document.getElementById('f-zip');
+    if(cityEl&&city) cityEl.value=city;
+    if(zipEl&&zip) zipEl.value=zip;
+  }
+  if(typeof updateJobBar==='function') updateJobBar();
+}
+// A TrueFrame report link brings its areas, ratings, notes and photos as a starting point.
+function prOfferReport(rep){
+  const c=rep.content||{};
+  const secs=(c.sections||[]).filter(s=>s&&s.enabled!==false&&(s.notes||s.rating||(s.photo_ids||[]).length));
+  if(!secs.length&&!c.summary&&!c.overall) return;
+  const apply=()=>{
+    const cap=new Map((rep.photos||[]).map(p=>[p.id,p.caption||'']));
+    rhReport.areas=secs.map(s=>({key:prKey(),name:String(s.name||'Area'),rating:prRating(s.rating),notes:String(s.notes||''),
+      photos:(s.photo_ids||[]).filter(id=>cap.has(id)&&prId(id)).map(id=>({id,caption:cap.get(id)}))}));
+    if(!rhReport.areas.length) rhReport.areas=prBlank().areas;
+    rhReport.overall=prRating(c.overall);
+    if(c.summary) rhReport.summary=String(c.summary);
+    rhReport.coverId=rhReport.areas.flatMap(a=>a.photos)[0]?.id||'';
+    renderPhotoReport(); showToast('Filled in from the TrueFrame report');
+  };
+  if(prHasContent()) rhConfirm({title:'Use the TrueFrame report?',msg:'The areas, ratings, notes and photos here will be replaced with the ones from this TrueFrame report.',ok:'Replace'},apply);
+  else apply();
+}
+
+function renderPhotoReport(){
+  const el=document.getElementById('pr-body'); if(!el) return;
+  const r=rhReport, used=prUsedIds();
+  const ratingSel=(cur,on)=>`<select class="pr-sel" onchange="${on}">${Object.entries(RH_RATINGS).map(([v,l])=>`<option value="${v}"${v===cur?' selected':''}>${l}</option>`).join('')}</select>`;
+  const shown=tfPhotos.filter(p=>!prHideUsed||!used.has(p.id));
+  const tray=tfPhotos.length
+    ? `<div class="pr-thumbs">${shown.map(p=>`<button type="button" class="pr-th${tfPicked===p.id?' picked':''}" draggable="true" ondragstart="prDragStart(event,'tray','${p.id}')" ondragend="prDragEnd()" onclick="prPick('${p.id}')" title="${escHtml(p.caption||'Drag into an area, or tap and then tap an area')}"><img src="${escHtml(p.thumbUrl)}" alt="" loading="lazy">${used.has(p.id)?'<span class="pr-used">&#10003;</span>':''}</button>`).join('')||'<div class="pr-drop-empty">Every photo is in the report.</div>'}</div>`
+    : `<div class="pr-drop-empty" style="padding:18px 6px">Paste a TrueFrame share link above to see this job's photos.</div>`;
+  let n=0;
+  const areas=r.areas.map((a,i)=>{
+    const tiles=a.photos.map((p,j)=>{
+      n++;
+      const src=tfById.get(p.id);
+      return `<div class="pr-ph" draggable="true" ondragstart="prDragStart(event,'area','${i}:${j}')" ondragend="prDragEnd()" ondragover="prDragOver(event)" ondrop="prDrop(event,${i},${j})">
+        <div class="pr-ph-img">${src?`<img src="${escHtml(src.thumbUrl)}" alt="" loading="lazy">`:`<div class="pr-missing">${tfState.busy?'Loading…':'Not in the current TrueFrame link'}</div>`}
+          <span class="pr-ph-n">${n}</span>
+          <span class="pr-ph-tools">
+            <button type="button" class="${r.coverId===p.id?'on':''}" title="Use as the cover photo" onclick="prSetCover('${p.id}')">&#9733;</button>
+            <button type="button" title="Move earlier" onclick="prMovePhoto(${i},${j},-1)">&#8249;</button>
+            <button type="button" title="Move later" onclick="prMovePhoto(${i},${j},1)">&#8250;</button>
+            <button type="button" title="Take out of the report" onclick="prRemovePhoto(${i},${j})">&#10005;</button>
+          </span>
+        </div>
+        <input class="pr-input" value="${escHtml(p.caption)}" placeholder="Caption" oninput="rhReport.areas[${i}].photos[${j}].caption=this.value">
+      </div>`;
+    }).join('');
+    return `<div class="pr-area">
+      <div class="pr-area-hd">
+        <input class="pr-input" value="${escHtml(a.name)}" placeholder="Area name" aria-label="Area name" oninput="rhReport.areas[${i}].name=this.value">
+        ${ratingSel(a.rating,`rhReport.areas[${i}].rating=this.value`)}
+        <button type="button" class="pr-icon" title="Move area up" onclick="prMoveArea(${i},-1)" ${i?'':'disabled'}>&#8593;</button>
+        <button type="button" class="pr-icon" title="Move area down" onclick="prMoveArea(${i},1)" ${i<r.areas.length-1?'':'disabled'}>&#8595;</button>
+        <button type="button" class="pr-icon" title="Remove area" onclick="prRemoveArea(${i})">&#10005;</button>
+      </div>
+      <textarea class="pr-ta" rows="2" placeholder="What you found in this area…" oninput="rhReport.areas[${i}].notes=this.value">${escHtml(a.notes)}</textarea>
+      <div class="pr-drop${tfPicked?' can-tap':''}" ondragover="prDragOver(event)" ondragleave="if(!this.contains(event.relatedTarget))this.classList.remove('over')" ondrop="prDrop(event,${i})" onclick="prTapDrop(event,${i})">${tiles||`<div class="pr-drop-empty">${tfPicked?'Tap here to add the selected photo':'Drag photos here'}</div>`}</div>
+    </div>`;
+  }).join('');
+  const have=new Set(r.areas.map(a=>a.name.trim().toLowerCase()));
+  const chips=RH_AREA_PRESETS.map((p,k)=>have.has(p.toLowerCase())?'':`<button type="button" class="pr-chip" onclick="prAddArea(${k})">+ ${escHtml(p)}</button>`).join('');
+  el.innerHTML=`
+    <div class="pr-link">
+      <input class="pr-input" id="pr-link" type="url" placeholder="Paste a TrueFrame share link (Full gallery or a report)" value="${escHtml(r.tfLink)}" onkeydown="if(event.key==='Enter')tfLoad()">
+      <button type="button" class="tpl-btn" id="pr-load" onclick="tfLoad()" ${tfState.busy?'disabled':''}>${tfPhotos.length?'Reload':'Load photos'}</button>
+      <span class="pr-status${tfState.err?' err':''}" id="pr-status">${escHtml(tfState.msg)}</span>
+    </div>
+    <div class="pr-cover">
+      <label class="po-lbl">Overall condition ${ratingSel(r.overall,'rhReport.overall=this.value')}</label>
+      <label class="po-lbl">Summary for the cover page<textarea class="pr-ta" rows="2" placeholder="e.g. The roof has hail damage on every slope and needs to be replaced." oninput="rhReport.summary=this.value">${escHtml(r.summary)}</textarea></label>
+    </div>
+    <div class="pr-grid">
+      <div class="pr-tray">
+        <div class="pr-tray-hd"><span>TrueFrame photos${tfPhotos.length?` (${tfPhotos.length})`:''}</span>${tfPhotos.length?`<label><input type="checkbox" ${prHideUsed?'checked':''} onchange="prHideUsed=this.checked;renderPhotoReport()">Hide used</label>`:''}</div>
+        ${tray}
+        ${tfPicked?'<div class="pr-sub" style="margin-top:6px">Photo selected. Tap an area to add it, or tap the photo again to cancel.</div>':''}
+      </div>
+      <div class="pr-areas">${areas}
+        <div class="pr-add">Add area: ${chips}<button type="button" class="pr-chip" onclick="prAddArea(-1)">+ Other area…</button></div>
+      </div>
+    </div>`;
+}
+function prPick(id){ tfPicked=tfPicked===id?null:id; renderPhotoReport(); }
+function prAddPhoto(i,id,at){
+  const a=rhReport.areas[i]; if(!a||!prId(id)) return;
+  a.photos.splice(at==null?a.photos.length:at,0,{id,caption:tfById.get(id)?.caption||''});
+  if(!rhReport.coverId) rhReport.coverId=id;
+}
+function prTapDrop(e,i){
+  if(!tfPicked||e.target.closest('button,input,textarea,select')) return;
+  prAddPhoto(i,tfPicked); tfPicked=null; renderPhotoReport();
+}
+function prDragStart(e,kind,ref){
+  prDrag={kind,ref};
+  e.dataTransfer.effectAllowed=kind==='tray'?'copy':'move';
+  try{ e.dataTransfer.setData('text/plain',ref); }catch(_){}
+  e.stopPropagation();
+}
+function prDragEnd(){ prDrag=null; document.querySelectorAll('.pr-drop.over').forEach(d=>d.classList.remove('over')); }
+function prDragOver(e){
+  if(!prDrag) return;
+  e.preventDefault();
+  e.dataTransfer.dropEffect=prDrag.kind==='tray'?'copy':'move';
+  e.currentTarget.closest('.pr-drop')?.classList.add('over');
+}
+function prDrop(e,i,j){
+  if(!prDrag) return;
+  e.preventDefault(); e.stopPropagation();
+  const d=prDrag; prDrag=null;
+  if(d.kind==='tray') prAddPhoto(i,d.ref,j);
+  else{
+    const [si,sj]=d.ref.split(':').map(Number);
+    const src=rhReport.areas[si], dst=rhReport.areas[i]; if(!src||!dst||!src.photos[sj]) return;
+    const [item]=src.photos.splice(sj,1);
+    let at=j==null?dst.photos.length:j;
+    if(si===i&&j!=null&&sj<j) at--;
+    dst.photos.splice(at,0,item);
+  }
+  renderPhotoReport();
+}
+function prMovePhoto(i,j,d){
+  const ph=rhReport.areas[i].photos, k=j+d;
+  if(k<0||k>=ph.length) return;
+  [ph[j],ph[k]]=[ph[k],ph[j]]; renderPhotoReport();
+}
+function prRemovePhoto(i,j){
+  const [gone]=rhReport.areas[i].photos.splice(j,1);
+  if(gone&&rhReport.coverId===gone.id&&!prUsedIds().has(gone.id)) rhReport.coverId=rhReport.areas.flatMap(a=>a.photos)[0]?.id||'';
+  renderPhotoReport();
+}
+function prSetCover(id){ rhReport.coverId=rhReport.coverId===id?'':id; renderPhotoReport(); }
+function prMoveArea(i,d){
+  const a=rhReport.areas, k=i+d; if(k<0||k>=a.length) return;
+  [a[i],a[k]]=[a[k],a[i]]; renderPhotoReport();
+}
+function prRemoveArea(i){
+  const a=rhReport.areas[i]; if(!a) return;
+  const go=()=>{ rhReport.areas.splice(i,1); if(rhReport.coverId&&!prUsedIds().has(rhReport.coverId)) rhReport.coverId=''; renderPhotoReport(); };
+  if(a.notes.trim()||a.photos.length) rhConfirm({title:`Remove ${a.name||'this area'}?`,msg:'Its notes and photo choices will be taken out of the report. The photos stay in TrueFrame.',ok:'Remove'},go);
+  else go();
+}
+function prAddArea(k){
+  rhReport.areas.push({key:prKey(),name:k>=0?RH_AREA_PRESETS[k]:'',rating:'',notes:'',photos:[]});
+  renderPhotoReport();
+  if(k<0){ const ins=document.querySelectorAll('.pr-area-hd .pr-input'); ins[ins.length-1]?.focus(); }
+}
+
+// Photos for the PDF are copied into the page (about 1400px JPEG) so links that run out
+// don't matter and the file stays small.
+async function tfImage(id){
+  if(tfImgCache.has(id)) return tfImgCache.get(id);
+  const p=tfById.get(id); if(!p) return null;
+  const res=await fetch(p.url); if(!res.ok) throw new Error('photo '+res.status);
+  const bmp=await createImageBitmap(await res.blob());
+  const k=Math.min(1,1400/Math.max(bmp.width,bmp.height));
+  const c=document.createElement('canvas'); c.width=Math.round(bmp.width*k); c.height=Math.round(bmp.height*k);
+  c.getContext('2d').drawImage(bmp,0,0,c.width,c.height);
+  if(bmp.close) bmp.close();
+  const out={src:c.toDataURL('image/jpeg',.82),w:c.width,h:c.height};
+  tfImgCache.set(id,out);
+  return out;
+}
+async function tfPrepareImages(ids){
+  const list=[...new Set(ids.filter(Boolean))];
+  const need=list.filter(id=>!tfImgCache.has(id));
+  if(need.length&&rhReport.tfToken&&(Date.now()-tfLoadedAt>45*60e3||need.some(id=>!tfById.has(id)))) await tfLoad(false);
+  const map=new Map(); let failed=0, next=0;
+  await Promise.all(Array.from({length:Math.min(4,list.length)},async()=>{
+    while(next<list.length){
+      const id=list[next++];
+      try{ const im=await tfImage(id); if(im) map.set(id,im); else failed++; }catch(e){ failed++; }
+    }
+  }));
+  return {map,failed};
+}
+
+// ─── PROPOSAL OPTIONS (Good / Better / Best cards) ───
+const RH_OPT_KEYS=['good','better','best'];
+function poCard(){ return {name:'',bullets:'• ',price:'',note:''}; }
+function poBlank(){ return {on:false,included:'• ',cards:{good:poCard(),better:poCard(),best:poCard()},badge:{tier:'better',text:'Most Popular'},compare:[]}; }
+let rhOpts=poBlank();
+function poNormalize(o){
+  const b=poBlank(); if(!o||typeof o!=='object') return b;
+  const card=c=>({name:String(c?.name||''),bullets:c?.bullets!=null?String(c.bullets):'• ',price:String(c?.price??''),note:String(c?.note||'')});
+  return {on:!!o.on, included:o.included!=null?String(o.included):'• ',
+    cards:{good:card(o.cards?.good),better:card(o.cards?.better),best:card(o.cards?.best)},
+    badge:{tier:['good','better','best',''].includes(o.badge?.tier)?o.badge.tier:'better',text:String(o.badge?.text??'Most Popular')},
+    compare:Array.isArray(o.compare)?o.compare.map(r=>({feature:String(r?.feature||''),sub:String(r?.sub||''),good:String(r?.good||''),better:String(r?.better||''),best:String(r?.best||'')})):[]};
+}
+function poBullets(s){ return String(s||'').split('\n').map(l=>l.replace(/^\s*[•\-\*·]\s*/,'').trim()).filter(Boolean); }
+// The tier's line items set the price when it has any; otherwise the typed price.
+function poPrice(k){
+  if(rhTierHasItems(k)) return {amt:rhTotalsFor(rhTierItems(k)).grand,from:'items'};
+  const v=parseFloat(String(rhOpts.cards[k].price).replace(/[^0-9.]/g,''));
+  return {amt:isFinite(v)&&v>0?v:null,from:'typed'};
+}
+function poFilled(k){ const c=rhOpts.cards[k]; return !!(c.name.trim()||poBullets(c.bullets).length||poPrice(k).amt); }
+function poBulletKey(e){
+  if(e.key!=='Enter'||e.shiftKey||e.isComposing) return;
+  const t=e.target, s=t.selectionStart;
+  e.preventDefault();
+  t.value=t.value.slice(0,s)+'\n• '+t.value.slice(t.selectionEnd);
+  t.selectionStart=t.selectionEnd=s+3;
+  t.dispatchEvent(new Event('input'));
+}
+function poToggle(on){ rhOpts.on=on; renderProposalOptions(); }
+function poAddRow(){ rhOpts.compare.push({feature:'',sub:'',good:'',better:'',best:''}); renderProposalOptions(); }
+
+let rhOptLib=[], rhOptLibLoaded=false, _rhOptLibLoading=null;
+function poLoadLib(){
+  if(_rhOptLibLoading) return _rhOptLibLoading;
+  _rhOptLibLoading=(async()=>{
+    try{
+      const {data,error}=await db.from('settings').select('value').eq('key','option_library').maybeSingle();
+      if(error) throw error;
+      rhOptLib=data?JSON.parse(data.value||'[]'):[];
+      rhOptLibLoaded=true;
+      try{ localStorage.setItem('rh_option_library',JSON.stringify(rhOptLib)); }catch(_){}
+    }catch(e){
+      try{ rhOptLib=JSON.parse(localStorage.getItem('rh_option_library')||'[]'); }catch(_){ rhOptLib=[]; }
+    }
+    if(!Array.isArray(rhOptLib)) rhOptLib=[];
+    _rhOptLibLoading=null;
+  })();
+  return _rhOptLibLoading;
+}
+async function poSaveLib(){
+  rhOptLib=rhOptLib.filter(it=>it.name.trim()||it.bullets.length);
+  try{ localStorage.setItem('rh_option_library',JSON.stringify(rhOptLib)); }catch(_){}
+  const {error}=await db.from('settings').upsert({key:'option_library',value:JSON.stringify(rhOptLib)},{onConflict:'key'});
+  showToast(error?'Saved on this device only: '+error.message:'Option library saved');
+  renderLibrary(); renderProposalOptions();
+}
+function poLibChoices(){
+  return rhOptLib.map((it,i)=>`<option value="${i}">${escHtml(it.name||'Untitled')}${it.trade?' · '+escHtml(TRADE_TEMPLATES[it.trade]?.label||it.trade):''}</option>`).join('');
+}
+function poFromLib(k,i){
+  const it=rhOptLib[+i]; if(i===''||!it) return;
+  const c=rhOpts.cards[k];
+  const go=()=>{ c.name=it.name||''; c.bullets=(it.bullets||[]).map(b=>'• '+b).join('\n')||'• '; renderProposalOptions(); };
+  if(c.name.trim()||poBullets(c.bullets).length) rhConfirm({title:`Replace ${RH_TIER_LABELS[k]}?`,msg:`Its name and bullet points will be replaced with "${it.name||'Untitled'}".`,ok:'Replace'},go);
+  else go();
+}
+async function poSaveToLib(k){
+  const c=rhOpts.cards[k];
+  if(!c.name.trim()){ showToast('Give this option a name first'); return; }
+  if(!rhOptLibLoaded) await poLoadLib();
+  const item={name:c.name.trim(),trade:currentTrade||'',bullets:poBullets(c.bullets)};
+  const at=rhOptLib.findIndex(it=>it.name.trim().toLowerCase()===item.name.toLowerCase());
+  if(at>=0) rhOptLib[at]=item; else rhOptLib.push(item);
+  await poSaveLib();
+}
+
+function renderProposalOptions(){
+  const el=document.getElementById('po-body'); if(!el) return;
+  const o=rhOpts;
+  if(!o.on){
+    el.innerHTML=`<div class="po-row"><span class="pr-sub" style="flex:1;min-width:200px">The proposal shows one scope of work and total. Turn on options to let the customer choose Good, Better or Best.</span><button type="button" class="tpl-btn" onclick="poToggle(true)">+ Give 3 options</button></div>`;
+    return;
+  }
+  if(!rhOptLibLoaded&&!_rhOptLibLoading) poLoadLib().then(()=>{ if(rhOpts.on) renderProposalOptions(); });
+  const lib=poLibChoices();
+  const card=k=>{
+    const c=o.cards[k], p=poPrice(k);
+    return `<div class="po-opt${o.badge.tier===k?' badged':''}">
+      <div class="po-k"><span>Option ${RH_OPT_KEYS.indexOf(k)+1} &middot; ${RH_TIER_LABELS[k]}</span><label><input type="radio" name="po-badge" ${o.badge.tier===k?'checked':''} onchange="rhOpts.badge.tier='${k}';renderProposalOptions()">Badge</label></div>
+      ${lib?`<select class="pr-sel" onchange="poFromLib('${k}',this.value);this.value=''"><option value="">Choose from library…</option>${lib}</select>`:''}
+      <input class="pr-input" placeholder="Product or package name" value="${escHtml(c.name)}" oninput="rhOpts.cards.${k}.name=this.value">
+      <textarea class="pr-ta" rows="5" placeholder="• What's included" oninput="rhOpts.cards.${k}.bullets=this.value" onkeydown="poBulletKey(event)">${escHtml(c.bullets)}</textarea>
+      <div class="po-price">${p.from==='items'
+        ? `<span>From the ${RH_TIER_LABELS[k]} line items: <b>$${fmtMoney(p.amt)}</b></span>`
+        : `<label class="po-row"><span class="po-lbl" style="flex-direction:row">Price $</span><input class="pr-input" style="width:120px" inputmode="decimal" placeholder="0.00" value="${escHtml(c.price)}" oninput="rhOpts.cards.${k}.price=this.value"></label><span class="pr-sub">Or price it with line items on the ${RH_TIER_LABELS[k]} tier.</span>`}</div>
+      <input class="pr-input" placeholder="Line under the price, e.g. ≈ $6.77 / sq ft installed" value="${escHtml(c.note)}" oninput="rhOpts.cards.${k}.note=this.value">
+      <button type="button" class="link-btn" style="align-self:flex-start" onclick="poSaveToLib('${k}')">Save to option library</button>
+    </div>`;
+  };
+  const cmp=o.compare.length
+    ? `<div class="po-cmp-wrap"><table class="sp-table po-cmp"><thead><tr><th>Feature</th><th>Good</th><th>Better</th><th>Best</th><th></th></tr></thead><tbody>${o.compare.map((r,i)=>`<tr>
+        <td><input value="${escHtml(r.feature)}" placeholder="e.g. Wear layer" oninput="rhOpts.compare[${i}].feature=this.value"><input value="${escHtml(r.sub)}" placeholder="Small note (optional)" style="font-size:.74rem" oninput="rhOpts.compare[${i}].sub=this.value"></td>
+        ${RH_OPT_KEYS.map(k=>`<td><input value="${escHtml(r[k])}" placeholder="${k==='good'?'✓, — or text':''}" oninput="rhOpts.compare[${i}].${k}=this.value"></td>`).join('')}
+        <td><button type="button" class="sp-x" title="Remove row" onclick="rhOpts.compare.splice(${i},1);renderProposalOptions()">&#10005;</button></td></tr>`).join('')}</tbody></table></div>
+       <div class="pr-sub" style="margin-top:4px">Type ✓ for included and — for not included. Fill in only Good to stretch one answer across all three.</div>`
+    : `<div class="pr-sub">Leave it empty to leave it out of the PDF.</div>`;
+  el.innerHTML=`
+    <div class="po-row" style="justify-content:space-between"><span class="pr-sub">Leave an option empty to leave it out. Press Enter in a list for a new bullet.</span><button type="button" class="link-btn link-danger" onclick="poToggle(false)">Turn off options</button></div>
+    <label class="po-lbl" style="margin-top:10px">Included in every option<textarea class="pr-ta" rows="3" oninput="rhOpts.included=this.value" onkeydown="poBulletKey(event)">${escHtml(o.included)}</textarea></label>
+    <div class="po-cards">${RH_OPT_KEYS.map(card).join('')}</div>
+    <div class="po-row"><span class="po-lbl" style="flex-direction:row">Badge text</span><input class="pr-input" style="width:180px" value="${escHtml(o.badge.text)}" oninput="rhOpts.badge.text=this.value"><label class="po-row" style="gap:4px"><input type="radio" name="po-badge" ${o.badge.tier?'':'checked'} onchange="rhOpts.badge.tier='';renderProposalOptions()"><span class="pr-sub">No badge</span></label></div>
+    <div style="margin-top:14px">
+      <div class="po-row" style="justify-content:space-between;margin-bottom:6px"><span class="po-lbl" style="flex-direction:row">Side-by-side table (optional)</span><button type="button" class="link-btn" onclick="poAddRow()">+ Add row</button></div>
+      ${cmp}
+    </div>`;
+}
+
+// Settings → Option Library
+function renderLibrary(){
+  const el=document.getElementById('lib-list'); if(!el) return;
+  if(!rhOptLib.length){ el.innerHTML='<div class="sp-empty">No products yet. Add one, or use “Save to option library” on an option.</div>'; return; }
+  const trades=Object.entries(TRADE_TEMPLATES).map(([k,t])=>[k,t.label||k]);
+  el.innerHTML=rhOptLib.map((it,i)=>`<div class="lib-item">
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <input class="pr-input" value="${escHtml(it.name)}" placeholder="Product or package name" oninput="rhOptLib[${i}].name=this.value">
+      <select class="pr-sel" onchange="rhOptLib[${i}].trade=this.value"><option value="">Any trade</option>${trades.map(([k,l])=>`<option value="${escHtml(k)}"${it.trade===k?' selected':''}>${escHtml(l)}</option>`).join('')}</select>
+    </div>
+    <textarea class="pr-ta" rows="4" placeholder="• Bullet points" onkeydown="poBulletKey(event)" oninput="rhOptLib[${i}].bullets=poBullets(this.value)">${escHtml((it.bullets||[]).map(b=>'• '+b).join('\n')||'• ')}</textarea>
+    <button type="button" class="sp-x" title="Delete product" onclick="rhOptLib.splice(${i},1);renderLibrary()">&#10005;</button>
+  </div>`).join('');
+}
+function libAdd(){ rhOptLib.push({name:'',trade:currentTrade||'',bullets:[]}); renderLibrary(); const ins=document.querySelectorAll('#lib-list .lib-item .pr-input'); ins[ins.length-1]?.focus(); }
+async function libOpen(){ if(!rhOptLibLoaded){ document.getElementById('lib-list').innerHTML='<div class="sp-empty">Loading…</div>'; await poLoadLib(); } renderLibrary(); }
+
+function prResetAll(data){
+  rhReport=prNormalize(data&&data.report); rhOpts=poNormalize(data&&data.options);
+  tfPhotos=[]; tfById=new Map(); tfImgCache.clear(); tfPicked=null; tfLoadedAt=0; prSetState('');
+  renderPhotoReport(); renderProposalOptions();
+  if(rhReport.tfToken) tfLoad(false);
+}
+setTimeout(()=>{ renderPhotoReport(); renderProposalOptions(); },0);
 
 // ─── HEADER OVERFLOW MENU ───
 function rhToggleMenu(e){
@@ -3818,7 +4321,9 @@ function collectEstimateData(){
     markup_pct: document.getElementById('markup-pct')?.value||'20',
     tax_pct: document.getElementById('tax-pct')?.value||'0',
     split_mode: splitMode,
-    sketch: skSerialize()
+    sketch: skSerialize(),
+    report: JSON.parse(JSON.stringify(rhReport)),
+    options: JSON.parse(JSON.stringify(rhOpts))
   };
 }
 
@@ -3867,6 +4372,8 @@ function restoreEstimateData(data){
   if(data.split_mode) setSplitMode(data.split_mode);
   // Roof sketch (older jobs have none, which clears the previous job's sketch)
   skLoad(data.sketch||null);
+  // Photo report and Good / Better / Best options (older jobs have none)
+  prResetAll(data);
   renderTable(); recalcSummary();
 }
 
@@ -3979,6 +4486,7 @@ function clearEstimate(){
   rhResetTiers();
   lineItems=[];
   skLoad(null);
+  prResetAll(null);
   ['f-name','f-addr','f-city','f-zip','f-phone','f-email','f-claim','f-adj','f-notes','f-inspection','f-resolution'].forEach(id=>{
     const el=document.getElementById(id);if(el)el.value='';
   });
@@ -4054,6 +4562,7 @@ async function rhDownloads(){
 // frame and saved as a real .pdf file.
 let rhDocKind = null; // last version opened, so the popup starts on it
 const RH_DOC_KINDS = {
+  inspection:{label:'Inspection & Proposal',        desc:'Photo report of what you found, then the proposal and options', file:'Inspection-Proposal', hiRes:true},
   detailed:  {label:'Customer Proposal — Detailed', desc:'Scope of work with a price on every line', file:'Proposal'},
   summary:   {label:'Customer Estimate — Summary',  desc:'Scope of work and total, no line prices', file:'Estimate'},
   insurance: {label:'Insurance Estimate',           desc:'RCV, depreciation and ACV with claim info', file:'Insurance-Estimate', landscape:true},
@@ -4079,7 +4588,9 @@ function rhPdfLibs(){
 
 // Draws a document page (full HTML) onto letter-size PDF pages with 0.5in margins.
 // Page breaks are moved up to the nearest gap between rows so no line is cut in half.
-async function rhHtmlToPdf(html, {landscape=false}={}){
+// .pdf-break starts a new page; .keep marks a block (up to a full page) that is never split.
+// hiRes draws each page on its own at 2x, for photo pages.
+async function rhHtmlToPdf(html, {landscape=false, hiRes=false, footer=''}={}){
   await rhPdfLibs();
   const pageW=landscape?11:8.5, pageH=landscape?8.5:11, margin=.5;
   const contentW=Math.round((pageW-2*margin)*96), sliceH=Math.floor((pageH-2*margin)*96);
@@ -4103,40 +4614,64 @@ async function rhHtmlToPdf(html, {landscape=false}={}){
     const blocks=[];
     body.querySelectorAll('*').forEach(el=>{
       const r=el.getBoundingClientRect();
-      if(!(r.height>0 && r.height<sliceH*.5)) return;
+      const keep=el.classList.contains('keep');
+      if(!(r.height>0 && (r.height<sliceH*.5 || (keep && r.height<=sliceH)))) return;
       const next=el.tagName==='TR'&&el.cells.length===1&&el.nextElementSibling;
-      blocks.push([r.top, next ? next.getBoundingClientRect().bottom : r.bottom]);
+      blocks.push([r.top, next ? next.getBoundingClientRect().bottom : r.bottom, keep]);
     });
+    const breaks=[...body.querySelectorAll('.pdf-break')].map(el=>Math.floor(el.getBoundingClientRect().top)).sort((a,b)=>a-b);
     const cuts=[0];
-    while(total-cuts[cuts.length-1]>sliceH){
-      const start=cuts[cuts.length-1], floor=start+sliceH*.5;
+    for(;;){
+      const start=cuts[cuts.length-1];
+      const forced=breaks.find(y=>y>start+2 && y<Math.min(total,start+sliceH));
+      if(forced!==undefined){ cuts.push(forced); continue; }
+      if(total-start<=sliceH) break;
+      const floor=start+sliceH*.5;
       let y=start+sliceH, moved=true;
       while(moved){
         moved=false;
-        for(const [t,b] of blocks) if(t<y-.5 && b>y+.5 && t>floor){ y=t; moved=true; }
+        for(const [t,b,keep] of blocks) if(t<y-.5 && b>y+.5 && t>(keep?start+2:floor)){ y=t; moved=true; }
       }
       cuts.push(Math.floor(y));
     }
     cuts.push(total);
 
+    const {jsPDF}=window.jspdf;
+    const pdf=new jsPDF({orientation:landscape?'landscape':'portrait',unit:'in',format:'letter',compress:true});
+    const pages=cuts.length-1;
+    const addPage=(c,i,h,scale)=>{
+      if(i) pdf.addPage();
+      pdf.addImage(c.toDataURL('image/jpeg',.9),'JPEG',margin,margin,pageW-2*margin,h/scale/96,undefined,'FAST');
+      pdf.setFontSize(8); pdf.setTextColor(140);
+      if(footer){
+        pdf.text(footer,margin,pageH-.25);
+        pdf.text(`${i+1} / ${pages}`,pageW-margin,pageH-.25,{align:'right'});
+      } else if(pages>1) pdf.text(`Page ${i+1} of ${pages}`,pageW/2,pageH-.25,{align:'center'});
+    };
+    if(hiRes){
+      // One render per page keeps each canvas small, so photos can be drawn sharp on any device
+      for(let i=0;i<pages;i++){
+        const h=cuts[i+1]-cuts[i]; if(h<=0) continue;
+        const target=doc.createElement('canvas');
+        target.width=contentW*2; target.height=Math.ceil(h*2);
+        const c=await html2canvas(body,{canvas:target,scale:2,backgroundColor:'#ffffff',useCORS:true,logging:false,x:0,y:cuts[i],width:contentW,height:h,windowWidth:contentW,windowHeight:total});
+        addPage(c,i,h*2,2);
+      }
+      return pdf.output('blob');
+    }
     // Keep the canvas under phone browser limits (~16M pixels)
     const scale=Math.max(1,Math.min(2,Math.sqrt(16e6/(contentW*total))));
     // The canvas comes from the frame's document so it can use the fonts loaded there
     const target=doc.createElement('canvas');
     target.width=Math.floor(contentW*scale); target.height=Math.floor(total*scale);
     const canvas=await html2canvas(body,{canvas:target,scale,backgroundColor:'#ffffff',useCORS:true,logging:false,width:contentW,height:total,windowWidth:contentW,windowHeight:total});
-    const {jsPDF}=window.jspdf;
-    const pdf=new jsPDF({orientation:landscape?'landscape':'portrait',unit:'in',format:'letter',compress:true});
-    const pages=cuts.length-1;
     for(let i=0;i<pages;i++){
       const y0=Math.round(cuts[i]*scale), h=Math.round(cuts[i+1]*scale)-y0;
       if(h<=0) continue;
       const c=document.createElement('canvas'); c.width=canvas.width; c.height=h;
       const g=c.getContext('2d'); g.fillStyle='#fff'; g.fillRect(0,0,c.width,h);
       g.drawImage(canvas,0,y0,canvas.width,h,0,0,c.width,h);
-      if(i) pdf.addPage();
-      pdf.addImage(c.toDataURL('image/jpeg',.92),'JPEG',margin,margin,pageW-2*margin,h/scale/96,undefined,'FAST');
-      if(pages>1){ pdf.setFontSize(8); pdf.setTextColor(140); pdf.text(`Page ${i+1} of ${pages}`,pageW/2,pageH-.25,{align:'center'}); }
+      addPage(c,i,h,scale);
     }
     return pdf.output('blob');
   } finally { frame.remove(); }
@@ -4156,6 +4691,7 @@ function rhPdfName(kind){
 }
 
 async function rhDocHtml(kind){
+  if(kind==='inspection') return printInspectionProposal();
   if(kind==='detailed'||kind==='summary'){
     const keep=splitMode; splitMode=kind;
     try{ return await printProposal({returnHtml:true}); } finally { splitMode=keep; }
@@ -4168,7 +4704,7 @@ async function rhDocHtml(kind){
 
 function openDownloadPdf(kind){
   const hasXact=!!document.getElementById('xact2-printable');
-  kind=kind||rhDocKind||(splitMode==='summary'?'summary':'detailed');
+  kind=kind||rhDocKind||(prHasContent()||rhOpts.on?'inspection':splitMode==='summary'?'summary':'detailed');
   if(kind==='xactimate'&&!hasXact) kind='detailed';
   document.getElementById('dl-opts').innerHTML=Object.entries(RH_DOC_KINDS)
     .filter(([k])=>k!=='xactimate'||hasXact)
@@ -4183,6 +4719,8 @@ function dlKindChanged(){
   document.getElementById('dl-fname').value=rhPdfName(kind);
   const claimBox=document.getElementById('dl-claim');
   claimBox.hidden=kind!=='insurance';
+  document.getElementById('dl-ppp').hidden=kind!=='inspection';
+  document.getElementById('dl-ppp-sel').value=String(rhReport.perPage||2);
   if(kind==='insurance'){
     ibPrefill();
     const claim=document.getElementById('ib-claim').value.trim(), carrier=document.getElementById('ib-carrier').value.trim();
@@ -4194,9 +4732,15 @@ function dlEditClaim(){
   closeDownloadPdf(); _dlReturn=true; openInsuranceBid();
 }
 
+// The inspection report can go out with findings or typed option prices and no line items.
+function rhDocReady(kind){
+  if(kind==='xactimate') return true;
+  if(kind==='inspection') return prHasContent()||rhAnyTierItems()||(rhOpts.on&&RH_OPT_KEYS.some(poFilled));
+  return rhAnyTierItems();
+}
 async function dlDownload(){
   const kind=dlKind();
-  if(kind!=='xactimate' && !rhAnyTierItems()){ showToast('Add line items before downloading'); return; }
+  if(!rhDocReady(kind)){ showToast(kind==='inspection'?'Add findings, photos or options first':'Add line items before downloading'); return; }
   let fname=document.getElementById('dl-fname').value.trim()||rhPdfName(kind);
   if(!/\.pdf$/i.test(fname)) fname+='.pdf';
   const btn=document.getElementById('dl-go'), lbl=btn.textContent;
@@ -4204,7 +4748,8 @@ async function dlDownload(){
   try{
     const html=await rhDocHtml(kind);
     if(!html) throw new Error('nothing to download yet');
-    const blob=await rhHtmlToPdf(html,{landscape:!!RH_DOC_KINDS[kind].landscape});
+    const blob=await rhHtmlToPdf(html,{landscape:!!RH_DOC_KINDS[kind].landscape,hiRes:!!RH_DOC_KINDS[kind].hiRes,
+      footer:kind==='inspection'?'Red Hammer Construction Group LLC  ·  325-428-7085  ·  redhammergroup.com':''});
     rhDocKind=kind;
     closeDownloadPdf();
     rhFinishPdf(blob,fname);
@@ -4220,7 +4765,7 @@ function rhFinishPdf(blob, fname){
 
 async function dlPrint(){
   const kind=dlKind();
-  if(kind!=='xactimate' && !rhAnyTierItems()){ showToast('Add line items first'); return; }
+  if(!rhDocReady(kind)){ showToast(kind==='inspection'?'Add findings, photos or options first':'Add line items first'); return; }
   const w=window.open('','_blank','width=1000,height=800,scrollbars=yes'); // open now so pop-up blockers allow it
   if(!w){ showToast('Pop-up blocked — please allow pop-ups for this page'); return; }
   const html=await rhDocHtml(kind);
@@ -4482,6 +5027,145 @@ async function printEstimate(opts={}){
 }
 
 // ─── CUSTOMER PROPOSAL ───
+// ─── INSPECTION & PROPOSAL PDF ───
+// Cover (overall condition, summary, cover photo) → 01 What We Found (findings text, then each
+// area with its condition, notes and numbered photos) → 02 Your Options (Good / Better / Best
+// cards, optional side-by-side) → printProposal's result, notes, terms and signatures.
+const RH_INSP_CSS=`
+  .prop-title{font-size:21pt}
+  .prop-title2{font-family:'Playfair Display',serif;font-size:13pt;font-weight:700;color:#8B1A1A;margin-top:3px}
+  .ov{background:#FBF8F4;border:1px solid #EFE6DA;border-radius:6px;padding:12px 16px;margin-bottom:16px}
+  .ov-k{font-size:7.5pt;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#9A7230;display:flex;align-items:center;gap:10px}
+  .ov-b{font-size:10pt;line-height:1.65;color:#2A2321;margin-top:7px}
+  .ov-k+.ov-b{margin-top:9px}
+  .cond{display:inline-block;padding:2px 10px;border-radius:999px;font-size:8pt;font-weight:700;letter-spacing:0;text-transform:none;white-space:nowrap}
+  .cond-good{background:#E3F1E7;color:#1E6B3A}
+  .cond-fair{background:#FDF3D7;color:#8A6100}
+  .cond-poor{background:#FCE8DA;color:#A4400F}
+  .cond-urgent{background:#FBE0DE;color:#A21C1C}
+  .cover-ph{display:flex;justify-content:center;background:#F4F2EF;border-radius:6px;padding:8px}
+  .cover-ph img,.ph-img img{display:block;border-radius:3px}
+  .area-hd{display:flex;justify-content:space-between;align-items:center;gap:12px;padding-bottom:6px;margin-bottom:8px;border-bottom:2px solid #E6DCCF}
+  .area-hd h2{font-family:'Playfair Display',serif;font-size:16pt;font-weight:700;color:#2A2321}
+  .area-notes{font-size:9.5pt;line-height:1.65;color:#3A332F;margin-bottom:10px}
+  .phs{display:grid;gap:14px;margin-bottom:14px}
+  .phs-2{grid-template-columns:1fr 1fr}
+  .ph{background:#F4F2EF;border-radius:6px;padding:8px;display:flex;flex-direction:column;overflow:hidden}
+  .ph-img{flex:1;display:flex;align-items:center;justify-content:center;position:relative;min-height:0}
+  .ph-n{position:absolute;top:4px;left:4px;background:#fff;color:#2A2321;font-size:8pt;font-weight:700;border-radius:4px;padding:1px 7px}
+  .ph-cap{font-size:9pt;color:#3A332F;padding:6px 2px 0;line-height:1.4;max-height:34px;overflow:hidden}
+  .incl{background:#FBF1EE;border:1px solid #EBCFC8;border-left:4px solid #8B1A1A;border-radius:6px;padding:12px 16px;margin-bottom:20px}
+  .incl-k{font-size:7.5pt;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#8B1A1A;margin-bottom:7px}
+  .incl-l{list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:3px 24px;font-size:9.5pt;line-height:1.55;color:#3A2A27}
+  .incl-l li{padding-left:15px;position:relative}
+  .incl-l li:before{content:'';position:absolute;left:0;top:.5em;width:6px;height:6px;background:#8B1A1A}
+  .opts{display:grid;gap:12px;margin:2px 0 22px}
+  .opt{border:1px solid #E6DCCF;border-radius:6px;overflow:hidden;display:flex;flex-direction:column;background:#fff}
+  .opt-hd{background:#2A2321;color:#fff;padding:11px 14px 10px;border-bottom:3px solid #B8893B}
+  .opt.badged .opt-hd{background:#8B1A1A}
+  .opt-badge{display:inline-block;background:#B8893B;color:#fff;font-size:6.5pt;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:2px 7px;border-radius:3px;margin-bottom:6px}
+  .opt-k{font-size:7pt;letter-spacing:.14em;text-transform:uppercase;color:#E9DFD3}
+  .opt-t{font-family:'Playfair Display',serif;font-size:15pt;font-weight:700;line-height:1.2}
+  .opt-b{padding:11px 14px;flex:1}
+  .opt-name{font-size:9.5pt;font-weight:700;color:#2A2321;margin-bottom:7px}
+  .opt-b ul{padding-left:15px;font-size:9pt;line-height:1.55;color:#3A332F}
+  .opt-b li{margin-bottom:2px}
+  .opt-f{background:#FBF8F4;border-top:1px solid #EFE6DA;padding:10px 14px;text-align:right}
+  .opt.badged .opt-f{background:#FBF1EE}
+  .opt-p{font-family:'Playfair Display',serif;font-size:19pt;font-weight:700;color:#8B1A1A;line-height:1.1}
+  .opt-n{font-size:7.5pt;color:#6B625C;margin-top:2px}
+  .sub-hd{font-size:8pt;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#2A2321;margin:4px 0 8px}
+  table.cmp{margin-bottom:24px}
+  table.cmp thead th{text-align:center}
+  table.cmp thead th:first-child{text-align:left}
+  table.cmp td{padding:7px 10px;font-size:9.5pt;border-bottom:1px solid #F1EAE1}
+  table.cmp tr:nth-child(even) td{background:#FCFAF7}
+  table.cmp td.c{text-align:center}
+  table.cmp .fs{font-size:8pt;font-style:italic;color:#857A72;margin-top:1px}
+  table.cmp .ck{color:#2D7A3A;font-weight:700}
+  table.cmp .dash{color:#B5ABA3}
+  table.cmp tr.tot td{font-weight:700;background:#FBF8F4;border-top:2px solid #D9CBB8}
+  table.cmp tr.tot td.hi{color:#8B1A1A}
+  .optsel{display:flex;align-items:center;gap:10px 22px;flex-wrap:wrap;margin-top:22px;font-size:9.5pt;color:#2A2321}
+  .optsel b{font-size:8pt;text-transform:uppercase;letter-spacing:.1em}
+  .optsel span{display:inline-flex;align-items:center;gap:7px}
+  .optsel i{display:inline-block;width:12px;height:12px;border:1.5px solid #2A2321;border-radius:2px}
+  @media print{.pdf-break{break-before:page}.keep{break-inside:avoid}}
+`;
+async function printInspectionProposal(){
+  const r=rhReport, o=rhOpts, per=[1,2,4].includes(+r.perPage)?+r.perPage:2;
+  const areas=r.areas.filter(a=>a.notes.trim()||a.rating||a.photos.length);
+  const coverId=r.coverId||areas.flatMap(a=>a.photos)[0]?.id||'';
+  const {map:img,failed}=await tfPrepareImages([coverId,...areas.flatMap(a=>a.photos.map(p=>p.id))]);
+  if(failed) showToast(`${failed} photo${failed>1?'s':''} could not be loaded from TrueFrame and ${failed>1?'were':'was'} left out`);
+
+  const W=720; // page content width in px (7.5in)
+  const fit=(im,bw,bh)=>{ const k=Math.min(bw/im.w,bh/im.h,1.6), w=Math.floor(im.w*k), h=Math.floor(im.h*k); return `<img src="${im.src}" width="${w}" height="${h}" style="width:${w}px;height:${h}px" alt="">`; };
+  const cond=v=>v?`<span class="cond cond-${v}">${escHtml(RH_RATINGS[v])}</span>`:'';
+  const para=s=>escHtml(s.trim()).replace(/\n/g,'<br>');
+  const money=v=>v==null?'':'$'+(Math.round(v*100)%100?fmtMoney(v):Math.round(v).toLocaleString('en-US'));
+  const step=(n,label)=>`<div class="step"><span class="step-n">${n}</span><span class="step-l">${label}</span><span class="step-rule"></span></div>`;
+
+  // Cover
+  const cov=coverId&&img.get(coverId);
+  const cover=(r.overall||r.summary.trim()?`<div class="ov keep">${r.overall?`<div class="ov-k">Overall condition ${cond(r.overall)}</div>`:''}${r.summary.trim()?`<div class="ov-b">${para(r.summary)}</div>`:''}</div>`:'')
+    +(cov?`<div class="cover-ph keep">${fit(cov,W-16,480)}</div>`:'');
+
+  // 01 What We Found: each area starts a page; its heading stays with its first photos
+  const cols=per===4?2:1, boxH=per===1?760:420, boxW=cols===2?(W-14)/2:W;
+  let n=0;
+  const phBox=p=>{
+    const im=img.get(p.id); if(!im) return '';
+    n++;
+    return `<div class="ph keep" style="height:${boxH}px"><div class="ph-img">${fit(im,boxW-16,boxH-50)}<span class="ph-n">${n}</span></div>${p.caption.trim()?`<div class="ph-cap">${escHtml(p.caption.trim())}</div>`:''}</div>`;
+  };
+  const areaHtml=areas.map((a,i)=>{
+    const boxes=a.photos.map(phBox).filter(Boolean);
+    const first=boxes.slice(0,cols), rest=boxes.slice(cols);
+    const hd=`<div class="area-hd"><h2>${escHtml(a.name.trim()||'Other')}</h2>${cond(a.rating)}</div>${a.notes.trim()?`<div class="area-notes">${para(a.notes)}</div>`:''}`;
+    return `${i?'<div class="pdf-break"></div>':''}<div class="keep">${hd}${first.length?`<div class="phs phs-${cols}">${first.join('')}</div>`:''}</div>${rest.length?`<div class="phs phs-${cols}">${rest.join('')}</div>`:''}`;
+  }).join('');
+  const insp=(document.getElementById('f-inspection')?.value||'').trim();
+  const findings=insp||areaHtml
+    ? `${cover?'<div class="pdf-break"></div>':''}${step('01','What We Found')}${insp?`<div class="story find keep"><div class="story-k">Inspection Findings</div><div class="story-b">${para(insp)}</div></div>`:''}${areaHtml}`
+    : '';
+
+  // 02 Your Options
+  const keys=o.on?RH_OPT_KEYS.filter(poFilled):[];
+  const price=k=>poPrice(k).amt;
+  let plan=null, planLabel='The Plan &amp; Investment', optionSelect='';
+  if(keys.length){
+    planLabel='Your Options';
+    const incl=poBullets(o.included);
+    const badgeOn=k=>o.badge.tier===k&&o.badge.text.trim();
+    const cards=keys.map((k,i)=>{
+      const c=o.cards[k], b=poBullets(c.bullets);
+      return `<div class="opt${badgeOn(k)?' badged':''}">
+        <div class="opt-hd">${badgeOn(k)?`<span class="opt-badge">${escHtml(o.badge.text.trim())}</span>`:''}<div class="opt-k">Option ${i+1}</div><div class="opt-t">${RH_TIER_LABELS[k]}</div></div>
+        <div class="opt-b">${c.name.trim()?`<div class="opt-name">${escHtml(c.name.trim())}</div>`:''}${b.length?`<ul>${b.map(x=>`<li>${escHtml(x)}</li>`).join('')}</ul>`:''}</div>
+        <div class="opt-f"><div class="opt-p">${money(price(k))||'&nbsp;'}</div>${c.note.trim()?`<div class="opt-n">${escHtml(c.note.trim())}</div>`:''}</div>
+      </div>`;
+    }).join('');
+    const cell=v=>{ v=String(v||'').trim();
+      if(/^(✓|✔|yes|y|included)$/i.test(v)) return '<span class="ck">&#10003;</span>';
+      if(/^(—|–|-|no|n)$/i.test(v)) return '<span class="dash">&mdash;</span>';
+      return escHtml(v); };
+    const rows=o.compare.filter(rw=>rw.feature.trim()||RH_OPT_KEYS.some(k=>rw[k].trim()));
+    const cmp=rows.length&&keys.length>1
+      ? `<div class="sub-hd">Side by side</div><table class="cmp"><thead><tr><th>Feature</th>${keys.map(k=>`<th>${RH_TIER_LABELS[k]}</th>`).join('')}</tr></thead><tbody>${rows.map(rw=>{
+          const span=rw.good.trim()&&!rw.better.trim()&&!rw.best.trim();
+          return `<tr><td>${escHtml(rw.feature)}${rw.sub.trim()?`<div class="fs">${escHtml(rw.sub)}</div>`:''}</td>${span?`<td class="c" colspan="${keys.length}">${cell(rw.good)}</td>`:keys.map(k=>`<td class="c">${cell(rw[k])}</td>`).join('')}</tr>`;
+        }).join('')}<tr class="tot"><td>Total Investment</td>${keys.map(k=>`<td class="c${badgeOn(k)?' hi':''}">${money(price(k))}</td>`).join('')}</tr></tbody></table>`
+      : '';
+    plan=`${incl.length?`<div class="incl keep"><div class="incl-k">Included in every option</div><ul class="incl-l">${incl.map(x=>`<li>${escHtml(x)}</li>`).join('')}</ul></div>`:''}
+      <div class="opts keep" style="grid-template-columns:repeat(${Math.max(keys.length,2)},minmax(0,1fr))">${cards}</div>${cmp}`;
+    if(keys.length>1) optionSelect=`<div class="optsel keep"><b>Option selected:</b>${keys.map(k=>`<span><i></i>${RH_TIER_LABELS[k]}${price(k)!=null?' — '+money(price(k)):''}</span>`).join('')}</div>`;
+  } else if(!rhAnyTierItems()){
+    plan='<!-- no pricing yet -->'; planLabel='';
+  }
+  return printProposal({returnHtml:true,inspection:{cover,findings,plan,planLabel,optionSelect,css:RH_INSP_CSS}});
+}
+
 async function printProposal(opts={}){
   const name    = document.getElementById('f-name').value||'—';
   const addr    = document.getElementById('f-addr').value||'';
@@ -4552,7 +5236,9 @@ async function printProposal(opts={}){
       </div>
     </div>`;
   };
-  const tierBlocks=rhTierSections().map(tierBlock).join('\n    ');
+  // opts.inspection (from printInspectionProposal) adds the cover, photo findings and option cards
+  const ins=opts.inspection||null;
+  const tierBlocks=ins&&ins.plan ? ins.plan : rhTierSections().map(tierBlock).join('\n    ');
 
   // Findings (the problem, in brand red) and Resolution (the outcome, in pine) are a matched
   // pair of story cards; the scope table between them is step 02.
@@ -4565,7 +5251,7 @@ async function printProposal(opts={}){
        </div>` : '';
 
   const resolutionHtml = resolution
-    ? `${step(inspection?'03':'02','The Result','pine')}
+    ? `${step(ins||inspection?'03':'02','The Result','pine')}
        <div class="story fix">
         <div class="story-k"><span class="chk">&#10003;</span>Upon Completion</div>
         <div class="story-b">${escHtml(resolution).replace(/\n/g,'<br>')}</div>
@@ -4580,13 +5266,16 @@ async function printProposal(opts={}){
   const contractLang = `
     <div style="margin-top:28px;padding:14px 16px;border:1px solid #E6DCCF;border-top:3px solid #2A2321;border-radius:5px;font-size:8.5pt;line-height:1.65;color:#4A423D;background:#FBF8F4">
       <div style="font-size:8pt;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#2A2321;margin-bottom:8px">Terms &amp; Conditions</div>
-      <p style="margin-bottom:6px"><strong>Acceptance of Work:</strong> By signing below, the customer agrees to authorize Red Hammer Construction Group LLC ("Contractor") to perform the scope of work described in this estimate at the price stated. Customer acknowledges having read and understood all terms herein.</p>
+      <p style="margin-bottom:6px"><strong>Acceptance of Work:</strong> ${ins&&ins.optionSelect
+        ? 'By selecting an option and signing below, the customer authorizes Red Hammer Construction Group LLC ("Contractor") to perform the scope of work for the selected option at the price stated.'
+        : 'By signing below, the customer agrees to authorize Red Hammer Construction Group LLC ("Contractor") to perform the scope of work described in this estimate at the price stated.'} Customer acknowledges having read and understood all terms herein.</p>
       <p style="margin-bottom:6px"><strong>Payment Terms:</strong> A deposit of <strong>50% is due at signing</strong> to schedule and procure materials. The remaining balance is due upon substantial completion of the work. Payments not received within 10 days of due date are subject to a 1.5% monthly finance charge.</p>
       <p style="margin-bottom:6px"><strong>Change Orders:</strong> Any changes to the scope of work must be agreed upon in writing and signed by both parties prior to commencement of the changed work. Additional costs resulting from unforeseen conditions discovered during the project (hidden damage, code compliance, etc.) will be communicated to the customer before proceeding.</p>
 <p style="margin-bottom:6px"><strong>Mechanic's Lien Notice:</strong> Texas law gives persons who perform work or furnish materials the right to file a lien against your property if they are not paid. This estimate, if accepted, constitutes notice of this right.</p>
       <p><strong>Proposal Validity:</strong> This proposal is valid for 30 days from the date issued${validUntil?' (expires '+validUntil+')':''}. Pricing is subject to change due to material cost fluctuations if not accepted within this period.</p>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:36px">
+    ${ins&&ins.optionSelect?ins.optionSelect:''}
+    <div class="keep" style="display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:${ins&&ins.optionSelect?'22':'36'}px">
       <div>
         <div style="font-size:8.5pt;color:#555">
           <div style="font-weight:700;margin-bottom:4px">Contractor — Red Hammer Construction Group LLC</div>
@@ -4609,7 +5298,7 @@ async function printProposal(opts={}){
 
   const html = `<!DOCTYPE html><html><head><meta charset="utf-8">
   <meta name="color-scheme" content="light">
-  <title>Proposal ${estnum} — Red Hammer Construction Group</title>
+  <title>${ins?'Inspection &amp; Proposal':'Proposal'} ${estnum} — Red Hammer Construction Group</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap">
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
@@ -4677,6 +5366,7 @@ async function printProposal(opts={}){
     .save-bar-btn{background:#fff;color:#8B1A1A;border:none;border-radius:6px;padding:8px 18px;font-size:13px;font-weight:700;cursor:pointer}
     .save-bar-btn:hover{background:#f0e8e8}
     body{padding-top:52px}
+    ${ins?ins.css:''}
   </style></head><body>
   <div class="save-bar">
     <span>&#128196;&nbsp; ${splitMode==='summary'?'Scope of Work Estimate (no pricing)':'Customer Proposal (itemized)'} &mdash; click the button &rarr; then choose <strong>Save as PDF</strong></span>
@@ -4692,7 +5382,7 @@ async function printProposal(opts={}){
         <div class="co-info">DFW Metroplex &nbsp;&bull;&nbsp; Licensed &amp; Insured</div>
       </div>
       <div class="prop-meta">
-        <div class="prop-title">${splitMode==='summary'?'ESTIMATE':'PROPOSAL'}</div>
+        ${ins?'<div class="prop-title">INSPECTION</div><div class="prop-title2">&amp; Proposal</div>':`<div class="prop-title">${splitMode==='summary'?'ESTIMATE':'PROPOSAL'}</div>`}
         <div class="prop-title-rule"></div>
         ${estnum?`<div class="prop-sub">No.&nbsp;<strong>${escHtml(estnum)}</strong></div>`:''}
         ${dateStr?`<div class="prop-sub">${escHtml(dateStr)}</div>`:''}
@@ -4712,9 +5402,9 @@ async function printProposal(opts={}){
       </div>
     </div>
 
-    ${inspectionHtml}
+    ${ins ? ins.cover+ins.findings : inspectionHtml}
 
-    ${inspection||resolution?step(inspection?'02':'01','The Plan &amp; Investment'):''}
+    ${ins ? (ins.planLabel?`<div class="pdf-break"></div>${step('02',ins.planLabel)}`:'') : inspection||resolution?step(inspection?'02':'01','The Plan &amp; Investment'):''}
     ${tierBlocks}
 
     ${resolutionHtml}
@@ -8157,6 +8847,7 @@ function openSettingsTab(tab){
   if(tab==='xact')      renderXactPriceList();
   if(tab==='prices')   {renderSettingsPrices();renderItemCatalog();}
   if(tab==='materials') spRender();
+  if(tab==='library')   libOpen();
 }
 
 // Labor Rates
