@@ -799,6 +799,12 @@ tbody td{padding:7px 10px}
 .pr-tray{border:1px solid var(--border);background:var(--surface);padding:8px;position:sticky;top:128px;max-height:calc(100vh - 140px);overflow:auto}
 .pr-tray-hd{display:flex;justify-content:space-between;align-items:center;font-size:.72rem;font-weight:600;color:var(--text-2);margin-bottom:6px;gap:6px}
 .pr-tray-hd label{font-weight:500;display:flex;gap:4px;align-items:center}
+.pr-tray-tools{display:flex;gap:10px;align-items:center}
+.pr-up-link{background:none;border:0;padding:0;font:inherit;font-weight:500;color:var(--text-2);cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+.pr-up-link:hover{color:var(--brand)}
+.pr-up-mark{position:absolute;left:2px;bottom:2px;background:rgba(0,0,0,.55);color:#fff;font-size:.58rem;border-radius:2px;padding:0 3px;line-height:1.5}
+.pr-up-del{position:absolute;left:2px;top:2px;background:rgba(0,0,0,.55);color:#fff;font-size:.6rem;border-radius:2px;padding:0 4px;line-height:1.5;display:none;cursor:pointer}
+.pr-th:hover .pr-up-del,.pr-th.picked .pr-up-del{display:block}
 .pr-thumbs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}
 .pr-th{position:relative;aspect-ratio:1;background:var(--surface-2);border:2px solid transparent;cursor:grab;padding:0;overflow:hidden;border-radius:3px}
 .pr-th img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}
@@ -3449,11 +3455,11 @@ const TF_KEY='sb_publishable_abwSgNPjp16wWxIEnQY7-g_jHmU8Wre'; // publishable ke
 const RH_RATINGS={'':'No rating',good:'Good',fair:'Fair',poor:'Poor',urgent:'Needs immediate attention'};
 const RH_AREA_PRESETS=['Roof','Chimney','Gutters & downspouts','Siding & trim','Windows & doors','Fascia & soffit','Attic / ventilation','Interior (ceilings, walls)','Other'];
 function prKey(){ return 'a'+Math.random().toString(36).slice(2,9); }
-function prBlank(){ return {tfLink:'',tfToken:'',overall:'',summary:'',coverId:'',perPage:2,areas:[{key:prKey(),name:'Roof',rating:'',notes:'',photos:[]}]}; }
+function prBlank(){ return {tfLink:'',tfToken:'',overall:'',summary:'',coverId:'',perPage:2,upFolder:'',uploads:[],areas:[{key:prKey(),name:'Roof',rating:'',notes:'',photos:[]}]}; }
 const prRating=v=>Object.prototype.hasOwnProperty.call(RH_RATINGS,v)?v:'';
 const prId=v=>/^[\w-]{1,80}$/.test(String(v||''))?String(v):'';
 let rhReport=prBlank();
-let tfPhotos=[], tfById=new Map(), tfLoadedAt=0, tfState={msg:'',err:false,busy:false}, tfPicked=null, prHideUsed=false, prDrag=null;
+let tfPhotos=[], tfList=[], upList=[], upSignedAt=0, tfById=new Map(), tfLoadedAt=0, tfState={msg:'',err:false,busy:false}, tfPicked=null, prHideUsed=false, prDrag=null;
 const tfImgCache=new Map();
 
 function prNormalize(r){
@@ -3464,7 +3470,9 @@ function prNormalize(r){
     photos:Array.isArray(a.photos)?a.photos.filter(p=>p&&prId(p.id)).map(p=>({id:prId(p.id),caption:String(p.caption||'')})):[]
   })):b.areas;
   return {tfLink:String(r.tfLink||''),tfToken:String(r.tfToken||''),overall:prRating(r.overall),summary:String(r.summary||''),
-    coverId:prId(r.coverId),perPage:[1,2,4].includes(+r.perPage)?+r.perPage:2,areas};
+    coverId:prId(r.coverId),perPage:[1,2,4].includes(+r.perPage)?+r.perPage:2,areas,
+    upFolder:/^[\w-]{1,80}$/.test(String(r.upFolder||''))?String(r.upFolder):'',
+    uploads:Array.isArray(r.uploads)?r.uploads.filter(u=>u&&prId(u.id)&&/^[\w-]+\/[\w-]+\.jpg$/.test(String(u.path||''))).map(u=>({id:prId(u.id),path:String(u.path),caption:String(u.caption||'')})):[]};
 }
 function prHasContent(){ return !!(rhReport.summary.trim()||rhReport.overall||rhReport.areas.some(a=>a.notes.trim()||a.rating||a.photos.length)); }
 function prUsedIds(){ return new Set(rhReport.areas.flatMap(a=>a.photos.map(p=>p.id))); }
@@ -3500,7 +3508,7 @@ async function tfLoad(fromInput=true){
       ? (rep.photos||[]).map(p=>({id:p.id,caption:p.caption||'',url:p.url,thumbUrl:p.url}))
       : (g.items||[]).filter(i=>i.type!=='video').map(i=>({id:i.id,caption:i.caption||'',url:i.url,thumbUrl:i.thumbUrl||i.url}))
     ).filter(p=>prId(p.id)&&p.url);
-    tfPhotos=list; tfById=new Map(list.map(p=>[p.id,p])); tfLoadedAt=Date.now();
+    tfList=list; prRebuildPhotos(); tfLoadedAt=Date.now();
     rhReport.tfLink=link; rhReport.tfToken=token;
     const where=g.project?.address||g.project?.name||'';
     prSetState(`${list.length} photo${list.length===1?'':'s'} from TrueFrame${where?' · '+where:''}`);
@@ -3552,15 +3560,15 @@ function renderPhotoReport(){
   const ratingSel=(cur,on)=>`<select class="pr-sel" onchange="${on}">${Object.entries(RH_RATINGS).map(([v,l])=>`<option value="${v}"${v===cur?' selected':''}>${l}</option>`).join('')}</select>`;
   const shown=tfPhotos.filter(p=>!prHideUsed||!used.has(p.id));
   const tray=tfPhotos.length
-    ? `<div class="pr-thumbs">${shown.map(p=>`<button type="button" class="pr-th${tfPicked===p.id?' picked':''}" draggable="true" ondragstart="prDragStart(event,'tray','${p.id}')" ondragend="prDragEnd()" onclick="prPick('${p.id}')" title="${escHtml(p.caption||'Drag into an area, or tap and then tap an area')}"><img src="${escHtml(p.thumbUrl)}" alt="" loading="lazy">${used.has(p.id)?'<span class="pr-used">&#10003;</span>':''}</button>`).join('')||'<div class="pr-drop-empty">Every photo is in the report.</div>'}</div>`
-    : `<div class="pr-drop-empty" style="padding:18px 6px">Paste a TrueFrame share link above to see this job's photos.</div>`;
+    ? `<div class="pr-thumbs">${shown.map(p=>`<button type="button" class="pr-th${tfPicked===p.id?' picked':''}" draggable="true" ondragstart="prDragStart(event,'tray','${p.id}')" ondragend="prDragEnd()" onclick="prPick('${p.id}')" title="${escHtml(p.caption||'Drag into an area, or tap and then tap an area')}"><img src="${escHtml(p.thumbUrl)}" alt="" loading="lazy">${used.has(p.id)?'<span class="pr-used">&#10003;</span>':''}${p.up?`<span class="pr-up-mark" title="Uploaded">&#8593;</span><span class="pr-up-del" role="button" title="Delete this uploaded photo" onclick="event.stopPropagation();prDeleteUpload('${p.id}')">&#10005;</span>`:''}</button>`).join('')||'<div class="pr-drop-empty">Every photo is in the report.</div>'}</div>`
+    : `<div class="pr-drop-empty" style="padding:18px 6px">Paste a TrueFrame share link above, or upload photos.</div>`;
   let n=0;
   const areas=r.areas.map((a,i)=>{
     const tiles=a.photos.map((p,j)=>{
       n++;
       const src=tfById.get(p.id);
       return `<div class="pr-ph" draggable="true" ondragstart="prDragStart(event,'area','${i}:${j}')" ondragend="prDragEnd()" ondragover="prDragOver(event)" ondrop="prDrop(event,${i},${j})">
-        <div class="pr-ph-img">${src?`<img src="${escHtml(src.thumbUrl)}" alt="" loading="lazy">`:`<div class="pr-missing">${tfState.busy?'Loading…':'Not in the current TrueFrame link'}</div>`}
+        <div class="pr-ph-img">${src?`<img src="${escHtml(src.thumbUrl)}" alt="" loading="lazy">`:`<div class="pr-missing">${tfState.busy?'Loading…':p.id.startsWith('up-')?'Uploaded photo not found':'Not in the current TrueFrame link'}</div>`}
           <span class="pr-ph-n">${n}</span>
           <span class="pr-ph-tools">
             <button type="button" class="${r.coverId===p.id?'on':''}" title="Use as the cover photo" onclick="prSetCover('${p.id}')">&#9733;</button>
@@ -3597,8 +3605,8 @@ function renderPhotoReport(){
       <label class="po-lbl">Summary for the cover page<textarea class="pr-ta" rows="2" placeholder="e.g. The roof has hail damage on every slope and needs to be replaced." oninput="rhReport.summary=this.value">${escHtml(r.summary)}</textarea></label>
     </div>
     <div class="pr-grid">
-      <div class="pr-tray">
-        <div class="pr-tray-hd"><span>TrueFrame photos${tfPhotos.length?` (${tfPhotos.length})`:''}</span>${tfPhotos.length?`<label><input type="checkbox" ${prHideUsed?'checked':''} onchange="prHideUsed=this.checked;renderPhotoReport()">Hide used</label>`:''}</div>
+      <div class="pr-tray" ondragover="prDragOver(event)" ondrop="prDrop(event,-1)">
+        <div class="pr-tray-hd"><span>Photos${tfPhotos.length?` (${tfPhotos.length})`:''}</span><span class="pr-tray-tools"><button type="button" class="pr-up-link" title="Add photos from your computer or phone (CompanyCam downloads, email…)" onclick="prPickFiles()">+ Upload</button>${tfPhotos.length?`<label><input type="checkbox" ${prHideUsed?'checked':''} onchange="prHideUsed=this.checked;renderPhotoReport()">Hide used</label>`:''}</span></div>
         ${tray}
         ${tfPicked?'<div class="pr-sub" style="margin-top:6px">Photo selected. Tap an area to add it, or tap the photo again to cancel.</div>':''}
       </div>
@@ -3625,13 +3633,15 @@ function prDragStart(e,kind,ref){
 }
 function prDragEnd(){ prDrag=null; document.querySelectorAll('.pr-drop.over').forEach(d=>d.classList.remove('over')); }
 function prDragOver(e){
-  if(!prDrag) return;
+  const files=!prDrag&&[...(e.dataTransfer?.types||[])].includes('Files');
+  if(!prDrag&&!files) return;
   e.preventDefault();
-  e.dataTransfer.dropEffect=prDrag.kind==='tray'?'copy':'move';
+  e.dataTransfer.dropEffect=files||prDrag.kind==='tray'?'copy':'move';
   e.currentTarget.closest('.pr-drop')?.classList.add('over');
 }
 function prDrop(e,i,j){
-  if(!prDrag) return;
+  if(!prDrag&&e.dataTransfer?.files?.length){ e.preventDefault(); e.stopPropagation(); prDragEnd(); prUpload(e.dataTransfer.files,i>=0?i:null,j); return; }
+  if(!prDrag||i<0){ prDragEnd(); return; }
   e.preventDefault(); e.stopPropagation();
   const d=prDrag; prDrag=null;
   if(d.kind==='tray') prAddPhoto(i,d.ref,j);
@@ -3672,17 +3682,90 @@ function prAddArea(k){
   if(k<0){ const ins=document.querySelectorAll('.pr-area-hd .pr-input'); ins[ins.length-1]?.focus(); }
 }
 
+// ─── Uploaded photos (for photos that aren't in TrueFrame) ───
+// Kept in the private Supabase bucket "report-photos"; the estimate saves only id, path and caption.
+const RH_UP_BUCKET='report-photos';
+function prRebuildPhotos(){
+  const tfIds=new Set(tfList.map(p=>p.id));
+  tfPhotos=[...tfList,...upList.filter(p=>!tfIds.has(p.id))];
+  tfById=new Map(tfPhotos.map(p=>[p.id,p]));
+}
+async function prShrink(blob,max){
+  const bmp=await createImageBitmap(blob);
+  const k=Math.min(1,max/Math.max(bmp.width,bmp.height));
+  const c=document.createElement('canvas'); c.width=Math.round(bmp.width*k); c.height=Math.round(bmp.height*k);
+  const g=c.getContext('2d'); g.fillStyle='#fff'; g.fillRect(0,0,c.width,c.height); g.drawImage(bmp,0,0,c.width,c.height);
+  if(bmp.close) bmp.close();
+  return c;
+}
+async function prSignedIn(){
+  try{ const {data:{session}}=await db.auth.getSession(); return !!session; }catch(e){ return false; }
+}
+function prPickFiles(){
+  const inp=document.createElement('input'); inp.type='file'; inp.accept='image/*'; inp.multiple=true;
+  inp.onchange=()=>{ if(inp.files.length) prUpload(inp.files,null); };
+  inp.click();
+}
+function prStorageMsg(e){
+  const m=String(e?.message||e||'');
+  return /bucket not found/i.test(m)?"Photo storage isn't set up yet. Run the one-time setup in Supabase.":'Upload failed: '+m;
+}
+async function prUpload(fileList,areaIdx,at){
+  const files=[...fileList].filter(f=>/^image\//.test(f.type));
+  if(!files.length){ showToast('Only photos can be uploaded'); return; }
+  if(!(await prSignedIn())){ showToast('Sign in to upload photos'); return; }
+  if(!rhReport.upFolder) rhReport.upFolder='est-'+crypto.randomUUID();
+  let done=0, failed=0, lastErr=null; const added=[];
+  for(const f of files){
+    prSetState(`Uploading ${done+failed+1} of ${files.length}…`,false,true);
+    try{
+      const c=await prShrink(f,1600);
+      const blob=await new Promise((ok,no)=>c.toBlob(b=>b?ok(b):no(new Error('Could not read the photo')),'image/jpeg',.85));
+      const uuid=crypto.randomUUID(), id='up-'+uuid, path=rhReport.upFolder+'/'+uuid+'.jpg';
+      const {error}=await db.storage.from(RH_UP_BUCKET).upload(path,blob,{contentType:'image/jpeg',upsert:false});
+      if(error) throw error;
+      const caption=f.name.replace(/\.[^.]+$/,'').replace(/^(IMG|DSC|PXL|photo)[_-]?\d[\w-]*$/i,'');
+      rhReport.uploads.push({id,path,caption});
+      tfImgCache.set(id,{src:c.toDataURL('image/jpeg',.82),w:c.width,h:c.height});
+      added.push(id); done++;
+    }catch(e){ failed++; lastErr=e; }
+  }
+  if(added.length) await prSignUploads();
+  if(areaIdx!=null&&rhReport.areas[areaIdx]) added.forEach((id,k)=>prAddPhoto(areaIdx,id,at==null?null:at+k));
+  prSetState(failed?(done?`${done} uploaded, ${failed} failed. `:'')+prStorageMsg(lastErr):`${done} photo${done===1?'':'s'} uploaded`,!!failed);
+  renderPhotoReport();
+}
+async function prSignUploads(){
+  const ups=rhReport.uploads; if(!ups.length){ upList=[]; prRebuildPhotos(); return; }
+  try{
+    const {data,error}=await db.storage.from(RH_UP_BUCKET).createSignedUrls(ups.map(u=>u.path),3600);
+    if(error) throw error;
+    const url=new Map((data||[]).filter(d=>d&&d.signedUrl&&!d.error).map(d=>[d.path,d.signedUrl]));
+    upList=ups.filter(u=>url.has(u.path)).map(u=>({id:u.id,caption:u.caption,url:url.get(u.path),thumbUrl:url.get(u.path),up:true}));
+    upSignedAt=Date.now();
+  }catch(e){ upList=[]; prSetState('Uploaded photos could not be loaded'+((await prSignedIn())?'':'. Sign in to see them.'),true); }
+  prRebuildPhotos();
+}
+function prDeleteUpload(id){
+  const u=rhReport.uploads.find(x=>x.id===id); if(!u) return;
+  const go=async()=>{
+    try{ await db.storage.from(RH_UP_BUCKET).remove([u.path]); }catch(e){}
+    rhReport.uploads=rhReport.uploads.filter(x=>x.id!==id);
+    rhReport.areas.forEach(a=>{ a.photos=a.photos.filter(p=>p.id!==id); });
+    if(rhReport.coverId===id) rhReport.coverId=rhReport.areas.flatMap(a=>a.photos)[0]?.id||'';
+    if(tfPicked===id) tfPicked=null;
+    upList=upList.filter(p=>p.id!==id); tfImgCache.delete(id); prRebuildPhotos(); renderPhotoReport();
+  };
+  rhConfirm({title:'Delete this photo?',msg:prUsedIds().has(id)?'It is in the report and will be taken out of it. The uploaded file is deleted.':'The uploaded file is deleted.',ok:'Delete'},go);
+}
+
 // Photos for the PDF are copied into the page (about 1400px JPEG) so links that run out
 // don't matter and the file stays small.
 async function tfImage(id){
   if(tfImgCache.has(id)) return tfImgCache.get(id);
   const p=tfById.get(id); if(!p) return null;
   const res=await fetch(p.url); if(!res.ok) throw new Error('photo '+res.status);
-  const bmp=await createImageBitmap(await res.blob());
-  const k=Math.min(1,1400/Math.max(bmp.width,bmp.height));
-  const c=document.createElement('canvas'); c.width=Math.round(bmp.width*k); c.height=Math.round(bmp.height*k);
-  c.getContext('2d').drawImage(bmp,0,0,c.width,c.height);
-  if(bmp.close) bmp.close();
+  const c=await prShrink(await res.blob(),1400);
   const out={src:c.toDataURL('image/jpeg',.82),w:c.width,h:c.height};
   tfImgCache.set(id,out);
   return out;
@@ -3690,7 +3773,9 @@ async function tfImage(id){
 async function tfPrepareImages(ids){
   const list=[...new Set(ids.filter(Boolean))];
   const need=list.filter(id=>!tfImgCache.has(id));
-  if(need.length&&rhReport.tfToken&&(Date.now()-tfLoadedAt>45*60e3||need.some(id=>!tfById.has(id)))) await tfLoad(false);
+  const upNeed=need.filter(id=>id.startsWith('up-')), tfNeed=need.filter(id=>!id.startsWith('up-'));
+  if(tfNeed.length&&rhReport.tfToken&&(Date.now()-tfLoadedAt>45*60e3||tfNeed.some(id=>!tfById.has(id)))) await tfLoad(false);
+  if(upNeed.length&&(Date.now()-upSignedAt>45*60e3||upNeed.some(id=>!tfById.has(id)))) await prSignUploads();
   const map=new Map(); let failed=0, next=0;
   await Promise.all(Array.from({length:Math.min(4,list.length)},async()=>{
     while(next<list.length){
@@ -3901,8 +3986,9 @@ function ipHeader(){
 
 function prResetAll(data){
   rhReport=prNormalize(data&&data.report); rhOpts=poNormalize(data&&data.options);
-  tfPhotos=[]; tfById=new Map(); tfImgCache.clear(); tfPicked=null; tfLoadedAt=0; prSetState('');
+  tfPhotos=[]; tfList=[]; upList=[]; upSignedAt=0; tfById=new Map(); tfImgCache.clear(); tfPicked=null; tfLoadedAt=0; prSetState('');
   renderPhotoReport(); renderProposalOptions(); ipHeader();
+  if(rhReport.uploads.length) prSignUploads().then(renderPhotoReport);
   if(rhReport.tfToken) tfLoad(false);
 }
 setTimeout(()=>{ renderPhotoReport(); renderProposalOptions(); },0);
