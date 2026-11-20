@@ -3632,15 +3632,62 @@ function prDragStart(e,kind,ref){
   e.stopPropagation();
 }
 function prDragEnd(){ prDrag=null; document.querySelectorAll('.pr-drop.over').forEach(d=>d.classList.remove('over')); }
+// Photos dragged in from TrueFrame (a computer with a mouse) carry their links and descriptions under this type.
+const TF_DRAG_TYPE='application/x-trueframe-photos';
 function prDragOver(e){
-  const files=!prDrag&&[...(e.dataTransfer?.types||[])].includes('Files');
-  if(!prDrag&&!files) return;
+  const types=[...(e.dataTransfer?.types||[])];
+  const outside=!prDrag&&(types.includes('Files')||types.includes(TF_DRAG_TYPE)||types.includes('text/uri-list'));
+  if(!prDrag&&!outside) return;
   e.preventDefault();
-  e.dataTransfer.dropEffect=files||prDrag.kind==='tray'?'copy':'move';
+  e.dataTransfer.dropEffect=outside||prDrag.kind==='tray'?'copy':'move';
   e.currentTarget.closest('.pr-drop')?.classList.add('over');
 }
+// Links to photos dropped from TrueFrame or another web page: [{url,id?,caption?}].
+function prDroppedLinks(dt,tfOnly){
+  let items=[];
+  try{
+    const j=JSON.parse(dt.getData(TF_DRAG_TYPE)||'null');
+    if(j&&Array.isArray(j.items)) items=j.items.filter(x=>x&&typeof x.url==='string'&&x.media_type!=='video');
+  }catch(_){}
+  if(!items.length&&!tfOnly) items=(dt.getData('text/uri-list')||'').split(/\r?\n/).map(s=>s.trim()).filter(s=>s&&!s.startsWith('#')).map(url=>({url}));
+  return items.filter(x=>/^https:\/\//i.test(x.url));
+}
+async function prDropLinks(links,areaIdx,at){
+  // A photo already in the loaded TrueFrame link goes straight in; anything else is copied into the estimate.
+  const known=[], copy=[];
+  links.forEach(l=>{ const id=prId(l.id); if(id&&tfById.has(id)) known.push(id); else copy.push(l); });
+  const area=areaIdx!=null&&rhReport.areas[areaIdx]?areaIdx:null;
+  if(area!=null) known.forEach((id,k)=>prAddPhoto(area,id,at==null?null:at+k));
+  if(known.length) renderPhotoReport();
+  if(!copy.length) return;
+  prSetState(`Getting ${copy.length} photo${copy.length===1?'':'s'} from TrueFrame…`,false,true);
+  const files=[]; let missed=0;
+  for(const l of copy){
+    try{
+      const res=await fetch(l.url); if(!res.ok) throw new Error(String(res.status));
+      const blob=await res.blob(); if(!/^image\//.test(blob.type)) throw new Error('not a photo');
+      const f=new File([blob],'IMG_0001.jpg',{type:blob.type});
+      f.rhCaption=String(l.caption||'').slice(0,500);
+      files.push(f);
+    }catch(_){ missed++; }
+  }
+  if(files.length) await prUpload(files,area,at==null?null:at+known.length);
+  if(missed) showToast(files.length?`${missed} photo${missed===1?'':'s'} couldn't be copied in`:"Those photos couldn't be copied in. Save them from TrueFrame and drag the files here instead.");
+  if(!files.length) prSetState('',false);
+}
 function prDrop(e,i,j){
-  if(!prDrag&&e.dataTransfer?.files?.length){ e.preventDefault(); e.stopPropagation(); prDragEnd(); prUpload(e.dataTransfer.files,i>=0?i:null,j); return; }
+  if(!prDrag){
+    const dt=e.dataTransfer;
+    // TrueFrame's own data first (it has the descriptions), then real files, then plain links from other pages.
+    const tf=dt?prDroppedLinks(dt,true):[];
+    const files=tf.length?null:dt?.files?.length?dt.files:null;
+    const links=tf.length||files?tf:(dt?prDroppedLinks(dt,false):[]);
+    if(files||links.length){
+      e.preventDefault(); e.stopPropagation(); prDragEnd();
+      if(files) prUpload(files,i>=0?i:null,j); else prDropLinks(links,i>=0?i:null,j);
+      return;
+    }
+  }
   if(!prDrag||i<0){ prDragEnd(); return; }
   e.preventDefault(); e.stopPropagation();
   const d=prDrag; prDrag=null;
@@ -3724,7 +3771,7 @@ async function prUpload(fileList,areaIdx,at){
       const uuid=crypto.randomUUID(), id='up-'+uuid, path=rhReport.upFolder+'/'+uuid+'.jpg';
       const {error}=await db.storage.from(RH_UP_BUCKET).upload(path,blob,{contentType:'image/jpeg',upsert:false});
       if(error) throw error;
-      const caption=f.name.replace(/\.[^.]+$/,'').replace(/^(IMG|DSC|PXL|photo)[_-]?\d[\w-]*$/i,'');
+      const caption=f.rhCaption!=null?f.rhCaption:f.name.replace(/\.[^.]+$/,'').replace(/^(IMG|DSC|PXL|photo)[_-]?\d[\w-]*$/i,'');
       rhReport.uploads.push({id,path,caption});
       tfImgCache.set(id,{src:c.toDataURL('image/jpeg',.82),w:c.width,h:c.height});
       added.push(id); done++;
