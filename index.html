@@ -461,13 +461,24 @@ tbody tr:hover .note-input,.note-input:focus{border-bottom-color:var(--border-st
 
 /* ─── SECTION NAVIGATION ─── */
 .section-nav{display:flex;gap:4px;background:var(--surface);border-bottom:1px solid var(--border);padding:0 20px;overflow-x:auto;-webkit-overflow-scrolling:touch;flex-shrink:0}
-.sec-nav-btn{display:flex;align-items:center;gap:7px;background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-1px;padding:11px 12px;font-size:.84rem;font-weight:600;color:var(--text-3);cursor:pointer;white-space:nowrap;transition:color .15s,border-color .15s}
-.sec-nav-btn svg{width:16px;height:16px;flex-shrink:0}
-.sec-nav-btn:hover{color:var(--text-1)}
-.sec-nav-btn.snb-active{color:var(--text-1);border-bottom-color:var(--brand)}
-.sec-nav-btn.snb-active svg{color:var(--brand-ink)}
 .app-section{display:none}
 .app-section.sec-active{display:block}
+/* Section picker: one dropdown instead of a row of tabs */
+.section-nav{align-items:center;gap:10px;padding:8px 20px;overflow:visible}
+.sec-pick{display:flex;align-items:center;gap:8px;font-size:.72rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--text-3)}
+.sec-select{appearance:none;-webkit-appearance:none;background:var(--surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238A827D' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 10px center;border:1px solid var(--border-strong);border-radius:4px;padding:7px 32px 7px 12px;font-size:.88rem;font-weight:600;color:var(--text-1);font-family:inherit;cursor:pointer;outline:none;min-width:220px;text-transform:none;letter-spacing:0}
+.sec-select:focus{border-color:var(--brand)}
+@media(max-width:600px){.section-nav{padding:8px 16px}.sec-pick{flex:1}.sec-select{flex:1;min-width:0}}
+/* Inspection & Proposal tab */
+.ip-head{display:flex;align-items:center;justify-content:space-between;gap:10px 16px;flex-wrap:wrap;border-bottom:1px solid var(--border);padding-bottom:12px}
+.ip-head h2{font-size:1.05rem;font-weight:700;color:var(--text-1);margin:0}
+.ip-head .pr-sub{display:block;margin-top:2px}
+.ip-step{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.ip-step .ip-n{font-size:.72rem;font-weight:700;color:var(--brand-ink);font-variant-numeric:tabular-nums}
+.ip-step .main-section-title{color:var(--text-1)}
+.ip-step .pr-sub{flex:1;min-width:160px}
+.ip-ta{width:100%;background:var(--surface);border:1px solid var(--border-strong);border-radius:4px;padding:8px 10px;font-size:.84rem;color:var(--text-1);font-family:inherit;resize:vertical;outline:none;line-height:1.5}
+.ip-ta:focus{border-color:var(--brand)}
 
 /* ─── COUNTERTOP SECTION ─── */
 .ct-wrap{max-width:1100px;margin:0 auto;padding:20px 16px}
@@ -828,6 +839,9 @@ tbody td{padding:7px 10px}
 .po-cmp td input+input{margin-top:2px}
 .lib-item{border:1px solid var(--border);background:var(--surface);padding:10px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr) auto;gap:8px;align-items:start;margin-bottom:8px}
 .lib-item .pr-input,.lib-item .pr-sel{width:100%}
+.lib-group{margin-bottom:14px}
+.lib-group-hd{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:.72rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text-1);border-bottom:1px solid var(--border-strong);padding-bottom:6px;margin-bottom:8px}
+.lib-group-hd .link-btn{text-transform:none;letter-spacing:0}
 @media(max-width:900px){
   .pr-grid{grid-template-columns:minmax(0,1fr)}
   .pr-tray{position:static;max-height:none}
@@ -860,7 +874,7 @@ tbody td{padding:7px 10px}
         <button class="ovf-item" role="menuitem" onclick="saveTemplate()">Save as template</button>
         <div class="ovf-sep"></div>
         <button class="ovf-item" role="menuitem" onclick="openMaterials()">Materials order sheet</button>
-        <button class="ovf-item" role="menuitem" onclick="openDownloadPdf('inspection')">Inspection &amp; proposal</button>
+        <button class="ovf-item" role="menuitem" onclick="switchSection('inspection')">Inspection &amp; proposal</button>
         <button class="ovf-item" role="menuitem" onclick="printProposal()">Customer proposal</button>
         <button class="ovf-item" role="menuitem" onclick="openInsuranceBid()">Insurance bid</button>
         <button class="ovf-item" role="menuitem" onclick="printEstimate()">Internal estimate</button>
@@ -893,9 +907,14 @@ tbody td{padding:7px 10px}
 
 <!-- SECTION NAVIGATION -->
 <nav class="section-nav" aria-label="Sections">
-  <button class="sec-nav-btn snb-active" onclick="switchSection('estimator')" id="snb-estimator"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 7h6M9 12h.01M12 12h.01M15 12h.01M9 16h.01M12 16h.01M15 16h.01"/></svg>Estimator</button>
-  <button class="sec-nav-btn" onclick="switchSection('countertops')" id="snb-countertops"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9h18v4H3z"/><path d="M5 13v7M19 13v7"/></svg>Countertops</button>
-  <button class="sec-nav-btn" onclick="switchSection('xactimate')" id="snb-xactimate"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6z"/></svg>Insurance / Xactimate</button>
+  <label class="sec-pick">Section
+    <select class="sec-select" id="section-select" onchange="switchSection(this.value)">
+      <option value="estimator">Estimator</option>
+      <option value="inspection">Inspection &amp; Proposal</option>
+      <option value="countertops">Countertops</option>
+      <option value="xactimate">Insurance / Xactimate</option>
+    </select>
+  </label>
 </nav>
 
 <div id="section-estimator" class="app-section sec-active">
@@ -1104,50 +1123,6 @@ tbody td{padding:7px 10px}
       </div>
     </div>
 
-    <!-- Proposal Narrative -->
-    <div class="card-main" id="notes-card">
-      <div class="main-section-title" style="margin-bottom:14px">Proposal Narrative</div>
-
-      <div class="notes-label">
-        <span class="notes-tag" style="background:var(--brand)">TOP</span>
-        Inspection findings
-      </div>
-      <textarea id="f-inspection" rows="3"
-        placeholder="Upon inspection of the property, our team identified the following damage / issues that require attention…"
-        style="width:100%;background:var(--surface-2);border:1px solid var(--border);border-radius:7px;padding:8px 10px;font-size:.82rem;color:var(--text-1);font-family:inherit;resize:vertical;outline:none;transition:border-color .15s;line-height:1.5;margin-bottom:10px"
-        onfocus="this.style.borderColor='var(--brand)'" onblur="this.style.borderColor='var(--border)'"></textarea>
-
-      <div class="notes-label">Notes &amp; scope exclusions</div>
-      <textarea id="f-notes" rows="3"
-        placeholder="e.g. Does not include: interior water damage, structural repairs. Work area must be accessible day of…"
-        style="width:100%;background:var(--surface-2);border:1px solid var(--border);border-radius:7px;padding:8px 10px;font-size:.82rem;color:var(--text-1);font-family:inherit;resize:vertical;outline:none;transition:border-color .15s;line-height:1.5;margin-bottom:10px"
-        onfocus="this.style.borderColor='var(--brand)'" onblur="this.style.borderColor='var(--border)'"></textarea>
-
-      <div class="notes-label">
-        <span class="notes-tag" style="background:#3E6B5A">BOTTOM</span>
-        Resolution &amp; outcome
-      </div>
-      <textarea id="f-resolution" rows="3"
-        placeholder="Upon completion, your property will be fully restored. Red Hammer Construction Group warranties all labor and workmanship…"
-        style="width:100%;background:var(--surface-2);border:1px solid var(--border);border-radius:7px;padding:8px 10px;font-size:.82rem;color:var(--text-1);font-family:inherit;resize:vertical;outline:none;transition:border-color .15s;line-height:1.5"
-        onfocus="this.style.borderColor='var(--brand)'" onblur="this.style.borderColor='var(--border)'"></textarea>
-    </div>
-
-    <!-- Photo report: findings by area with photos from TrueFrame (filled by renderPhotoReport) -->
-    <div class="card-main" id="pr-card">
-      <div class="pr-head">
-        <span class="main-section-title">Photo Report &amp; Findings</span>
-        <span class="pr-sub">Photos come from the TrueFrame job. Drag them into an area, or tap a photo and then tap an area.</span>
-      </div>
-      <div id="pr-body"></div>
-    </div>
-
-    <!-- Good / Better / Best options for the proposal (filled by renderProposalOptions) -->
-    <div class="card-main" id="po-card">
-      <div class="pr-head"><span class="main-section-title">Proposal Options</span></div>
-      <div id="po-body"></div>
-    </div>
-
     <!-- Job Cost Summary (internal only — roofing trades) -->
     <div class="card-main" id="job-cost-card" style="display:none">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
@@ -1190,6 +1165,43 @@ tbody td{padding:7px 10px}
     </div><!-- /main -->
 </div><!-- /layout -->
 </div><!-- /section-estimator -->
+
+<!-- INSPECTION & PROPOSAL SECTION: findings, TrueFrame photos, Good/Better/Best options, resolution -->
+<div id="section-inspection" class="app-section">
+<div class="main">
+    <div class="ip-head">
+      <div><h2 id="ip-title">Inspection &amp; Proposal</h2><span class="pr-sub" id="ip-sub">Uses the customer and line items from the Estimator section.</span></div>
+      <button class="hdr-primary" onclick="openDownloadPdf('inspection')">Download PDF</button>
+    </div>
+
+    <div class="card-main">
+      <div class="ip-step"><span class="ip-n">01</span><span class="main-section-title">Inspection findings</span><span class="pr-sub">The opening paragraph of What We Found.</span></div>
+      <textarea class="ip-ta" id="f-inspection" rows="3"
+        placeholder="Upon inspection of the property, our team identified the following damage / issues that require attention…"></textarea>
+    </div>
+
+    <!-- Photo report: findings by area with photos from TrueFrame (filled by renderPhotoReport) -->
+    <div class="card-main" id="pr-card">
+      <div class="ip-step"><span class="ip-n">02</span><span class="main-section-title">Photo report</span><span class="pr-sub">Photos come from the TrueFrame job. Drag them into an area, or tap a photo and then tap an area.</span></div>
+      <div id="pr-body"></div>
+    </div>
+
+    <!-- Good / Better / Best options for the proposal (filled by renderProposalOptions) -->
+    <div class="card-main" id="po-card">
+      <div class="ip-step"><span class="ip-n">03</span><span class="main-section-title">Proposal options</span><span class="pr-sub">Saved options are edited in Settings &rarr; Good / Better / Best.</span></div>
+      <div id="po-body"></div>
+    </div>
+
+    <div class="card-main">
+      <div class="ip-step"><span class="ip-n">04</span><span class="main-section-title">Resolution &amp; outcome</span><span class="pr-sub">The Result: what the customer gets when the work is done.</span></div>
+      <textarea class="ip-ta" id="f-resolution" rows="4"
+        placeholder="Upon completion, your property will be fully restored. Red Hammer Construction Group warranties all labor and workmanship…"></textarea>
+      <div class="ip-step" style="margin-top:14px"><span class="main-section-title">Notes &amp; scope exclusions</span></div>
+      <textarea class="ip-ta" id="f-notes" rows="3"
+        placeholder="e.g. Does not include: interior water damage, structural repairs. Work area must be accessible day of…"></textarea>
+    </div>
+</div>
+</div><!-- /section-inspection -->
 
 <!-- COUNTERTOP SECTION -->
 <div id="section-countertops" class="app-section">
@@ -1697,7 +1709,7 @@ tbody td{padding:7px 10px}
         <button class="settings-nav-item" id="stab-materials" onclick="openSettingsTab('materials')"><span class="sni-icon">&#127959;</span><span class="sni-label">Materials</span></button>
         <button class="settings-nav-item" id="stab-labor" onclick="openSettingsTab('labor')"><span class="sni-icon">&#128295;</span><span class="sni-label">Labor Rates</span></button>
         <button class="settings-nav-item" id="stab-xact" onclick="openSettingsTab('xact')"><span class="sni-icon">&#128196;</span><span class="sni-label">Xactimate</span></button>
-        <button class="settings-nav-item" id="stab-library" onclick="openSettingsTab('library')"><span class="sni-icon">&#128203;</span><span class="sni-label">Option Library</span></button>
+        <button class="settings-nav-item" id="stab-library" onclick="openSettingsTab('library')"><span class="sni-icon">&#128203;</span><span class="sni-label">Good / Better / Best</span></button>
         <div class="settings-nav-sep"></div>
         <button class="settings-nav-item" id="stab-aiscan" onclick="openSettingsTab('aiscan')"><span class="sni-icon">&#129302;</span><span class="sni-label">AI Scan</span></button>
         <button class="settings-nav-item" id="stab-company" onclick="openSettingsTab('company')"><span class="sni-icon">&#127981;</span><span class="sni-label">Company</span></button>
@@ -1855,14 +1867,13 @@ tbody td{padding:7px 10px}
       </div>
     </div>
 
-    <!-- TAB: Option Library (products for the Good / Better / Best options) -->
+    <!-- TAB: Good / Better / Best (saved options and included lists) -->
     <div class="stab-panel" id="stab-panel-library">
-      <div style="font-size:.78rem;color:var(--text-2);margin-bottom:10px">Products and packages you offer. Each one shows up in the <b>Choose from library…</b> list on the Good, Better and Best options, and fills in its name and bullet points.</div>
+      <div style="font-size:.78rem;color:var(--text-2);margin-bottom:12px">The options you offer at each level. Each one shows up in the dropdown on its Good, Better or Best card in <b>Inspection &amp; Proposal</b> and fills in the name and bullet points. Included lists fill in <b>Included in every option</b>.</div>
       <div id="lib-list"></div>
       <div class="po-row" style="margin-top:10px">
-        <button class="tpl-btn" onclick="libAdd()">+ Add product</button>
         <span style="flex:1"></span>
-        <button class="dl-go" onclick="poSaveLib()">Save library</button>
+        <button class="dl-go" onclick="poSaveLib()">Save changes</button>
       </div>
     </div>
 
@@ -3514,6 +3525,7 @@ function prFillCustomer(p){
     if(zipEl&&zip) zipEl.value=zip;
   }
   if(typeof updateJobBar==='function') updateJobBar();
+  ipHeader();
 }
 // A TrueFrame report link brings its areas, ratings, notes and photos as a starting point.
 function prOfferReport(rep){
@@ -3743,27 +3755,62 @@ async function poSaveLib(){
   rhOptLib=rhOptLib.filter(it=>it.name.trim()||it.bullets.length);
   try{ localStorage.setItem('rh_option_library',JSON.stringify(rhOptLib)); }catch(_){}
   const {error}=await db.from('settings').upsert({key:'option_library',value:JSON.stringify(rhOptLib)},{onConflict:'key'});
-  showToast(error?'Saved on this device only: '+error.message:'Option library saved');
+  showToast(error?'Saved on this device only: '+error.message:'Saved options updated');
   renderLibrary(); renderProposalOptions();
 }
-function poLibChoices(){
-  return rhOptLib.map((it,i)=>`<option value="${i}">${escHtml(it.name||'Untitled')}${it.trade?' · '+escHtml(TRADE_TEMPLATES[it.trade]?.label||it.trade):''}</option>`).join('');
+// Saved options live in Settings → Good / Better / Best, each filed under the tier it is
+// offered at ('included' holds ready-made "Included in every option" lists).
+const RH_LIB_GROUPS=[['included','Included in every option'],['good','Good'],['better','Better'],['best','Best']];
+const libTier=it=>RH_LIB_GROUPS.some(([g])=>g===it.tier)?it.tier:'';
+function poLibChoices(k){
+  const mine=[], other=[];
+  rhOptLib.forEach((it,i)=>{
+    if(libTier(it)==='included') return;
+    const o=`<option value="${i}">${escHtml(it.name||'Untitled')}${it.trade?' · '+escHtml(TRADE_TEMPLATES[it.trade]?.label||it.trade):''}</option>`;
+    (libTier(it)===k||!libTier(it)?mine:other).push(o);
+  });
+  return `<option value="">${mine.length?`Saved ${RH_TIER_LABELS[k]} options…`:`No saved ${RH_TIER_LABELS[k]} options yet`}</option>${mine.join('')}`
+    +(other.length?`<optgroup label="Other tiers">${other.join('')}</optgroup>`:'')
+    +`<option value="__edit">Edit saved options in Settings…</option>`;
 }
+function poIncludedChoices(){
+  const list=rhOptLib.map((it,i)=>libTier(it)==='included'?`<option value="${i}">${escHtml(it.name||'Untitled list')}</option>`:'').join('');
+  return `<option value="">${list?'Saved lists…':'No saved lists yet'}</option>${list}<option value="__edit">Edit saved lists in Settings…</option>`;
+}
+function poEditLib(){ openSettings(); openSettingsTab('library'); }
 function poFromLib(k,i){
+  if(i==='__edit'){ poEditLib(); return; }
   const it=rhOptLib[+i]; if(i===''||!it) return;
   const c=rhOpts.cards[k];
-  const go=()=>{ c.name=it.name||''; c.bullets=(it.bullets||[]).map(b=>'• '+b).join('\n')||'• '; renderProposalOptions(); };
+  const go=()=>{ c.name=it.name||''; c.bullets=(it.bullets||[]).map(b=>'• '+b).join('\n')||'• '; if(it.note) c.note=it.note; renderProposalOptions(); };
   if(c.name.trim()||poBullets(c.bullets).length) rhConfirm({title:`Replace ${RH_TIER_LABELS[k]}?`,msg:`Its name and bullet points will be replaced with "${it.name||'Untitled'}".`,ok:'Replace'},go);
   else go();
 }
+function poIncludedFromLib(i){
+  if(i==='__edit'){ poEditLib(); return; }
+  const it=rhOptLib[+i]; if(i===''||!it) return;
+  const go=()=>{ rhOpts.included=(it.bullets||[]).map(b=>'• '+b).join('\n')||'• '; renderProposalOptions(); };
+  if(poBullets(rhOpts.included).length) rhConfirm({title:'Replace the included list?',msg:`It will be replaced with "${it.name||'Untitled list'}".`,ok:'Replace'},go);
+  else go();
+}
+// Saves a card (k = good/better/best) or the included list (k = 'included') into Settings.
 async function poSaveToLib(k){
+  if(!rhOptLibLoaded) await poLoadLib();
+  const save=item=>{
+    const at=rhOptLib.findIndex(it=>libTier(it)===k&&it.name.trim().toLowerCase()===item.name.toLowerCase());
+    if(at>=0) rhOptLib[at]=item; else rhOptLib.push(item);
+    poSaveLib();
+  };
+  if(k==='included'){
+    if(!poBullets(rhOpts.included).length){ showToast('Add some bullet points first'); return; }
+    const suggest=((currentTrade&&TRADE_TEMPLATES[currentTrade]?.label)||'Standard')+' included list';
+    rhPrompt({title:'Save this included list',label:'Name for the list',value:suggest,ok:'Save'},
+      name=>{ if(name&&String(name).trim()) save({tier:'included',name:String(name).trim(),trade:currentTrade||'',bullets:poBullets(rhOpts.included)}); });
+    return;
+  }
   const c=rhOpts.cards[k];
   if(!c.name.trim()){ showToast('Give this option a name first'); return; }
-  if(!rhOptLibLoaded) await poLoadLib();
-  const item={name:c.name.trim(),trade:currentTrade||'',bullets:poBullets(c.bullets)};
-  const at=rhOptLib.findIndex(it=>it.name.trim().toLowerCase()===item.name.toLowerCase());
-  if(at>=0) rhOptLib[at]=item; else rhOptLib.push(item);
-  await poSaveLib();
+  save({tier:k,name:c.name.trim(),trade:currentTrade||'',bullets:poBullets(c.bullets),note:c.note.trim()});
 }
 
 function renderProposalOptions(){
@@ -3774,19 +3821,18 @@ function renderProposalOptions(){
     return;
   }
   if(!rhOptLibLoaded&&!_rhOptLibLoading) poLoadLib().then(()=>{ if(rhOpts.on) renderProposalOptions(); });
-  const lib=poLibChoices();
   const card=k=>{
     const c=o.cards[k], p=poPrice(k);
     return `<div class="po-opt${o.badge.tier===k?' badged':''}">
       <div class="po-k"><span>Option ${RH_OPT_KEYS.indexOf(k)+1} &middot; ${RH_TIER_LABELS[k]}</span><label><input type="radio" name="po-badge" ${o.badge.tier===k?'checked':''} onchange="rhOpts.badge.tier='${k}';renderProposalOptions()">Badge</label></div>
-      ${lib?`<select class="pr-sel" onchange="poFromLib('${k}',this.value);this.value=''"><option value="">Choose from library…</option>${lib}</select>`:''}
+      <select class="pr-sel" aria-label="Saved ${RH_TIER_LABELS[k]} options" onchange="poFromLib('${k}',this.value);this.value=''">${poLibChoices(k)}</select>
       <input class="pr-input" placeholder="Product or package name" value="${escHtml(c.name)}" oninput="rhOpts.cards.${k}.name=this.value">
       <textarea class="pr-ta" rows="5" placeholder="• What's included" oninput="rhOpts.cards.${k}.bullets=this.value" onkeydown="poBulletKey(event)">${escHtml(c.bullets)}</textarea>
       <div class="po-price">${p.from==='items'
         ? `<span>From the ${RH_TIER_LABELS[k]} line items: <b>$${fmtMoney(p.amt)}</b></span>`
-        : `<label class="po-row"><span class="po-lbl" style="flex-direction:row">Price $</span><input class="pr-input" style="width:120px" inputmode="decimal" placeholder="0.00" value="${escHtml(c.price)}" oninput="rhOpts.cards.${k}.price=this.value"></label><span class="pr-sub">Or price it with line items on the ${RH_TIER_LABELS[k]} tier.</span>`}</div>
+        : `<label class="po-row"><span class="po-lbl" style="flex-direction:row">Price $</span><input class="pr-input" style="width:120px" inputmode="decimal" placeholder="0.00" value="${escHtml(c.price)}" oninput="rhOpts.cards.${k}.price=this.value"></label><span class="pr-sub">Or price it with line items on the ${RH_TIER_LABELS[k]} tier in the Estimator.</span>`}</div>
       <input class="pr-input" placeholder="Line under the price, e.g. ≈ $6.77 / sq ft installed" value="${escHtml(c.note)}" oninput="rhOpts.cards.${k}.note=this.value">
-      <button type="button" class="link-btn" style="align-self:flex-start" onclick="poSaveToLib('${k}')">Save to option library</button>
+      <button type="button" class="link-btn" style="align-self:flex-start" onclick="poSaveToLib('${k}')">Save as a ${RH_TIER_LABELS[k]} option</button>
     </div>`;
   };
   const cmp=o.compare.length
@@ -3798,7 +3844,10 @@ function renderProposalOptions(){
     : `<div class="pr-sub">Leave it empty to leave it out of the PDF.</div>`;
   el.innerHTML=`
     <div class="po-row" style="justify-content:space-between"><span class="pr-sub">Leave an option empty to leave it out. Press Enter in a list for a new bullet.</span><button type="button" class="link-btn link-danger" onclick="poToggle(false)">Turn off options</button></div>
-    <label class="po-lbl" style="margin-top:10px">Included in every option<textarea class="pr-ta" rows="3" oninput="rhOpts.included=this.value" onkeydown="poBulletKey(event)">${escHtml(o.included)}</textarea></label>
+    <div class="po-lbl" style="margin-top:10px">
+      <div class="po-row" style="justify-content:space-between"><span>Included in every option</span><span class="po-row"><select class="pr-sel" aria-label="Saved included lists" onchange="poIncludedFromLib(this.value);this.value=''">${poIncludedChoices()}</select><button type="button" class="link-btn" onclick="poSaveToLib('included')">Save this list</button></span></div>
+      <textarea class="pr-ta" rows="3" aria-label="Included in every option" oninput="rhOpts.included=this.value" onkeydown="poBulletKey(event)">${escHtml(o.included)}</textarea>
+    </div>
     <div class="po-cards">${RH_OPT_KEYS.map(card).join('')}</div>
     <div class="po-row"><span class="po-lbl" style="flex-direction:row">Badge text</span><input class="pr-input" style="width:180px" value="${escHtml(o.badge.text)}" oninput="rhOpts.badge.text=this.value"><label class="po-row" style="gap:4px"><input type="radio" name="po-badge" ${o.badge.tier?'':'checked'} onchange="rhOpts.badge.tier='';renderProposalOptions()"><span class="pr-sub">No badge</span></label></div>
     <div style="margin-top:14px">
@@ -3807,27 +3856,53 @@ function renderProposalOptions(){
     </div>`;
 }
 
-// Settings → Option Library
+// Settings → Good / Better / Best: saved options grouped by tier
 function renderLibrary(){
   const el=document.getElementById('lib-list'); if(!el) return;
-  if(!rhOptLib.length){ el.innerHTML='<div class="sp-empty">No products yet. Add one, or use “Save to option library” on an option.</div>'; return; }
   const trades=Object.entries(TRADE_TEMPLATES).map(([k,t])=>[k,t.label||k]);
-  el.innerHTML=rhOptLib.map((it,i)=>`<div class="lib-item">
+  const groups=[...RH_LIB_GROUPS];
+  if(rhOptLib.some(it=>!libTier(it))) groups.push(['','Not sorted yet']);
+  const item=(it,i)=>`<div class="lib-item" data-i="${i}">
     <div style="display:flex;flex-direction:column;gap:6px">
-      <input class="pr-input" value="${escHtml(it.name)}" placeholder="Product or package name" oninput="rhOptLib[${i}].name=this.value">
-      <select class="pr-sel" onchange="rhOptLib[${i}].trade=this.value"><option value="">Any trade</option>${trades.map(([k,l])=>`<option value="${escHtml(k)}"${it.trade===k?' selected':''}>${escHtml(l)}</option>`).join('')}</select>
+      <input class="pr-input" value="${escHtml(it.name)}" placeholder="${libTier(it)==='included'?'List name, e.g. Roof replacement':'Product or package name'}" oninput="rhOptLib[${i}].name=this.value">
+      <select class="pr-sel" aria-label="Trade" onchange="rhOptLib[${i}].trade=this.value"><option value="">Any trade</option>${trades.map(([k,l])=>`<option value="${escHtml(k)}"${it.trade===k?' selected':''}>${escHtml(l)}</option>`).join('')}</select>
+      <select class="pr-sel" aria-label="Offered as" onchange="rhOptLib[${i}].tier=this.value;renderLibrary()">${libTier(it)?'':'<option value="" selected>Pick a tier…</option>'}${RH_LIB_GROUPS.map(([g,l])=>`<option value="${g}"${libTier(it)===g?' selected':''}>${g==='included'?'Included list':'Offered as '+l}</option>`).join('')}</select>
     </div>
-    <textarea class="pr-ta" rows="4" placeholder="• Bullet points" onkeydown="poBulletKey(event)" oninput="rhOptLib[${i}].bullets=poBullets(this.value)">${escHtml((it.bullets||[]).map(b=>'• '+b).join('\n')||'• ')}</textarea>
-    <button type="button" class="sp-x" title="Delete product" onclick="rhOptLib.splice(${i},1);renderLibrary()">&#10005;</button>
-  </div>`).join('');
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <textarea class="pr-ta" rows="4" placeholder="• Bullet points" onkeydown="poBulletKey(event)" oninput="rhOptLib[${i}].bullets=poBullets(this.value)">${escHtml((it.bullets||[]).map(b=>'• '+b).join('\n')||'• ')}</textarea>
+      ${libTier(it)==='included'?'':`<input class="pr-input" value="${escHtml(it.note||'')}" placeholder="Line under the price (optional)" oninput="rhOptLib[${i}].note=this.value">`}
+    </div>
+    <button type="button" class="sp-x" title="Delete" onclick="rhOptLib.splice(${i},1);renderLibrary()">&#10005;</button>
+  </div>`;
+  el.innerHTML=groups.map(([g,l])=>{
+    const rows=rhOptLib.map((it,i)=>libTier(it)===g?item(it,i):'').join('');
+    return `<div class="lib-group">
+      <div class="lib-group-hd"><span>${escHtml(l)}</span>${g?`<button type="button" class="link-btn" onclick="libAdd('${g}')">+ Add ${g==='included'?'list':escHtml(l)+' option'}</button>`:''}</div>
+      ${rows||`<div class="pr-sub" style="padding:2px 0 8px">${g==='included'?'No saved lists yet.':`No saved ${escHtml(l)} options yet.`}</div>`}
+    </div>`;
+  }).join('');
 }
-function libAdd(){ rhOptLib.push({name:'',trade:currentTrade||'',bullets:[]}); renderLibrary(); const ins=document.querySelectorAll('#lib-list .lib-item .pr-input'); ins[ins.length-1]?.focus(); }
+function libAdd(g){
+  rhOptLib.push({tier:g,name:'',trade:currentTrade||'',bullets:[],note:''});
+  renderLibrary();
+  document.querySelector(`#lib-list .lib-item[data-i="${rhOptLib.length-1}"] .pr-input`)?.focus();
+}
 async function libOpen(){ if(!rhOptLibLoaded){ document.getElementById('lib-list').innerHTML='<div class="sp-empty">Loading…</div>'; await poLoadLib(); } renderLibrary(); }
+
+// The Inspection & Proposal section header names the job it belongs to.
+function ipRefresh(){ ipHeader(); renderPhotoReport(); renderProposalOptions(); }
+function ipHeader(){
+  const v=id=>(document.getElementById(id)?.value||'').trim();
+  const t=document.getElementById('ip-title'), sub=document.getElementById('ip-sub');
+  if(t) t.textContent=v('f-name')?`Inspection & Proposal · ${v('f-name')}`:'Inspection & Proposal';
+  if(sub) sub.textContent=[[v('f-addr'),v('f-city')].filter(Boolean).join(', '),v('f-estnum')].filter(Boolean).join(' · ')
+    || 'Uses the customer and line items from the Estimator section.';
+}
 
 function prResetAll(data){
   rhReport=prNormalize(data&&data.report); rhOpts=poNormalize(data&&data.options);
   tfPhotos=[]; tfById=new Map(); tfImgCache.clear(); tfPicked=null; tfLoadedAt=0; prSetState('');
-  renderPhotoReport(); renderProposalOptions();
+  renderPhotoReport(); renderProposalOptions(); ipHeader();
   if(rhReport.tfToken) tfLoad(false);
 }
 setTimeout(()=>{ renderPhotoReport(); renderProposalOptions(); },0);
@@ -8082,12 +8157,13 @@ Invoice text:\n${text.substring(0,7000)}`;
 // SECTION NAVIGATION
 // ═══════════════════════════════════════════════════════════════════════
 function switchSection(id){
-  document.querySelectorAll('.app-section').forEach(el=>el.classList.remove('sec-active'));
-  document.querySelectorAll('.sec-nav-btn').forEach(el=>el.classList.remove('snb-active'));
   const sec = document.getElementById('section-'+id);
-  const btn = document.getElementById('snb-'+id);
-  if(sec) sec.classList.add('sec-active');
-  if(btn) btn.classList.add('snb-active');
+  if(!sec) return;
+  document.querySelectorAll('.app-section').forEach(el=>el.classList.remove('sec-active'));
+  sec.classList.add('sec-active');
+  const pick = document.getElementById('section-select');
+  if(pick && pick.value!==id) pick.value=id;
+  if(id==='inspection') ipRefresh();
   if(id==='countertops' && typeof ctInit==='function') ctInit();
   if(id==='xactimate' && typeof xactInit==='function') xactInit();
   if(id==='ai-scan' && typeof aiInit==='function') aiInit();
