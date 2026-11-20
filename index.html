@@ -4,10 +4,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
 <style>
-/* Layout: estimator workbench — quiet neutral shell, intake column on the left, line items under a sticky job bar; Red Hammer red only for primary actions, active state and the money. */
+/* Layout: estimator workbench — light data-first shell, collapsible job details above a bordered line-item table, sticky job header; Red Hammer red only for primary actions, active state and the money. */
 :root{
-  --brand:#8B1A1A;--brand-dk:#6E1414;--brand-lt:#F7EBEA;--brand-ink:#8B1A1A;
-  --bg:#F3F2F0;--surface:#FFFFFF;--surface-2:#F8F7F5;
+  --brand:#e8401c;--brand-dk:#c7330f;--brand-lt:#fdeee9;--brand-ink:#b92e0c;
+  --bg:#FAFAF9;--surface:#FFFFFF;--surface-2:#F6F6F5;
   --border:#E4E0DC;--border-strong:#D2CCC7;
   --text-1:#1C1817;--text-2:#55504C;--text-3:#8A827D;
   --success:#2D7A3A;--success-bg:#EDF7EF;--warn:#B45309;--warn-bg:#FEF3C7;--danger:#B42318;--danger-bg:#FDECEA;
@@ -15,12 +15,12 @@
   --shadow-pop:0 12px 32px rgba(28,24,23,.16),0 2px 6px rgba(28,24,23,.08);
   --font-display:'Archivo','Helvetica Neue',Arial,sans-serif;
   --font-body:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
-  --hdr-h:64px;
-  --radius:10px;--radius-sm:7px;
+  --hdr-h:56px;
+  --radius:4px;--radius-sm:4px;
 }
 @media(prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
-    --brand:#C9443A;--brand-dk:#A8362D;--brand-lt:#2B1816;--brand-ink:#EE8379;
+    --brand:#e8401c;--brand-dk:#c7330f;--brand-lt:#2B1816;--brand-ink:#ff8a6b;
     --bg:#121011;--surface:#1B1819;--surface-2:#221E1F;
     --border:#312B2C;--border-strong:#433B3C;
     --text-1:#F2EDEC;--text-2:#BDB3B1;--text-3:#8B807E;
@@ -31,7 +31,7 @@
   }
 }
 :root[data-theme="dark"]{
-  --brand:#C9443A;--brand-dk:#A8362D;--brand-lt:#2B1816;--brand-ink:#EE8379;
+  --brand:#e8401c;--brand-dk:#c7330f;--brand-lt:#2B1816;--brand-ink:#ff8a6b;
   --bg:#121011;--surface:#1B1819;--surface-2:#221E1F;
   --border:#312B2C;--border-strong:#433B3C;
   --text-1:#F2EDEC;--text-2:#BDB3B1;--text-3:#8B807E;
@@ -221,6 +221,29 @@ tbody tr:hover .pin-btn:not(.pinned){opacity:.8}
 .modal-actions{display:flex;gap:8px;justify-content:flex-end}
 .modal-cancel{background:var(--surface);border:1px solid var(--border-strong);border-radius:var(--radius-sm);padding:8px 16px;font-size:.85rem;font-weight:600;cursor:pointer;color:var(--text-1)}
 .modal-cancel:hover{background:var(--surface-2)}
+/* PDF download bar + popup */
+.dl-bar{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;margin-top:16px}
+.dl-bar-txt{display:flex;flex-direction:column;gap:2px;min-width:0}
+.dl-bar-txt b{font-family:var(--font-display);font-size:.95rem;color:var(--text-1)}
+.dl-bar-txt span{font-size:.8rem;color:var(--text-2)}
+.dl-go{display:inline-flex;align-items:center;gap:7px;background:var(--brand);color:#fff;border:none;border-radius:var(--radius-sm);padding:9px 18px;font-size:.88rem;font-weight:700;cursor:pointer}
+.dl-go:hover{background:var(--brand-dk)}
+.dl-go:disabled{opacity:.6;cursor:wait}
+.dl-go svg{width:16px;height:16px}
+.dl-box{max-width:480px;max-height:92vh;overflow-y:auto}
+.dl-opts{display:flex;flex-direction:column;gap:6px;margin:12px 0 14px}
+.dl-opt{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 12px;cursor:pointer}
+.dl-opt:has(input:checked){border-color:var(--brand);background:var(--brand-lt)}
+.dl-opt input{margin-top:3px;accent-color:var(--brand)}
+.dl-opt b{display:block;font-size:.86rem;color:var(--text-1)}
+.dl-opt span{font-size:.76rem;color:var(--text-2)}
+.dl-claim{font-size:.78rem;color:var(--text-2);margin:-6px 0 12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.dl-claim button{background:none;border:none;color:var(--brand-ink);font-weight:700;font-size:.78rem;cursor:pointer;padding:0;text-decoration:underline}
+.dl-field{display:block;font-size:.78rem;color:var(--text-2);margin-bottom:12px}
+.dl-field .modal-input{margin:4px 0 0}
+.dl-how{font-size:.78rem;color:var(--text-2);background:var(--surface-2);border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:16px;line-height:1.5}
+.dl-how b{color:var(--text-1)}
+.dl-box .modal-actions{flex-wrap:wrap}
 .modal-confirm{background:var(--brand);color:#fff;border:1px solid var(--brand);border-radius:var(--radius-sm);padding:8px 16px;font-size:.85rem;font-weight:600;cursor:pointer}
 .modal-confirm:hover{background:var(--brand-dk)}
 .modal-danger{background:#C42B1F;color:#fff;border:1px solid #C42B1F;border-radius:var(--radius-sm);padding:8px 16px;font-size:.85rem;font-weight:600;cursor:pointer}
@@ -612,6 +635,142 @@ tbody tr:hover .note-input,.note-input:focus{border-bottom-color:var(--border-st
 @media(max-width:600px){.settings-sidebar{width:44px}.settings-nav-item .sni-label{display:none}.settings-nav-item{padding:10px 12px;justify-content:center}}
 @media(max-width:700px){.xact2-layout{flex-direction:column;height:auto}.xact2-left{width:100%;border-right:none;border-bottom:2px solid var(--border);max-height:60vh}.xact2-right{min-height:400px}.xact2-claim-grid{grid-template-columns:1fr}}
 
+
+/* ─── V80: light, table-first workspace ─── */
+.card,.card-main,.summary-card,.job-bar{box-shadow:none}
+.layout{display:block}
+.main{padding:12px 20px 32px;gap:14px;max-width:1500px;margin:0 auto}
+.card-main,.summary-card{border:none;background:transparent;padding:0}
+.card{margin-bottom:12px;padding:12px 14px}
+.card-title{border-bottom:none;padding-bottom:0;margin-bottom:10px}
+
+/* Header: Save + Generate PDF, everything else behind the overflow menu */
+.ovf{position:relative}
+.ovf-menu{position:absolute;right:0;top:calc(100% + 6px);z-index:300;min-width:220px;background:var(--surface);border:1px solid var(--border-strong);border-radius:4px;box-shadow:var(--shadow-pop);padding:4px 0}
+.ovf-menu[hidden]{display:none}
+.ovf-item{display:flex;align-items:center;gap:8px;width:100%;background:none;border:none;border-radius:0;height:auto;padding:8px 14px;font-size:.84rem;font-weight:500;color:var(--text-1);cursor:pointer;text-align:left}
+.ovf-item:hover,.ovf-item:focus-visible{background:var(--surface-2);color:var(--text-1)}
+.ovf-item svg{display:none}
+.ovf-sep{height:1px;background:var(--border);margin:4px 0}
+.hdr-primary{border-radius:4px;padding:7px 14px}
+.hdr-icon{border-radius:4px}
+
+/* Job header row */
+.job-bar{display:grid;grid-template-columns:minmax(120px,1.2fr) minmax(160px,2fr) minmax(90px,.7fr) minmax(80px,.6fr) auto;gap:18px;align-items:end;border-radius:4px;padding:10px 16px}
+.jb-cell{min-width:0;display:flex;flex-direction:column;gap:1px}
+.jb-cell span,.job-bar .jb-total span{font-size:.64rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--text-3)}
+.jb-cell b{font-size:.9rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
+.jb-cell b.jb-empty{color:var(--text-3);font-weight:500}
+.job-bar .jb-total{display:flex;flex-direction:column;gap:1px;text-align:right;padding-left:18px;border-left:1px solid var(--border)}
+.job-bar .jb-total b{font-size:1.3rem}
+
+/* Text-link actions */
+.link-btn{background:none;border:none;padding:0;color:var(--brand-ink);font-size:.8rem;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap}
+.link-btn:hover{text-decoration:underline}
+.link-btn:disabled{color:var(--text-3);cursor:default;text-decoration:none}
+.link-btn.link-danger:hover{color:var(--danger)}
+.jp-head{display:flex;align-items:center;margin-bottom:-6px}
+
+/* Job details: a collapsible row of columns, never a permanent side column */
+.sidebar{width:auto;height:auto;overflow:visible;background:none;border:none;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;align-items:start;transition:none}
+.sidebar.sb-collapsed{display:none;width:auto;padding:0}
+.sidebar{grid-template-columns:minmax(0,1fr) minmax(0,1.8fr) minmax(0,1fr)}
+.sidebar .measure-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+.sidebar .counter-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+#settings-modal .modal-box{max-width:none}
+.settings-content{min-width:0}
+.panel-col{min-width:0}
+.panel-col>.card:last-child{margin-bottom:0}
+
+/* Tier and category tabs */
+.rh-tabs{display:flex;align-items:center;gap:2px;flex-wrap:wrap;border-bottom:1px solid var(--border-strong);margin-bottom:10px}
+.rh-tab{background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-1px;padding:7px 14px;font-size:.84rem;font-weight:600;color:var(--text-2);cursor:pointer;font-family:inherit}
+.rh-tab:hover{color:var(--text-1)}
+.rh-tab.on{color:var(--brand-ink);border-bottom-color:var(--brand)}
+.rh-tab small{font-size:.7rem;font-weight:500;color:var(--text-3);margin-left:4px;font-variant-numeric:tabular-nums}
+.rh-tabs-end{margin-left:auto;padding:0 2px 4px}
+.tier-add{padding:0 10px}
+
+/* Line items: clean bordered table */
+.toggle-row{margin-bottom:8px}
+.split-toggle{border-radius:4px}
+.split-toggle button{border-radius:3px}
+.clear-all-btn{border:none;background:none;padding:0;color:var(--text-3);font-weight:600;font-size:.8rem}
+.clear-all-btn:hover{background:none;color:var(--danger);text-decoration:underline}
+.table-wrap{border:1px solid var(--border);background:var(--surface)}
+thead th{background:var(--surface-2)}
+tbody tr:last-child{border-bottom:none}
+tbody td{padding:7px 10px}
+.price-input{border-radius:3px}
+.add-row{align-items:center;margin-top:10px!important;padding-top:0;border-top:none}
+.add-item-btn{background:var(--surface);color:var(--text-1);border-color:var(--border-strong);border-radius:4px}
+.add-item-btn:hover{background:var(--surface-2);border-color:var(--text-3)}
+.add-section-btn{border:none;background:none;padding:0;color:var(--brand-ink);font-size:.8rem}
+.add-section-btn:hover{color:var(--brand-ink);text-decoration:underline}
+
+/* Modals: a title, 1-2 fields, Cancel + primary */
+.modal-box{border-radius:4px;border-top:3px solid var(--brand)}
+.modal-confirm,.modal-cancel,.modal-danger{border-radius:4px}
+.modal-box .field{margin-bottom:12px}
+#rh-confirm-modal,#rh-prompt-modal{z-index:1800}
+.modal-danger{background:var(--brand);border-color:var(--brand)}
+
+/* Insurance tab: template loader */
+.xact2-tpl-btn{margin:10px 14px 0;background:var(--surface);border:1px solid var(--border-strong);border-radius:4px;padding:8px 10px;font-size:.8rem;font-weight:600;color:var(--text-1);cursor:pointer;flex-shrink:0}
+.xact2-tpl-btn:hover{border-color:var(--brand);color:var(--brand-ink)}
+.xt-wrap{padding:16px 20px;background:var(--surface);border-bottom:1px solid var(--border)}
+.xt-wrap[hidden]{display:none}
+.xt-head{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:10px}
+.xt-title{font-size:.95rem;font-weight:700}
+.xt-sub{font-size:.76rem;color:var(--text-3);flex:1;min-width:180px}
+.xt-table,.sp-table{width:100%;border-collapse:collapse;font-size:.82rem;background:var(--surface)}
+.xt-table th,.sp-table th{background:var(--surface-2);padding:6px 8px;border:1px solid var(--border);text-align:left}
+.xt-table td,.sp-table td{padding:3px 5px;border:1px solid var(--border)}
+.xt-table tbody tr:hover,.sp-table tbody tr:hover{background:none}
+.xt-table input,.sp-table input,.sp-table select{width:100%;min-width:0;background:transparent;border:1px solid transparent;border-radius:3px;padding:4px 6px;font-size:.82rem;color:var(--text-1);font-family:inherit;outline:none}
+.xt-table input:hover,.sp-table input:hover,.sp-table select:hover{border-color:var(--border-strong)}
+.xt-table input:focus,.sp-table input:focus,.sp-table select:focus{border-color:var(--brand);background:var(--surface)}
+.xt-table input[type=number],.sp-table input[type=number]{text-align:right;font-variant-numeric:tabular-nums}
+.xt-table .xt-qty{background:var(--surface-2);border-color:var(--border-strong)}
+.xt-cat td{background:var(--surface-2);font-size:.68rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text-2);padding:5px 8px}
+.xt-foot{display:flex;justify-content:flex-end;margin-top:10px}
+
+/* Settings: supplier pricing */
+.sp-bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.sp-bar select,.sp-bar input{background:var(--surface);border:1px solid var(--border-strong);border-radius:4px;padding:5px 9px;font-size:.8rem;color:var(--text-1);outline:none}
+.sp-bar input{flex:1;min-width:140px;max-width:280px}
+.sp-spacer{flex:1}
+.sp-scroll{overflow:auto;border:1px solid var(--border)}
+.sp-table{min-width:760px}
+.sp-table th{white-space:nowrap;font-size:.66rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3)}
+.sp-sup-head{display:flex;align-items:center;gap:2px;min-width:118px}
+.sp-table .sp-sup-name{font-weight:600;font-size:.76rem;text-transform:none;letter-spacing:0}
+.sp-x{background:none;border:none;color:var(--text-3);cursor:pointer;font-size:.8rem;padding:2px 5px;line-height:1}
+.sp-x:hover{color:var(--danger)}
+.sp-cost{display:flex;align-items:center;gap:1px;min-width:104px}
+.sp-star{background:none;border:none;cursor:pointer;color:var(--text-3);font-size:1rem;line-height:1;padding:2px 3px}
+.sp-star:hover{color:var(--brand-ink)}
+.sp-star.on{color:var(--brand)}
+.sp-cost.on input{font-weight:700}
+.sp-empty{padding:18px;text-align:center;color:var(--text-3);font-size:.82rem}
+.mat-from-list{margin-top:6px;width:100%;background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:6px 8px;font-size:.78rem;color:var(--text-2)}
+
+@media(max-width:1100px){
+  .sidebar{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .sidebar .measure-grid,.sidebar .counter-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:480px){.header-info{display:none}}
+@media(max-width:800px){
+  .header-actions{width:auto;margin-left:auto;overflow:visible;padding-bottom:0}
+  .hdr-primary{order:0}
+  .job-bar{grid-template-columns:1fr 1fr;gap:10px 14px;position:static}
+  .jb-project{grid-column:1/-1;grid-row:2}
+  .job-bar .jb-total{grid-column:1/-1;border-left:none;border-top:1px solid var(--border);padding:8px 0 0;text-align:left;margin:0}
+  .sidebar{grid-template-columns:minmax(0,1fr)}
+  .sidebar.sb-collapsed{height:auto}
+  .main{padding:12px 16px 28px}
+  .custom-inputs{width:100%}
+}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -626,17 +785,25 @@ tbody tr:hover .note-input,.note-input:focus{border-bottom-color:var(--border-st
     </div>
   </div>
   <div class="header-actions">
-    <span class="est-badge" id="est-badge">Est #—</span>
-    <div class="hdr-docs" role="group" aria-label="Documents">
-      <button class="hdr-doc" onclick="openMaterials()" title="Materials order sheet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></svg><span class="hdr-doc-lbl">Materials</span></button>
-      <button class="hdr-doc" onclick="printProposal()" title="Customer-facing proposal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><path d="M8 13h8M8 17h5"/></svg><span class="hdr-doc-lbl">Proposal</span></button>
-      <button class="hdr-doc" onclick="openInsuranceBid()" title="Insurance-style estimate with O&amp;P and RCV/ACV breakdown"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg><span class="hdr-doc-lbl">Ins. Bid</span></button>
-      <button class="hdr-doc" onclick="printEstimate()" title="Internal / insurance estimate"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span class="hdr-doc-lbl">Internal</span></button>
+    <span class="est-badge" id="est-badge" hidden>Est #—</span>
+    <button class="hdr-primary" onclick="promptSaveJob()" title="Save this estimate">Save</button>
+    <button class="hdr-primary" onclick="openDownloadPdf()" title="Choose a version and download it as a PDF">Generate PDF</button>
+    <div class="ovf">
+      <button class="hdr-icon" id="ovf-btn" onclick="rhToggleMenu(event)" title="More actions" aria-label="More actions" aria-haspopup="true" aria-expanded="false"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg></button>
+      <div class="ovf-menu" id="ovf-menu" role="menu" hidden onclick="rhCloseMenu()">
+        <button class="ovf-item" role="menuitem" onclick="clearEstimate()">New estimate</button>
+        <button class="ovf-item" role="menuitem" onclick="saveTemplate()">Save as template</button>
+        <div class="ovf-sep"></div>
+        <button class="ovf-item" role="menuitem" onclick="openMaterials()">Materials order sheet</button>
+        <button class="ovf-item" role="menuitem" onclick="printProposal()">Customer proposal</button>
+        <button class="ovf-item" role="menuitem" onclick="openInsuranceBid()">Insurance bid</button>
+        <button class="ovf-item" role="menuitem" onclick="printEstimate()">Internal estimate</button>
+        <div class="ovf-sep"></div>
+        <button class="ovf-item" role="menuitem" onclick="openSettings()">Pricing settings</button>
+        <button class="ovf-item" role="menuitem" onclick="toggleTheme()">Light / dark theme</button>
+        <button class="ovf-item hdr-auth" role="menuitem" id="auth-btn" onclick="rhAuthButton()" title="Sign in to save and load jobs"><span id="auth-btn-lbl">Sign in</span></button>
+      </div>
     </div>
-    <button class="hdr-icon" onclick="toggleTheme()" title="Switch light / dark" aria-label="Switch light or dark theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor" stroke="none"/></svg></button>
-    <button class="hdr-icon" onclick="openSettings()" title="Pricing settings" aria-label="Pricing settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg></button>
-    <button class="hdr-auth" id="auth-btn" onclick="rhAuthButton()" title="Sign in to save and load jobs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span id="auth-btn-lbl">Sign in</span></button>
-    <button class="hdr-primary" onclick="promptSaveJob()" title="Save this estimate"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-7H7v7M7 3v4h8"/></svg>Save Job</button>
   </div>
 </header>
 
@@ -668,10 +835,26 @@ tbody tr:hover .note-input,.note-input:focus{border-bottom-color:var(--border-st
 <div id="section-estimator" class="app-section sec-active">
 
 <div class="layout">
-  <!-- SIDEBAR -->
-  <div class="sidebar-wrap">
+
+
+
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- Job bar: who this estimate is for and what it comes to (filled by updateJobBar) -->
+    <div class="job-bar" id="job-bar">
+      <div class="jb-cell"><span>Customer</span><b class="jb-empty" id="jb-name">New estimate</b></div>
+      <div class="jb-cell jb-project"><span>Project</span><b class="jb-empty" id="jb-project">—</b></div>
+      <div class="jb-cell"><span>Date</span><b id="jb-date">—</b></div>
+      <div class="jb-cell"><span>Estimate #</span><b id="jb-estnum">—</b></div>
+      <div class="jb-total"><span id="jb-total-lbl">Job total</span><b id="jb-total">$0.00</b></div>
+    </div>
+
+    <div class="jp-head"><button class="link-btn" id="sb-toggle-btn" onclick="toggleSidebar()" aria-expanded="true" aria-controls="sidebar"><span id="sb-toggle-caret">&#9662;</span> Job details &amp; measurements</button></div>
   <div class="sidebar" id="sidebar">
 
+    <div class="panel-col">
     <!-- Customer Info -->
     <div class="card">
       <div class="card-title">Customer Info</div>
@@ -689,6 +872,7 @@ tbody tr:hover .note-input,.note-input:focus{border-bottom-color:var(--border-st
       </div>
     </div>
 
+    </div><div class="panel-col">
     <!-- Trade Selector -->
     <div class="card">
       <div class="card-title">Trade</div>
@@ -744,6 +928,7 @@ tbody tr:hover .note-input,.note-input:focus{border-bottom-color:var(--border-st
       <div id="measure-body"></div>
     </div>
 
+    </div><div class="panel-col">
     <!-- Roofing Surcharges (hidden for non-roofing) -->
     <div id="surcharge-card" class="card" style="display:none">
       <div class="card-title">Pitch &amp; Stories</div>
@@ -785,7 +970,6 @@ tbody tr:hover .note-input,.note-input:focus{border-bottom-color:var(--border-st
       <!-- JOBS tab -->
       <div id="jobs-tab-panel">
         <div class="tpl-row">
-          <button class="tpl-btn" onclick="promptSaveJob()">Save current job</button>
           <button class="tpl-btn" onclick="clearEstimate()">+ New estimate</button>
         </div>
         <div id="saved-jobs" style="margin-top:8px"></div>
@@ -802,31 +986,11 @@ tbody tr:hover .note-input,.note-input:focus{border-bottom-color:var(--border-st
       </div>
     </div>
 
-  </div><!-- /sidebar -->
-  </div><!-- /sidebar-wrap -->
-
-  <!-- SIDEBAR TAB — lives outside sidebar so it stays visible when collapsed -->
-  <button class="sb-tab" id="sb-toggle-btn" onclick="toggleSidebar()" title="Collapse sidebar">&#9664;</button>
-
-  <!-- MAIN -->
-  <div class="main">
-
-    <!-- Job bar: who this estimate is for and what it comes to (filled by updateJobBar) -->
-    <div class="job-bar" id="job-bar">
-      <div class="jb-who">
-        <div class="jb-name jb-empty" id="jb-name">New estimate</div>
-        <div class="jb-meta" id="jb-meta">Add the customer on the left to start</div>
-      </div>
-      <div class="jb-stats">
-        <div class="jb-stat"><span>Trade</span><b id="jb-trade">—</b></div>
-        <div class="jb-stat" id="jb-sq-wrap"><span>Squares</span><b id="jb-sq">—</b></div>
-        <div class="jb-stat"><span>Subtotal</span><b id="jb-sub">$0.00</b></div>
-        <div class="jb-stat jb-total"><span>Job total</span><b id="jb-total">$0.00</b></div>
-      </div>
-    </div>
+  </div></div><!-- /sidebar -->
 
     <!-- Line Items -->
     <div class="card-main">
+      <div class="rh-tabs" id="tier-bar" role="tablist" aria-label="Pricing tier"></div>
       <div class="toggle-row">
         <span class="main-section-title">Line Items</span>
         <div style="display:flex;gap:8px;align-items:center">
@@ -857,8 +1021,8 @@ tbody tr:hover .note-input,.note-input:focus{border-bottom-color:var(--border-st
           </select>
           <input class="custom-price" type="number" id="ci-price" placeholder="Unit $" step="0.01" min="0">
         </div>
-        <button class="add-item-btn" onclick="addCustomItem()">+ Add Line</button>
-        <button class="add-section-btn" onclick="addSectionBreak()">☰ Section Break</button>
+        <button class="add-item-btn" onclick="addCustomItem()">+ Add Line Item</button>
+        <button class="add-section-btn" onclick="addSectionBreak()">+ Section break</button>
       </div>
     </div>
 
@@ -894,7 +1058,7 @@ tbody tr:hover .note-input,.note-input:focus{border-bottom-color:var(--border-st
         onfocus="this.style.borderColor='var(--brand)'" onblur="this.style.borderColor='var(--border)'"></textarea>
 
       <div class="notes-label">
-        <span class="notes-tag" style="background:#2D6A3E">BOTTOM</span>
+        <span class="notes-tag" style="background:#3E6B5A">BOTTOM</span>
         Resolution &amp; outcome
       </div>
       <textarea id="f-resolution" rows="3"
@@ -942,7 +1106,7 @@ tbody tr:hover .note-input,.note-input:focus{border-bottom-color:var(--border-st
       <button onclick="openMaterials()" style="margin-top:10px;width:100%;padding:7px 10px;background:none;border:1px solid var(--border);border-radius:7px;color:var(--text-3);font-size:.76rem;cursor:pointer;transition:border-color .15s" onmouseover="this.style.borderColor='var(--brand)'" onmouseout="this.style.borderColor='var(--border)'">&#128230; Open Materials List to review / update quantities</button>
     </div>
 
-  </div><!-- /main -->
+    </div><!-- /main -->
 </div><!-- /layout -->
 </div><!-- /section-estimator -->
 
@@ -1122,6 +1286,7 @@ tbody tr:hover .note-input,.note-input:focus{border-bottom-color:var(--border-st
       <h3>&#128196; Insurance Estimate</h3>
       <p>Enter measurements &amp; scope — generates Xactimate-style output</p>
     </div>
+    <button class="xact2-tpl-btn" onclick="xactLoadTemplate()">&#128196; Load Xactimate Template</button>
 
     <!-- Claim Info -->
     <div class="xact2-fields">
@@ -1241,6 +1406,7 @@ tbody tr:hover .note-input,.note-input:focus{border-bottom-color:var(--border-st
 
   <!-- ── RIGHT PANEL: Output ── -->
   <div class="xact2-right" id="xact2-output">
+    <div class="xt-wrap" id="xact-tpl" hidden></div>
     <div class="xact2-empty" id="xact2-empty-state">
       <svg width="56" height="56" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
       <p>Select scope of damage, enter measurements, then hit<br><strong>Generate Insurance Estimate</strong></p>
@@ -1248,6 +1414,29 @@ tbody tr:hover .note-input,.note-input:focus{border-bottom-color:var(--border-st
     <div class="xact2-doc" id="xact2-doc" style="display:none"></div>
   </div>
 </div>
+</div>
+
+<!-- Confirm + name modals -->
+<div id="rh-confirm-modal" class="modal-overlay" onclick="if(event.target===this)rhConfirmClose()">
+  <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="rh-confirm-title">
+    <div class="modal-title" id="rh-confirm-title"></div>
+    <div class="modal-msg" id="rh-confirm-msg"></div>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="rhConfirmClose()">Cancel</button>
+      <button class="modal-danger" id="rh-confirm-go" onclick="rhConfirmGo()">Delete</button>
+    </div>
+  </div>
+</div>
+<div id="rh-prompt-modal" class="modal-overlay" onclick="if(event.target===this)rhPromptClose()">
+  <form class="modal-box" role="dialog" aria-modal="true" aria-labelledby="rh-prompt-title" onsubmit="rhPromptGo(event)">
+    <div class="modal-title" id="rh-prompt-title"></div>
+    <div class="field"><label for="rh-prompt-input" id="rh-prompt-label"></label><input type="text" id="rh-prompt-input" autocomplete="off"></div>
+    <div class="field" id="rh-prompt-sel-wrap" hidden><label for="rh-prompt-sel" id="rh-prompt-sel-label"></label><select id="rh-prompt-sel"></select></div>
+    <div class="modal-actions">
+      <button type="button" class="modal-cancel" onclick="rhPromptClose()">Cancel</button>
+      <button type="submit" class="modal-confirm" id="rh-prompt-go">Save</button>
+    </div>
+  </form>
 </div>
 
 <!-- Delete Modal -->
@@ -1338,6 +1527,7 @@ tbody tr:hover .note-input,.note-input:focus{border-bottom-color:var(--border-st
         <tbody id="mat-tbody"></tbody>
       </table>
       <button onclick="addMatRow()" style="margin-top:8px;padding:5px 14px;background:none;border:1px dashed var(--border);border-radius:6px;color:var(--text-3);font-size:.75rem;cursor:pointer;width:100%;transition:border-color .15s" onmouseover="this.style.borderColor='var(--brand)'" onmouseout="this.style.borderColor='var(--border)'">+ Add Item</button>
+      <select class="mat-from-list" id="mat-from-list" aria-label="Add from price list" onchange="spAddToOrder(this)"></select>
     </div>
     <!-- Footer -->
     <div style="border-top:1px solid var(--border);padding:10px 18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;flex-shrink:0">
@@ -1488,32 +1678,23 @@ tbody tr:hover .note-input,.note-input:focus{border-bottom-color:var(--border-st
 
     <!-- TAB: Materials (buy costs) -->
     <div class="stab-panel" id="stab-panel-materials">
-      <div style="font-size:.75rem;color:var(--text-3);margin-bottom:10px">Your material buy costs — what you actually pay at the supply house. Used for job costing and margin tracking. Not shown to customers.</div>
-      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px">
-        <input type="text" id="mat-search" placeholder="Filter materials…" oninput="renderMaterials()"
-          style="flex:1;min-width:160px;background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:5px 10px;font-size:.8rem;color:var(--text-1);outline:none">
-        <select id="mat-cat-filter" onchange="renderMaterials()"
-          style="background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:5px 10px;font-size:.8rem;color:var(--text-1);outline:none">
-          <option value="">All Categories</option>
-        </select>
+      <div style="font-size:.75rem;color:var(--text-3)">What you pay at the supply house, by supplier. The starred cost on each row is the one that fills in on the Materials order sheet. Not shown to customers. Changes save as you make them.</div>
+      <div class="sp-bar">
+        <select id="sp-list" aria-label="Price list" onchange="spPickList(this.value)"></select>
+        <button class="link-btn" onclick="spNewList()">+ New Price List</button>
+        <button class="link-btn" id="sp-list-rename" onclick="spRenameList()" hidden>Rename</button>
+        <button class="link-btn link-danger" id="sp-list-delete" onclick="spDeleteList()" hidden>Delete list</button>
+        <span class="sp-spacer"></span>
+        <input type="text" id="sp-search" placeholder="Filter items…" aria-label="Filter items" oninput="spRenderTable()">
+        <button class="hdr-btn" onclick="spAddSupplier()">+ Add Supplier</button>
       </div>
-      <div class="cat-lib-hdr">
-        <span>Material</span><span>Unit</span><span style="text-align:right">My Cost</span><span>Category</span><span></span>
+      <div class="rh-tabs" id="sp-cats" style="margin-bottom:0"></div>
+      <div class="sp-scroll" id="sp-table-wrap"></div>
+      <div class="sp-bar">
+        <button class="link-btn" onclick="spAddItem()">+ Add Item</button>
+        <select id="sp-add-existing" aria-label="Add an existing item to this list" onchange="spAddExisting(this)" hidden></select>
       </div>
-      <div id="materials-list-body"></div>
-      <div class="cat-add-row">
-        <input class="cat-lib-input" id="mat-add-desc" placeholder="Material name…">
-        <select class="cat-lib-input" id="mat-add-unit">
-          <option>SQ</option><option>LF</option><option>SF</option><option>SY</option><option selected>EA</option><option>HR</option><option>LS</option><option>BDL</option><option>BOX</option><option>GAL</option>
-        </select>
-        <input class="cat-lib-input" type="number" id="mat-add-cost" placeholder="Cost" min="0" step="0.01" style="text-align:right">
-        <input class="cat-lib-input" id="mat-add-cat" placeholder="Category" list="mat-cats">
-        <button onclick="addMaterial()" style="background:var(--brand);color:#fff;border:none;border-radius:6px;padding:5px 8px;font-size:13px;font-weight:800;cursor:pointer">+</button>
-      </div>
-      <datalist id="mat-cats"></datalist>
-      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px">
-        <button onclick="saveMaterialEdits()" style="background:var(--brand);color:#fff;border:none;border-radius:8px;padding:8px 22px;font-size:.88rem;font-weight:700;cursor:pointer">&#10003; Save Materials</button>
-      </div>
+      <datalist id="sp-cat-options"></datalist>
     </div>
 
     <!-- TAB: Labor Rates -->
@@ -1614,6 +1795,38 @@ tbody tr:hover .note-input,.note-input:focus{border-bottom-color:var(--border-st
   </div>
   <div style="flex:1;overflow:auto;background:#666;padding:20px 0">
     <iframe id="proposal-preview-iframe" style="display:block;width:8.5in;min-height:11in;margin:0 auto;border:none;background:#fff;box-shadow:0 4px 32px rgba(0,0,0,.4)"></iframe>
+  </div>
+</div>
+
+<!-- ── DOWNLOAD PDF MODAL ── -->
+<div id="dl-modal" class="modal-overlay" onclick="if(event.target===this)closeDownloadPdf()">
+  <div class="modal-box dl-box" role="dialog" aria-modal="true" aria-labelledby="dl-title">
+    <div class="modal-title" id="dl-title">Download estimate</div>
+    <div class="modal-msg" style="margin-bottom:0">Pick the version to save.</div>
+    <div class="dl-opts" id="dl-opts"></div>
+    <div class="dl-claim" id="dl-claim" hidden><span id="dl-claim-txt"></span><button type="button" onclick="dlEditClaim()">Edit claim info</button></div>
+    <label class="dl-field">File name<input class="modal-input" id="dl-fname" type="text" autocomplete="off"></label>
+    <div class="dl-how">
+      <b>Download PDF</b> saves the file to your Downloads folder. On a phone, open it from the notification to text or email it.<br>
+      <b>Print / Save as PDF</b> opens the print window. Pick <b>Save as PDF</b> as the printer to choose the folder yourself.
+    </div>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeDownloadPdf()">Cancel</button>
+      <button class="modal-cancel" onclick="dlPrint()">Print / Save as PDF</button>
+      <button class="dl-go" id="dl-go" onclick="dlDownload()">Download PDF</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── SAVE TO CRM DOCUMENTS (only when opened from a CRM job) ── -->
+<div id="crm-save-modal" class="modal-overlay" style="z-index:4000">
+  <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="crm-save-title">
+    <div class="modal-title" id="crm-save-title">Save to CRM Documents?</div>
+    <div class="modal-msg" id="crm-save-msg"></div>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="crmSaveAnswer(false)">Not now</button>
+      <button class="dl-go" id="crm-save-go" onclick="crmSaveAnswer(true)">Save to Documents</button>
+    </div>
   </div>
 </div>
 
@@ -1902,6 +2115,10 @@ document.getElementById('login-logo').src = LOGO_SRC;
 
 // ─── STATE ───
 let lineItems = [];
+const RH_TIER_KEYS=['standard','good','better','best'];
+const RH_TIER_LABELS={standard:'Standard',good:'Good',better:'Better',best:'Best'};
+let rhTiers={standard:[],good:[],better:[],best:[]};
+let rhActiveTier='standard', rhTiersOn=false;
 let splitMode = 'detailed';
 let currentPitch = 'standard';
 let currentStory = '1';
@@ -2659,6 +2876,8 @@ function onTradeChange(){
         const el = document.getElementById('p-'+cf.id);
         if(el) snap['c_'+cf.id] = el.value;
       });
+      snap._pitch = currentPitch;
+      snap._story = currentStory;
       measureSnapshots[leavingTrade] = snap;
       // Also cache this trade's actual line items as fallback
       // (handles templates loaded without measurements filled in)
@@ -2696,6 +2915,10 @@ function onTradeChange(){
   // This preserves line items when switching back to a trade you were on before
   const snap = measureSnapshots[currentTrade];
   if(snap){
+    currentPitch = snap._pitch||'standard';
+    currentStory = snap._story||'1';
+    document.querySelectorAll('#pitch-pills .pill').forEach(p=>p.classList.toggle('active',p.dataset.pitch===currentPitch));
+    document.querySelectorAll('#story-pills .pill').forEach(p=>p.classList.toggle('active',p.dataset.story===currentStory));
     const tpl2 = TRADE_TEMPLATES[currentTrade];
     (tpl2?.measures||[]).forEach(mf=>{
       const el = document.getElementById('m-'+mf.id);
@@ -2741,7 +2964,16 @@ function recalc(){
   const currentTradeIds = new Set(tpl.items.map(t=>t.id));
 
   // Separate items: those from current trade vs. other trades/custom
-  const otherItems = lineItems.filter(li=> !currentTradeIds.has(li.id) || li.custom);
+  // Pitch and story charges are rebuilt below, so this trade's old rows must not carry over.
+  // Other trades keep one row per charge, which also cleans duplicates in older saved jobs.
+  const isAccessCharge=li=>!li.custom&&/^(pitch|story)_(rem|inst)_charge$/.test(li.id||'');
+  const oldCharges=new Map(lineItems.filter(li=>isAccessCharge(li)&&li._trade===currentTrade).map(li=>[li.id,li]));
+  const lastCharge=new Map();
+  lineItems.forEach((li,i)=>{ if(isAccessCharge(li)) lastCharge.set(li.id+'|'+li._trade,i); });
+  const otherItems = lineItems.filter((li,i)=>{
+    if(isAccessCharge(li)) return li._trade!==currentTrade && lastCharge.get(li.id+'|'+li._trade)===i;
+    return !currentTradeIds.has(li.id) || li.custom;
+  });
 
   // Collect pinned/price overrides from CURRENT trade items only
   const pinned = {};
@@ -2806,6 +3038,15 @@ function recalc(){
     }
   }
 
+  // A typed price, note or pin on a charge stays while it's the same charge at the same pitch or story
+  newTradeItems.forEach(n=>{
+    const o=oldCharges.get(n.id);
+    if(!o||o.desc!==n.desc) return;
+    if(o._manualPrice){ n.price=o.price; n._manualPrice=true; }
+    if(o.note) n.note=o.note;
+    if(o.pinned) n.pinned=true;
+  });
+
   // Fallback: if trade switch produced no items (empty measurements after template load),
   // restore from cache so items aren't lost on round-trip between trades
   if(_tradeSwitching && newTradeItems.length === 0 && (tradeLineItemsCache[currentTrade]?.length||0) > 0) {
@@ -2814,12 +3055,14 @@ function recalc(){
 
   // Merge: other trades first, then current trade items
   lineItems = [...otherItems, ...newTradeItems];
+  if(!_tradeSwitching) rhSyncTierQtys(newTradeItems,currentTradeIds);
   renderTable();
   recalcSummary();
 }
 
 // ─── RENDER TABLE ───
 function renderTable(){
+  renderTierBar();
   const addRow = document.querySelector('.add-row');
 
   // Build section groups
@@ -2975,18 +3218,228 @@ function updateJobBar(t){
   if(!nameEl) return;
   nameEl.textContent=name||'New estimate';
   nameEl.classList.toggle('jb-empty',!name);
+  const sqEl=document.getElementById('m-sq'), sq=sqEl?parseFloat(sqEl.value)||0:0;
   const place=[v('f-addr'),v('f-city')].filter(Boolean).join(', ');
-  const est=v('f-estnum'), claim=v('f-claim');
-  const meta=[place, est&&('Est #'+est), claim&&('Claim '+claim)].filter(Boolean).join('  ·  ');
-  document.getElementById('jb-meta').textContent=meta||'Add the customer on the left to start';
-  document.getElementById('jb-trade').textContent=TRADE_TEMPLATES[currentTrade]?.label||'—';
-  const sqEl=document.getElementById('m-sq');
-  document.getElementById('jb-sq-wrap').hidden=!sqEl;
-  if(sqEl){ const sq=parseFloat(sqEl.value)||0; document.getElementById('jb-sq').textContent=sq?fmtNum(Math.round(sq*100)/100):'—'; }
-  document.getElementById('jb-sub').textContent='$'+fmtMoney(t.sub);
+  const claim=v('f-claim');
+  const project=[TRADE_TEMPLATES[currentTrade]?.label, place, sq&&(fmtNum(Math.round(sq*100)/100)+' SQ'), claim&&('Claim '+claim)].filter(Boolean).join('  ·  ');
+  const projEl=document.getElementById('jb-project');
+  projEl.textContent=project||'—';
+  projEl.title=project;
+  projEl.classList.toggle('jb-empty',!project);
+  const date=v('f-date');
+  document.getElementById('jb-date').textContent=date?new Date(date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'—';
+  document.getElementById('jb-estnum').textContent=v('f-estnum')||'—';
   document.getElementById('jb-total').textContent='$'+fmtMoney(t.grand);
 }
 document.getElementById('sidebar').addEventListener('input',e=>{ if(/^f-/.test(e.target.id||'')) updateJobBar(); });
+
+// ─── GOOD / BETTER / BEST TIERS ───
+// lineItems is always the tier on screen; rhTiers holds the others. Every existing screen
+// keeps reading and writing lineItems, so an estimate that only uses Standard behaves as before.
+function rhTierItems(k){ return k===rhActiveTier ? lineItems : (rhTiers[k]||[]); }
+function rhTierHasItems(k){ return rhTierItems(k).some(li=>li.type!=='section'); }
+function rhAnyTierItems(){ return RH_TIER_KEYS.some(rhTierHasItems); }
+function rhResetTiers(){
+  rhTiers={standard:[],good:[],better:[],best:[]};
+  rhActiveTier='standard'; rhTiersOn=false;
+}
+function rhCollectTiers(){
+  const out={};
+  RH_TIER_KEYS.forEach(k=>{ out[k]=JSON.parse(JSON.stringify(rhTierItems(k))); });
+  return out;
+}
+// Older saved estimates have only data.items: those lines become the Standard tier.
+function rhRestoreTiers(data){
+  const t=data.tiers;
+  const list=k=>Array.isArray(t&&t[k]) ? JSON.parse(JSON.stringify(t[k])) : [];
+  rhTiers = t&&typeof t==='object'
+    ? {standard:list('standard'),good:list('good'),better:list('better'),best:list('best')}
+    : {standard:data.items?JSON.parse(JSON.stringify(data.items)):[],good:[],better:[],best:[]};
+  const filled=k=>rhTiers[k].some(li=>li.type!=='section');
+  rhTiersOn=!!data.tiers_on||['good','better','best'].some(filled);
+  rhActiveTier=RH_TIER_KEYS.includes(data.active_tier)&&filled(data.active_tier)
+    ? data.active_tier
+    : (RH_TIER_KEYS.find(filled)||'standard');
+  lineItems=rhTiers[rhActiveTier];
+}
+function rhSetTier(k){
+  if(k===rhActiveTier) return;
+  rhTiers[rhActiveTier]=lineItems;
+  rhActiveTier=k;
+  lineItems=rhTiers[k];
+  renderTable(); recalcSummary();
+}
+function rhEnableTiers(){ rhTiersOn=true; renderTierBar(); }
+function rhCopyTier(from,to){
+  if(!rhTierHasItems(from)){ showToast(`${RH_TIER_LABELS[from]} has no line items to copy`); return; }
+  const copy=()=>{
+    const items=JSON.parse(JSON.stringify(rhTierItems(from))); // deep copy: edits here never reach the source tier
+    if(to===rhActiveTier) lineItems=items; else rhTiers[to]=items;
+    renderTable(); recalcSummary();
+    showToast(`Copied ${RH_TIER_LABELS[from]} to ${RH_TIER_LABELS[to]}`);
+  };
+  if(rhTierHasItems(to)) rhConfirm({title:`Replace ${RH_TIER_LABELS[to]}?`,msg:`Its line items will be replaced with a copy of ${RH_TIER_LABELS[from]}.`,ok:'Replace'},copy);
+  else copy();
+}
+function renderTierBar(){
+  const el=document.getElementById('tier-bar');
+  if(!el) return;
+  const tab=k=>{
+    const n=rhTierItems(k).filter(li=>li.type!=='section').length;
+    return `<button class="rh-tab${k===rhActiveTier?' on':''}" role="tab" aria-selected="${k===rhActiveTier}" onclick="rhSetTier('${k}')">${RH_TIER_LABELS[k]}${n?`<small>${n}</small>`:''}</button>`;
+  };
+  if(!rhTiersOn){
+    el.innerHTML=tab('standard')+`<button class="link-btn tier-add" onclick="rhEnableTiers()">+ Tiers</button>`;
+  } else {
+    const from={good:'standard',better:'good',best:'better'}[rhActiveTier];
+    el.innerHTML=RH_TIER_KEYS.map(tab).join('')
+      +(from?`<span class="rh-tabs-end"><button class="link-btn" onclick="rhCopyTier('${from}','${rhActiveTier}')">Copy from ${RH_TIER_LABELS[from]} &rarr;</button></span>`:'');
+  }
+  const lbl=document.getElementById('jb-total-lbl');
+  if(lbl) lbl.textContent=rhTiersOn?`${RH_TIER_LABELS[rhActiveTier]} total`:'Job total';
+}
+// Measurements belong to the job, so a change reaches every tier that already has line items.
+// Rows someone deleted from a tier stay deleted, and prices are left alone.
+function rhSyncTierQtys(fresh,tradeIds){
+  if(!rhTiersOn) return;
+  const isCharge=li=>/^(pitch|story)_(rem|inst)_charge$/.test(li.id||'')&&li._trade===currentTrade;
+  const freshQty=new Map(fresh.map(li=>[li.id,li.qty]));
+  const charges=fresh.filter(isCharge);
+  RH_TIER_KEYS.forEach(k=>{
+    if(k===rhActiveTier) return;
+    const cur=rhTiers[k];
+    if(!cur.some(li=>!li.custom&&(tradeIds.has(li.id)||isCharge(li)))) return; // tier has nothing from this trade
+    const kept=cur
+      .filter(li=>!isCharge(li)&&(li.custom||!tradeIds.has(li.id)||freshQty.has(li.id)))
+      .map(li=>!li.custom&&tradeIds.has(li.id)?{...li,qty:freshQty.get(li.id)}:li);
+    rhTiers[k]=[...kept,...charges.map(c=>{
+      const o=cur.find(x=>x.id===c.id&&isCharge(x)&&x.desc===c.desc); // this tier's own price stays
+      return o?{...c,price:o.price,_manualPrice:!!o._manualPrice,note:o.note,pinned:!!o.pinned}:{...c};
+    })];
+  });
+}
+// What each PDF prints. Only Standard filled in (or nothing yet) has no label, so it prints as before.
+function rhTierSections(){
+  const filled=RH_TIER_KEYS.filter(rhTierHasItems);
+  if(!filled.length) return [{key:rhActiveTier,label:null,items:lineItems}];
+  if(filled.length===1&&filled[0]==='standard') return [{key:'standard',label:null,items:rhTierItems('standard')}];
+  return filled.map(k=>({key:k,label:RH_TIER_LABELS[k],items:rhTierItems(k)}));
+}
+function rhTierHeading(label,color='#8B1A1A',rule='#B8893B'){
+  return `<div style="font-family:'Playfair Display',serif;font-size:14pt;font-weight:700;color:${color};padding:4px 0 5px;margin:14px 0 8px;border-bottom:2px solid ${rule}">${escHtml(label)}</div>`;
+}
+
+// ─── HEADER OVERFLOW MENU ───
+function rhToggleMenu(e){
+  e.stopPropagation();
+  const m=document.getElementById('ovf-menu'), open=m.hidden;
+  m.hidden=!open;
+  document.getElementById('ovf-btn').setAttribute('aria-expanded',String(open));
+  if(open) m.querySelector('button')?.focus();
+}
+function rhCloseMenu(){
+  const m=document.getElementById('ovf-menu');
+  if(m&&!m.hidden){ m.hidden=true; document.getElementById('ovf-btn').setAttribute('aria-expanded','false'); }
+}
+document.addEventListener('click',rhCloseMenu);
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'&&!document.getElementById('ovf-menu').hidden){ rhCloseMenu(); document.getElementById('ovf-btn').focus(); }
+});
+
+// ─── SMALL MODALS ───
+let _rhConfirmFn=null, _rhPromptFn=null;
+function rhConfirm({title,msg,ok='Delete'},fn){
+  _rhConfirmFn=fn;
+  document.getElementById('rh-confirm-title').textContent=title;
+  document.getElementById('rh-confirm-msg').textContent=msg||'';
+  document.getElementById('rh-confirm-go').textContent=ok;
+  document.getElementById('rh-confirm-modal').classList.add('open');
+}
+function rhConfirmClose(){ _rhConfirmFn=null; document.getElementById('rh-confirm-modal').classList.remove('open'); }
+function rhConfirmGo(){ const fn=_rhConfirmFn; rhConfirmClose(); if(fn) fn(); }
+function rhPrompt({title,label,value='',ok='Save',select=null},fn){
+  _rhPromptFn=fn;
+  document.getElementById('rh-prompt-title').textContent=title;
+  document.getElementById('rh-prompt-label').textContent=label;
+  const inp=document.getElementById('rh-prompt-input'); inp.value=value;
+  document.getElementById('rh-prompt-go').textContent=ok;
+  const wrap=document.getElementById('rh-prompt-sel-wrap');
+  wrap.hidden=!select;
+  if(select){
+    document.getElementById('rh-prompt-sel-label').textContent=select.label;
+    document.getElementById('rh-prompt-sel').innerHTML=select.options.map(o=>`<option value="${_esc(o)}">${_esc(o)}</option>`).join('');
+  }
+  document.getElementById('rh-prompt-modal').classList.add('open');
+  setTimeout(()=>{ inp.focus(); inp.select(); },60);
+}
+function rhPromptClose(){ _rhPromptFn=null; document.getElementById('rh-prompt-modal').classList.remove('open'); }
+function rhPromptGo(e){
+  e.preventDefault();
+  const v=document.getElementById('rh-prompt-input').value.trim();
+  if(!v) return;
+  const sel=document.getElementById('rh-prompt-sel').value, fn=_rhPromptFn;
+  rhPromptClose();
+  if(fn) fn(v,sel);
+}
+
+// ─── XACTIMATE TEMPLATE ───
+// Loads every rh_xact_prices item with a blank quantity. Rows left blank never reach the estimate.
+let xactTplRows=[];
+function xactLoadTemplate(){
+  const load=()=>{
+    let prices=null;
+    try{ prices=JSON.parse(localStorage.getItem('rh_xact_prices')||'null'); }catch(e){}
+    prices=prices||XACT_PRICES;
+    xactTplRows=Object.entries(prices).map(([k,v])=>({
+      id:k, cat:k==='metal_roof'?'Roofing':catOf(k), desc:v.label||k, unit:v.unit||'EA', price:parseFloat(v.price)||0, qty:''
+    }));
+    xactTplRender();
+    document.getElementById('xact-tpl').scrollIntoView({block:'start'});
+    showToast(xactTplRows.length+' template items loaded. Fill in the quantities.');
+  };
+  if(xactTplRows.some(r=>r.qty!=='')) rhConfirm({title:'Reload the template?',msg:'Quantities and edits you made in the template will be replaced.',ok:'Reload'},load);
+  else load();
+}
+function xactTplRender(){
+  const el=document.getElementById('xact-tpl');
+  if(!el) return;
+  const hasRows=xactTplRows.length>0;
+  el.hidden=!hasRows;
+  const docOpen=document.getElementById('xact2-doc').style.display==='block';
+  document.getElementById('xact2-empty-state').style.display=hasRows||docOpen?'none':'flex';
+  if(!hasRows){ el.innerHTML=''; return; }
+  const cats=[...new Set(xactTplRows.map(r=>r.cat))];
+  const row=r=>`<tr>
+    <td><input aria-label="Description" value="${_esc(r.desc)}" data-id="${_esc(r.id)}" onchange="xactTplSet(this,'desc')"></td>
+    <td style="width:66px"><input aria-label="Unit" value="${_esc(r.unit)}" data-id="${_esc(r.id)}" onchange="xactTplSet(this,'unit')"></td>
+    <td style="width:104px"><input aria-label="RCV price" type="number" min="0" step="0.01" value="${r.price}" data-id="${_esc(r.id)}" onchange="xactTplSet(this,'price')"></td>
+    <td style="width:92px"><input class="xt-qty" aria-label="Quantity" type="number" min="0" step="0.01" value="${r.qty}" data-id="${_esc(r.id)}" onchange="xactTplSet(this,'qty')"></td>
+    <td style="width:34px;text-align:center"><button class="sp-x" title="Delete item" aria-label="Delete item" data-id="${_esc(r.id)}" onclick="xactTplDelete(this.dataset.id)">&#10005;</button></td>
+  </tr>`;
+  el.innerHTML=`<div class="xt-head">
+      <span class="xt-title">Xactimate Template</span>
+      <span class="xt-sub">Fill in quantities and delete what doesn't apply. Items left blank stay off the estimate.</span>
+      <button class="link-btn link-danger" onclick="xactTplRemove()">Remove template</button>
+    </div>
+    <table class="xt-table">
+      <thead><tr><th>Description</th><th>Unit</th><th style="text-align:right">RCV Price</th><th style="text-align:right">Qty</th><th></th></tr></thead>
+      <tbody>${cats.map(c=>`<tr class="xt-cat"><td colspan="5">${_esc(c)}</td></tr>`+xactTplRows.filter(r=>r.cat===c).map(row).join('')).join('')}</tbody>
+    </table>
+    <div class="xt-foot"><button class="hdr-primary" onclick="xact2Generate()">Generate Insurance Estimate</button></div>`;
+}
+function xactTplSet(input,field){
+  const r=xactTplRows.find(x=>x.id===input.dataset.id);
+  if(!r) return;
+  if(field==='price') r.price=Math.max(0,parseFloat(input.value)||0);
+  else if(field==='qty'){ const q=parseFloat(input.value); r.qty=q>0?q:''; }
+  else r[field]=input.value.trim();
+}
+function xactTplDelete(id){ xactTplRows=xactTplRows.filter(r=>r.id!==id); xactTplRender(); }
+function xactTplRemove(){
+  const clear=()=>{ xactTplRows=[]; xactTplRender(); };
+  if(xactTplRows.some(r=>r.qty!=='')) rhConfirm({title:'Remove the template?',msg:'The quantities you entered will be cleared.',ok:'Remove'},clear);
+  else clear();
+}
 
 // ─── HELPERS ───
 function fmtMoney(n){return (Math.round(n*100)/100).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}
@@ -3024,12 +3477,12 @@ function setPrice(idx,val){
   if(tc) tc.innerHTML='<strong>$'+fmtMoney(tot)+'</strong>';
   recalcSummary();
 }
-function toggleSidebar(){
+function toggleSidebar(force){
   const sb=document.getElementById('sidebar');
-  const btn=document.getElementById('sb-toggle-btn');
-  const collapsed=sb.classList.toggle('sb-collapsed');
-  btn.innerHTML=collapsed?'&#9654;':'&#9664;';
-  btn.title=collapsed?'Expand sidebar':'Collapse sidebar';
+  const collapsed=sb.classList.toggle('sb-collapsed',force);
+  document.getElementById('sb-toggle-caret').innerHTML=collapsed?'&#9656;':'&#9662;';
+  document.getElementById('sb-toggle-btn').setAttribute('aria-expanded',String(!collapsed));
+  try{ localStorage.setItem('rh_jobpanel',collapsed?'closed':'open'); }catch(e){}
 }
 function togglePin(idx){
   lineItems[idx].pinned=!lineItems[idx].pinned;
@@ -3045,8 +3498,8 @@ function askDeleteItem(idx){
 }
 function askClearAll(){
   _pendingDelType='clearall';
-  document.getElementById('del-modal-title').textContent='Clear all line items?';
-  document.getElementById('del-modal-msg').textContent='All items will be removed from the estimate. This cannot be undone.';
+  document.getElementById('del-modal-title').textContent=rhTiersOn?`Clear all ${RH_TIER_LABELS[rhActiveTier]} line items?`:'Clear all line items?';
+  document.getElementById('del-modal-msg').textContent=rhTiersOn?'Only this tier is cleared. This cannot be undone.':'All items will be removed from the estimate. This cannot be undone.';
   document.getElementById('del-modal').classList.add('open');
 }
 function closeDelModal(){document.getElementById('del-modal').classList.remove('open');_pendingDelIdx=null;_pendingDelType=null;_pendingDelId=null;}
@@ -3358,6 +3811,9 @@ function collectEstimateData(){
     pitch: pitchPill ? pitchPill.dataset.pitch : currentPitch,
     story: storyPill ? storyPill.dataset.story : currentStory,
     items: JSON.parse(JSON.stringify(lineItems)),
+    tiers: rhCollectTiers(),
+    tiers_on: rhTiersOn,
+    active_tier: rhActiveTier,
     measurements,
     markup_pct: document.getElementById('markup-pct')?.value||'20',
     tax_pct: document.getElementById('tax-pct')?.value||'0',
@@ -3403,7 +3859,7 @@ function restoreEstimateData(data){
     },50);
   }
   // Line items
-  lineItems = data.items ? JSON.parse(JSON.stringify(data.items)) : [];
+  rhRestoreTiers(data);
   // Markup / tax
   if(data.markup_pct !== undefined){ const el=document.getElementById('markup-pct'); if(el) el.value=data.markup_pct; }
   if(data.tax_pct !== undefined){ const el=document.getElementById('tax-pct'); if(el) el.value=data.tax_pct; }
@@ -3501,7 +3957,7 @@ async function renderJobsList(){
   const {data:all,error}=await db.from('estimates').select('id,name,est_num,updated_at,data').order('updated_at',{ascending:false});
   if(error||!all){el.innerHTML='<div style="font-size:.72rem;color:var(--text-3);padding:6px 0">Could not load jobs.</div>';return;}
   if(!all.length){
-    el.innerHTML='<div style="font-size:.72rem;color:var(--text-3);padding:6px 0">No saved jobs yet — hit "Save Current Job" to start.</div>';
+    el.innerHTML='<div style="font-size:.72rem;color:var(--text-3);padding:6px 0">No saved jobs yet. Use Save at the top to add one.</div>';
     return;
   }
   el.innerHTML = all.map(j=>{
@@ -3520,6 +3976,7 @@ async function renderJobsList(){
 
 // ─── CLEAR ───
 function clearEstimate(){
+  rhResetTiers();
   lineItems=[];
   skLoad(null);
   ['f-name','f-addr','f-city','f-zip','f-phone','f-email','f-claim','f-adj','f-notes','f-inspection','f-resolution'].forEach(id=>{
@@ -3591,6 +4048,248 @@ async function rhDownloads(){
   };
 }
 
+// ─── PDF DOWNLOAD ───
+// One popup for every estimate version. Each version is built by its own generator
+// (printProposal / printInsuranceBid / printEstimate / xact2Html), drawn in a hidden
+// frame and saved as a real .pdf file.
+let rhDocKind = null; // last version opened, so the popup starts on it
+const RH_DOC_KINDS = {
+  detailed:  {label:'Customer Proposal — Detailed', desc:'Scope of work with a price on every line', file:'Proposal'},
+  summary:   {label:'Customer Estimate — Summary',  desc:'Scope of work and total, no line prices', file:'Estimate'},
+  insurance: {label:'Insurance Estimate',           desc:'RCV, depreciation and ACV with claim info', file:'Insurance-Estimate', landscape:true},
+  xactimate: {label:'Insurance Sheet',              desc:'From the Insurance / Xactimate tab', file:'Insurance-Sheet'},
+  internal:  {label:'Internal Estimate',            desc:'Unit prices and totals for your records', file:'Internal-Estimate'},
+};
+
+function rhLoadScript(src){
+  return new Promise((res,rej)=>{
+    const s=document.createElement('script'); s.src=src; s.onload=res;
+    s.onerror=()=>{ s.remove(); rej(new Error('Could not load the PDF tools. Check your signal and try again.')); };
+    document.head.appendChild(s);
+  });
+}
+let _rhPdfLibs=null;
+function rhPdfLibs(){
+  if(!_rhPdfLibs) _rhPdfLibs=Promise.all([
+    window.html2canvas || rhLoadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js'),
+    window.jspdf || rhLoadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js')
+  ]).catch(e=>{ _rhPdfLibs=null; throw e; });
+  return _rhPdfLibs;
+}
+
+// Draws a document page (full HTML) onto letter-size PDF pages with 0.5in margins.
+// Page breaks are moved up to the nearest gap between rows so no line is cut in half.
+async function rhHtmlToPdf(html, {landscape=false}={}){
+  await rhPdfLibs();
+  const pageW=landscape?11:8.5, pageH=landscape?8.5:11, margin=.5;
+  const contentW=Math.round((pageW-2*margin)*96), sliceH=Math.floor((pageH-2*margin)*96);
+  html=html.replace(/<script[\s\S]*?<\/script>/gi,'')
+    .replace(/<\/head>/i,`<style>.save-bar{display:none!important}html,body{margin:0!important;padding:0!important;background:#fff!important;width:${contentW}px!important;min-width:0!important}.page{max-width:none!important;margin:0!important;padding:0!important}</style></head>`);
+  const frame=document.createElement('iframe');
+  frame.setAttribute('sandbox','allow-same-origin');
+  frame.setAttribute('aria-hidden','true');
+  frame.style.cssText=`position:fixed;left:-20000px;top:0;width:${contentW}px;height:1200px;border:0`;
+  document.body.appendChild(frame);
+  try{
+    await new Promise(r=>{ frame.onload=r; frame.srcdoc=html; });
+    const doc=frame.contentDocument, body=doc.body;
+    try{ await doc.fonts.ready; }catch(e){}
+    await Promise.all([...doc.images].map(im=>im.complete?0:new Promise(r=>{ im.onload=im.onerror=r; })));
+    const total=Math.ceil(body.scrollHeight);
+    frame.style.height=total+'px';
+
+    // Small blocks (rows, lines, boxes) a page break should not run through.
+    // A one-cell row is a section header, so it stays with the row under it.
+    const blocks=[];
+    body.querySelectorAll('*').forEach(el=>{
+      const r=el.getBoundingClientRect();
+      if(!(r.height>0 && r.height<sliceH*.5)) return;
+      const next=el.tagName==='TR'&&el.cells.length===1&&el.nextElementSibling;
+      blocks.push([r.top, next ? next.getBoundingClientRect().bottom : r.bottom]);
+    });
+    const cuts=[0];
+    while(total-cuts[cuts.length-1]>sliceH){
+      const start=cuts[cuts.length-1], floor=start+sliceH*.5;
+      let y=start+sliceH, moved=true;
+      while(moved){
+        moved=false;
+        for(const [t,b] of blocks) if(t<y-.5 && b>y+.5 && t>floor){ y=t; moved=true; }
+      }
+      cuts.push(Math.floor(y));
+    }
+    cuts.push(total);
+
+    // Keep the canvas under phone browser limits (~16M pixels)
+    const scale=Math.max(1,Math.min(2,Math.sqrt(16e6/(contentW*total))));
+    // The canvas comes from the frame's document so it can use the fonts loaded there
+    const target=doc.createElement('canvas');
+    target.width=Math.floor(contentW*scale); target.height=Math.floor(total*scale);
+    const canvas=await html2canvas(body,{canvas:target,scale,backgroundColor:'#ffffff',useCORS:true,logging:false,width:contentW,height:total,windowWidth:contentW,windowHeight:total});
+    const {jsPDF}=window.jspdf;
+    const pdf=new jsPDF({orientation:landscape?'landscape':'portrait',unit:'in',format:'letter',compress:true});
+    const pages=cuts.length-1;
+    for(let i=0;i<pages;i++){
+      const y0=Math.round(cuts[i]*scale), h=Math.round(cuts[i+1]*scale)-y0;
+      if(h<=0) continue;
+      const c=document.createElement('canvas'); c.width=canvas.width; c.height=h;
+      const g=c.getContext('2d'); g.fillStyle='#fff'; g.fillRect(0,0,c.width,h);
+      g.drawImage(canvas,0,y0,canvas.width,h,0,0,c.width,h);
+      if(i) pdf.addPage();
+      pdf.addImage(c.toDataURL('image/jpeg',.92),'JPEG',margin,margin,pageW-2*margin,h/scale/96,undefined,'FAST');
+      if(pages>1){ pdf.setFontSize(8); pdf.setTextColor(140); pdf.text(`Page ${i+1} of ${pages}`,pageW/2,pageH-.25,{align:'center'}); }
+    }
+    return pdf.output('blob');
+  } finally { frame.remove(); }
+}
+
+function rhSaveBlob(blob, filename){
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download=filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),60000);
+}
+
+function rhPdfName(kind){
+  const est=(document.getElementById('f-estnum')?.value||'').trim();
+  const name=(document.getElementById('f-name')?.value||'').trim();
+  return ['RHC',RH_DOC_KINDS[kind].file,est,name].filter(Boolean).join('-').replace(/[^a-zA-Z0-9-]+/g,'_').slice(0,90)+'.pdf';
+}
+
+async function rhDocHtml(kind){
+  if(kind==='detailed'||kind==='summary'){
+    const keep=splitMode; splitMode=kind;
+    try{ return await printProposal({returnHtml:true}); } finally { splitMode=keep; }
+  }
+  if(kind==='insurance'){ ibPrefill(); return printInsuranceBid({returnHtml:true}); }
+  if(kind==='internal') return printEstimate({returnHtml:true});
+  if(kind==='xactimate') return xact2Html();
+  return '';
+}
+
+function openDownloadPdf(kind){
+  const hasXact=!!document.getElementById('xact2-printable');
+  kind=kind||rhDocKind||(splitMode==='summary'?'summary':'detailed');
+  if(kind==='xactimate'&&!hasXact) kind='detailed';
+  document.getElementById('dl-opts').innerHTML=Object.entries(RH_DOC_KINDS)
+    .filter(([k])=>k!=='xactimate'||hasXact)
+    .map(([k,d])=>`<label class="dl-opt"><input type="radio" name="dl-kind" value="${k}" ${k===kind?'checked':''} onchange="dlKindChanged()"><div><b>${d.label}</b><span>${d.desc}</span></div></label>`).join('');
+  dlKindChanged();
+  document.getElementById('dl-modal').classList.add('open');
+}
+function closeDownloadPdf(){ document.getElementById('dl-modal').classList.remove('open'); }
+function dlKind(){ return document.querySelector('input[name="dl-kind"]:checked')?.value||'detailed'; }
+function dlKindChanged(){
+  const kind=dlKind();
+  document.getElementById('dl-fname').value=rhPdfName(kind);
+  const claimBox=document.getElementById('dl-claim');
+  claimBox.hidden=kind!=='insurance';
+  if(kind==='insurance'){
+    ibPrefill();
+    const claim=document.getElementById('ib-claim').value.trim(), carrier=document.getElementById('ib-carrier').value.trim();
+    document.getElementById('dl-claim-txt').textContent=claim||carrier?`Claim ${claim||'—'} · ${carrier||'no carrier'}`:'No claim number or carrier yet.';
+  }
+}
+let _dlReturn=false;
+function dlEditClaim(){
+  closeDownloadPdf(); _dlReturn=true; openInsuranceBid();
+}
+
+async function dlDownload(){
+  const kind=dlKind();
+  if(kind!=='xactimate' && !rhAnyTierItems()){ showToast('Add line items before downloading'); return; }
+  let fname=document.getElementById('dl-fname').value.trim()||rhPdfName(kind);
+  if(!/\.pdf$/i.test(fname)) fname+='.pdf';
+  const btn=document.getElementById('dl-go'), lbl=btn.textContent;
+  btn.disabled=true; btn.textContent='Making PDF…';
+  try{
+    const html=await rhDocHtml(kind);
+    if(!html) throw new Error('nothing to download yet');
+    const blob=await rhHtmlToPdf(html,{landscape:!!RH_DOC_KINDS[kind].landscape});
+    rhDocKind=kind;
+    closeDownloadPdf();
+    rhFinishPdf(blob,fname);
+  }catch(e){ showToast('PDF failed: '+(e?.message||e)); }
+  finally{ btn.disabled=false; btn.textContent=lbl; }
+}
+
+function rhFinishPdf(blob, fname){
+  rhSaveBlob(blob,fname);
+  showToast('PDF downloaded');
+  if(rhCrm) askCrmSave(blob,fname);
+}
+
+async function dlPrint(){
+  const kind=dlKind();
+  if(kind!=='xactimate' && !rhAnyTierItems()){ showToast('Add line items first'); return; }
+  const w=window.open('','_blank','width=1000,height=800,scrollbars=yes'); // open now so pop-up blockers allow it
+  if(!w){ showToast('Pop-up blocked — please allow pop-ups for this page'); return; }
+  const html=await rhDocHtml(kind);
+  rhDocKind=kind;
+  w.document.write(html); w.document.close();
+  closeDownloadPdf();
+  if(kind!=='internal') setTimeout(()=>{ try{ w.focus(); w.print(); }catch(e){} },600); // internal prints itself
+}
+
+// ─── CRM LINK ───
+// When the CRM opens the estimator for a job (?crmJob=<id>&crmName=<customer>, or an
+// 'rh-crm-hello' {jobId, jobName} message from the CRM window), each downloaded PDF can
+// also be filed under that job's Documents. The CRM gets
+// {type:'rh-estimate-pdf', id, jobId, name, category, blob} and answers
+// {type:'rh-estimate-pdf-saved', id, ok, error}.
+const RH_CRM_ORIGINS=[location.origin,'https://redhammergroup.github.io'];
+let rhCrm=null; // {jobId, jobName, win, origin}
+(function(){
+  const q=new URLSearchParams(location.search);
+  const win=window.opener||(window.parent!==window?window.parent:null);
+  if(q.get('crmJob')&&win){
+    let origin='https://redhammergroup.github.io';
+    try{ if(RH_CRM_ORIGINS.includes(win.location.origin)) origin=win.location.origin; }catch(e){} // readable only when same-origin
+    rhCrm={jobId:q.get('crmJob'),jobName:q.get('crmName')||'',win,origin};
+  }
+  window.addEventListener('message',e=>{
+    const d=e.data;
+    if(!RH_CRM_ORIGINS.includes(e.origin)||!d||typeof d!=='object') return;
+    if(d.type==='rh-crm-hello'&&d.jobId) rhCrm={jobId:String(d.jobId),jobName:String(d.jobName||''),win:e.source,origin:e.origin};
+  });
+  if(win) try{ win.postMessage({type:'rh-estimator-ready'},'*'); }catch(e){}
+})();
+
+let _crmPending=null;
+function askCrmSave(blob, fname){
+  _crmPending={blob,fname};
+  const who=rhCrm.jobName||document.getElementById('f-name')?.value||'this';
+  document.getElementById('crm-save-msg').textContent=`Save "${fname}" under Documents on ${who}'s job in the CRM?`;
+  document.getElementById('crm-save-modal').classList.add('open');
+}
+async function crmSaveAnswer(yes){
+  const p=_crmPending, btn=document.getElementById('crm-save-go');
+  if(!yes||!p){ _crmPending=null; document.getElementById('crm-save-modal').classList.remove('open'); return; }
+  btn.disabled=true; btn.textContent='Saving…';
+  try{
+    await rhCrmSend(p.blob,p.fname);
+    showToast('Saved to CRM Documents');
+  }catch(e){ showToast((e?.message||e)+' The PDF is still in your Downloads.'); }
+  finally{
+    btn.disabled=false; btn.textContent='Save to Documents';
+    _crmPending=null; document.getElementById('crm-save-modal').classList.remove('open');
+  }
+}
+function rhCrmSend(blob, name){
+  return new Promise((resolve,reject)=>{
+    if(!rhCrm||!rhCrm.win||rhCrm.win.closed) return reject(new Error('The CRM window is closed.'));
+    const id=Math.random().toString(36).slice(2);
+    const t=setTimeout(()=>{ window.removeEventListener('message',on); reject(new Error('The CRM did not answer.')); },20000);
+    function on(e){
+      const d=e.data;
+      if(e.source!==rhCrm.win||!d||d.type!=='rh-estimate-pdf-saved'||d.id!==id) return;
+      clearTimeout(t); window.removeEventListener('message',on);
+      d.ok ? resolve() : reject(new Error(d.error||'The CRM could not save it.'));
+    }
+    window.addEventListener('message',on);
+    rhCrm.win.postMessage({type:'rh-estimate-pdf',id,jobId:rhCrm.jobId,name,category:'Estimate',blob},rhCrm.origin);
+  });
+}
+
 // ─── TOAST ───
 function showToast(msg){
   const t=document.getElementById('toast');
@@ -3599,7 +4298,7 @@ function showToast(msg){
 }
 
 // ─── PRINT ───
-async function printEstimate(){
+async function printEstimate(opts={}){
   const name=document.getElementById('f-name').value||'—';
   const addr=document.getElementById('f-addr').value||'';
   const city=document.getElementById('f-city').value||'';
@@ -3613,31 +4312,32 @@ async function printEstimate(){
   const markup=(parseFloat(document.getElementById('markup-pct')?.value)||0)/100;
   const taxPct=(parseFloat(document.getElementById('tax-pct')?.value)||0)/100;
 
+  const tradeName = TRADE_TEMPLATES[currentTrade]?.label||'';
+
+  const tierBlock=({items:tierItems,label:tierLabel})=>{
   let mat=0,lab=0;
-  lineItems.forEach(li=>{
+  tierItems.forEach(li=>{
     if(li.type==='section') return;
     const t=li.qty*li.price;lab+=t*(li.laborPct||.5);mat+=t*(1-(li.laborPct||.5));
   });
   const sub=mat+lab,oop=sub*markup,tax=mat*taxPct,grand=sub+oop+tax;
 
-  const tradeName = TRADE_TEMPLATES[currentTrade]?.label||'';
-
   // Build rows with section headers + subtotals
-  const hasSection=lineItems.some(li=>li.type==='section');
+  const hasSection=tierItems.some(li=>li.type==='section');
   const printRows=[];
   let secSub=0, secName=null;
-  lineItems.forEach(li=>{
+  tierItems.forEach(li=>{
     if(li.type==='section'){
       if(hasSection&&secSub>0){
-        printRows.push(`<tr style="background:#f9f6f5">
-          <td colspan="3" style="text-align:right;font-size:9pt;font-weight:600;color:#666;border-top:1px solid #ddd">${secName?escHtml(secName)+' Subtotal':'Subtotal'}</td>
-          <td style="border-top:1px solid #ddd"></td>
-          <td style="text-align:right;font-weight:700;color:#8B1A1A;border-top:1px solid #ddd">$${fmtMoney(secSub)}</td>
+        printRows.push(`<tr style="background:#FCFAF7">
+          <td colspan="3" style="text-align:right;font-size:9pt;font-weight:600;color:#6B625C;border-top:1px solid #D9CBB8">${secName?escHtml(secName)+' Subtotal':'Subtotal'}</td>
+          <td style="border-top:1px solid #D9CBB8"></td>
+          <td style="text-align:right;font-weight:700;color:#2A2321;border-top:1px solid #D9CBB8">$${fmtMoney(secSub)}</td>
         </tr>`);
       }
       secSub=0; secName=li.name;
-      printRows.push(`<tr style="background:#f3eded">
-        <td colspan="5" style="font-weight:700;font-size:9pt;color:#8B1A1A;letter-spacing:.05em;text-transform:uppercase;padding:7px 10px;border-top:2px solid #8B1A1A">${escHtml(li.name)}</td>
+      printRows.push(`<tr style="background:#F5EEE6">
+        <td colspan="5" style="font-weight:700;font-size:8.5pt;color:#8B1A1A;letter-spacing:.08em;text-transform:uppercase;padding:7px 10px;border-left:4px solid #8B1A1A">${escHtml(li.name)}</td>
       </tr>`);
     } else {
       secSub+=li.qty*li.price;
@@ -3651,13 +4351,30 @@ async function printEstimate(){
     }
   });
   if(hasSection&&secSub>0){
-    printRows.push(`<tr style="background:#f9f6f5">
-      <td colspan="3" style="text-align:right;font-size:9pt;font-weight:600;color:#666;border-top:1px solid #ddd">${secName?escHtml(secName)+' Subtotal':'Subtotal'}</td>
-      <td style="border-top:1px solid #ddd"></td>
-      <td style="text-align:right;font-weight:700;color:#8B1A1A;border-top:1px solid #ddd">$${fmtMoney(secSub)}</td>
+    printRows.push(`<tr style="background:#FCFAF7">
+      <td colspan="3" style="text-align:right;font-size:9pt;font-weight:600;color:#6B625C;border-top:1px solid #D9CBB8">${secName?escHtml(secName)+' Subtotal':'Subtotal'}</td>
+      <td style="border-top:1px solid #D9CBB8"></td>
+      <td style="text-align:right;font-weight:700;color:#2A2321;border-top:1px solid #D9CBB8">$${fmtMoney(secSub)}</td>
     </tr>`);
   }
   const rows=printRows.join('');
+  return `${tierLabel?rhTierHeading(tierLabel):''}<table>
+      <thead><tr>
+        <th style="width:45%">Description</th>
+        <th style="width:10%;text-align:center">Qty</th>
+        <th style="width:8%;text-align:center">Unit</th>
+        <th style="width:14%;text-align:right">Unit Price</th>
+        <th style="width:14%;text-align:right">Total</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <div class="summary-box">
+      <div class="sum-row"><span>O&amp;P (${Math.round(markup*100)}%)</span><span>$${fmtMoney(oop)}</span></div>
+      ${taxPct>0?`<div class="sum-row"><span>Tax (${(taxPct*100).toFixed(1)}%)</span><span>$${fmtMoney(tax)}</span></div>`:''}
+      <div class="sum-row total"><span>TOTAL</span><span>$${fmtMoney(grand)}</span></div>
+    </div>`;
+  };
+  const tierBlocks=rhTierSections().map(tierBlock).join('\n    ');
 
   const dateStr=date?new Date(date+'T12:00:00').toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}):'';
 
@@ -3666,24 +4383,24 @@ async function printEstimate(){
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap">
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:'Inter',sans-serif;font-size:11pt;color:#111;background:#fff;padding:0}
+    body{font-family:'Inter',sans-serif;font-size:11pt;color:#2A2321;background:#fff;padding:0}
     .page{max-width:8.5in;margin:0 auto;padding:.6in .65in}
-    .hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;border-bottom:3px solid #8B1A1A;padding-bottom:14px}
+    .hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;border-bottom:3px solid #8B1A1A;box-shadow:0 2px 0 #B8893B;padding-bottom:14px}
     .co-logo{height:52px;filter:none}
     .co-name{font-family:'Playfair Display',serif;font-size:18pt;font-weight:700;color:#8B1A1A;line-height:1.2}
     .co-info{font-size:8.5pt;color:#555;margin-top:3px}
     .est-meta{text-align:right;font-size:9pt}
-    .est-title{font-family:'Playfair Display',serif;font-size:16pt;font-weight:700;color:#8B1A1A}
+    .est-title{font-family:'Playfair Display',serif;font-size:16pt;font-weight:700;color:#2A2321;letter-spacing:.04em}
     .est-num{font-size:9pt;color:#666;margin-top:2px}
     .est-date{font-size:9pt;color:#666}
     .bill-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
-    .bill-box h3{font-size:8pt;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#666;margin-bottom:5px;border-bottom:1px solid #ddd;padding-bottom:4px}
+    .bill-box h3{font-size:7.5pt;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#9A7230;margin-bottom:5px;border-bottom:1px solid #E6DCCF;padding-bottom:4px}
     .bill-box p{font-size:9.5pt;line-height:1.6;color:#333}
-    .trade-badge{display:inline-block;background:#8B1A1A;color:#fff;font-size:8pt;font-weight:700;padding:3px 10px;border-radius:3px;margin-bottom:14px;letter-spacing:.04em;text-transform:uppercase}
+    .trade-badge{display:inline-block;background:#8B1A1A;color:#fff;border-bottom:2px solid #B8893B;font-size:8pt;font-weight:700;padding:3px 10px;border-radius:3px;margin-bottom:14px;letter-spacing:.04em;text-transform:uppercase}
     table{width:100%;border-collapse:collapse;margin-bottom:16px}
-    thead th{background:#8B1A1A;color:#fff;padding:7px 10px;text-align:left;font-size:8.5pt;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
-    tbody tr:nth-child(even){background:#f9f6f5}
-    tbody td{padding:6px 10px;font-size:9.5pt;border-bottom:1px solid #eee}
+    thead th{background:#2A2321;color:#F6EFE6;padding:7px 10px;text-align:left;font-size:8pt;font-weight:700;letter-spacing:.08em;text-transform:uppercase;border-bottom:2px solid #B8893B}
+    tbody tr:nth-child(even){background:#FCFAF7}
+    tbody td{padding:6px 10px;font-size:9.5pt;border-bottom:1px solid #F1EAE1}
     .summary-box{margin-left:auto;width:260px}
     .sum-row{display:flex;justify-content:space-between;padding:4px 0;font-size:10pt}
     .sum-row.total{border-top:2px solid #8B1A1A;margin-top:4px;padding-top:8px;font-weight:700;font-size:11.5pt;color:#8B1A1A}
@@ -3728,21 +4445,7 @@ async function printEstimate(){
       </div>
     </div>
     <div class="trade-badge">${tradeName}</div>
-    <table>
-      <thead><tr>
-        <th style="width:45%">Description</th>
-        <th style="width:10%;text-align:center">Qty</th>
-        <th style="width:8%;text-align:center">Unit</th>
-        <th style="width:14%;text-align:right">Unit Price</th>
-        <th style="width:14%;text-align:right">Total</th>
-      </tr></thead>
-      <tbody>${rows}</tbody>
-    </table>
-    <div class="summary-box">
-      <div class="sum-row"><span>O&amp;P (${Math.round(markup*100)}%)</span><span>$${fmtMoney(oop)}</span></div>
-      ${taxPct>0?`<div class="sum-row"><span>Tax (${(taxPct*100).toFixed(1)}%)</span><span>$${fmtMoney(tax)}</span></div>`:''}
-      <div class="sum-row total"><span>TOTAL</span><span>$${fmtMoney(grand)}</span></div>
-    </div>
+    ${tierBlocks}
     <div class="sig-block">
       <div><div class="sig-line">Authorized Signature &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Date</div></div>
       <div><div class="sig-line">Customer Acceptance &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Date</div></div>
@@ -3762,6 +4465,9 @@ async function printEstimate(){
   <\/script>
   </body></html>`;
 
+  if(opts.returnHtml) return html;
+  rhDocKind='internal';
+
   // Download via artifact downloads capability
   try {
     const dl = await rhDownloads();
@@ -3776,7 +4482,7 @@ async function printEstimate(){
 }
 
 // ─── CUSTOMER PROPOSAL ───
-async function printProposal(){
+async function printProposal(opts={}){
   const name    = document.getElementById('f-name').value||'—';
   const addr    = document.getElementById('f-addr').value||'';
   const city    = document.getElementById('f-city').value||'';
@@ -3791,62 +4497,89 @@ async function printProposal(){
   const markup  = (parseFloat(document.getElementById('markup-pct')?.value)||0)/100;
   const taxPct  = (parseFloat(document.getElementById('tax-pct')?.value)||0)/100;
 
+  const dateStr = date ? new Date(date+'T12:00:00').toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}) : '';
+  const validUntil = date ? new Date(new Date(date+'T12:00:00').getTime()+30*864e5).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}) : '';
+
+  const tierBlock=({items:tierItems,label:tierLabel})=>{
   // Grand total calc (same as internal)
   let sub = 0;
-  lineItems.forEach(li=>{ if(li.type!=='section') sub += li.qty * li.price; });
+  tierItems.forEach(li=>{ if(li.type!=='section') sub += li.qty * li.price; });
   const oop   = sub * markup;
   const taxMat= sub * taxPct; // simplified
   const grand = sub + oop + taxMat;
 
-  const dateStr = date ? new Date(date+'T12:00:00').toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}) : '';
-  const validUntil = date ? new Date(new Date(date+'T12:00:00').getTime()+30*864e5).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}) : '';
-
   // Build proposal line rows — show desc + total (no unit price breakdown)
   const propRows = [];
   let secSub = 0, secName = null, inSection = true;
-  lineItems.forEach(li=>{
+  tierItems.forEach(li=>{
     if(li.type==='section'){
       if(inSection && secSub>0){
-        propRows.push(`<tr class="sec-sub"><td colspan="${splitMode==='summary'?'1':'2'}" style="text-align:right;font-size:9pt;font-weight:600;color:#555;border-top:1px solid #ddd;padding:5px 10px">${secName?escHtml(secName)+' Subtotal':'Subtotal'}</td><td style="text-align:right;font-weight:700;color:#8B1A1A;border-top:1px solid #ddd;padding:5px 10px">$${fmtMoney(secSub*(1+markup))}</td></tr>`);
+        propRows.push(`<tr class="sec-sub"><td colspan="${splitMode==='summary'?'1':'2'}">${secName?escHtml(secName)+' Subtotal':'Subtotal'}</td><td>$${fmtMoney(secSub*(1+markup))}</td></tr>`);
         secSub=0;
       }
       inSection=true; secName=li.name; secSub=0;
-      propRows.push(`<tr><td colspan="${splitMode==='summary'?'2':'3'}" style="background:#8B1A1A;font-weight:700;font-size:9pt;color:#fff;letter-spacing:.06em;text-transform:uppercase;padding:7px 10px">${escHtml(li.name)}</td></tr>`);
+      propRows.push(`<tr class="sec-hd"><td colspan="${splitMode==='summary'?'2':'3'}">${escHtml(li.name)}</td></tr>`);
     } else {
       const tot = li.qty * li.price;
       secSub += tot;
+      const desc = `${escHtml(li.desc)}${li.note?`<div class="li-note">${escHtml(li.note)}</div>`:''}`;
       if(splitMode==='summary'){
-        propRows.push(`<tr><td style="padding:6px 10px;font-size:9.5pt">${escHtml(li.desc)}${li.note?`<br><em style="font-size:8.5pt;color:#777">${escHtml(li.note)}</em>`:''}</td><td style="text-align:right;padding:6px 10px;font-size:9.5pt;color:#555">${fmtNum(li.qty)} ${li.unit}</td></tr>`);
+        propRows.push(`<tr class="li"><td>${desc}</td><td class="qty" style="text-align:right">${fmtNum(li.qty)} ${li.unit}</td></tr>`);
       } else {
-        propRows.push(`<tr><td style="padding:6px 10px;font-size:9.5pt">${escHtml(li.desc)}${li.note?`<br><em style="font-size:8.5pt;color:#777">${escHtml(li.note)}</em>`:''}</td><td style="text-align:center;padding:6px 10px;font-size:9.5pt;color:#555">${fmtNum(li.qty)} ${li.unit}</td><td style="text-align:right;padding:6px 10px;font-size:9.5pt">$${fmtMoney(tot)}</td></tr>`);
+        propRows.push(`<tr class="li"><td>${desc}</td><td class="qty" style="text-align:center">${fmtNum(li.qty)} ${li.unit}</td><td class="amt">$${fmtMoney(tot)}</td></tr>`);
       }
     }
   });
   if(inSection && secSub>0){
-    propRows.push(`<tr><td colspan="${splitMode==='summary'?'1':'2'}" style="text-align:right;font-size:9pt;font-weight:600;color:#555;border-top:1px solid #ddd;padding:5px 10px">${secName?escHtml(secName)+' Subtotal':'Subtotal'}</td><td style="text-align:right;font-weight:700;color:#8B1A1A;border-top:1px solid #ddd;padding:5px 10px">$${fmtMoney(secSub*(1+markup))}</td></tr>`);
+    propRows.push(`<tr class="sec-sub"><td colspan="${splitMode==='summary'?'1':'2'}">${secName?escHtml(secName)+' Subtotal':'Subtotal'}</td><td>$${fmtMoney(secSub*(1+markup))}</td></tr>`);
   }
 
+  return `${tierLabel?rhTierHeading(tierLabel):''}<table>
+      <thead><tr>
+        <th style="${splitMode==='summary'?'width:80%':'width:60%'}">Scope of Work</th>
+        <th style="${splitMode==='summary'?'width:20%;text-align:right':'width:20%;text-align:center'}">Qty / Unit</th>
+        ${splitMode==='summary'?'':'<th style="width:20%;text-align:right">Amount</th>'}
+      </tr></thead>
+      <tbody>${propRows.join('')}</tbody>
+    </table>
+
+    ${taxPct>0 && splitMode!=='summary'?`<div style="display:flex;justify-content:flex-end;margin-top:6px;font-size:9.5pt;color:#555"><span style="margin-right:30px">Tax (${(taxPct*100).toFixed(1)}%)</span><span>$${fmtMoney(taxMat)}</span></div>`:''}
+
+    <div class="total-row">
+      <div class="total-box">
+        <span class="total-label">Total Investment</span>
+        <span class="total-amount">$${fmtMoney(grand)}</span>
+      </div>
+    </div>`;
+  };
+  const tierBlocks=rhTierSections().map(tierBlock).join('\n    ');
+
+  // Findings (the problem, in brand red) and Resolution (the outcome, in pine) are a matched
+  // pair of story cards; the scope table between them is step 02.
+  const step = (n, label, cls='') => `<div class="step ${cls}"><span class="step-n">${n}</span><span class="step-l">${label}</span><span class="step-rule"></span></div>`;
   const inspectionHtml = inspection
-    ? `<div style="margin-bottom:22px;padding:14px 16px;background:#f9f6f5;border-left:4px solid #8B1A1A;border-radius:0 5px 5px 0;font-size:9.5pt;line-height:1.7;color:#333">
-        <div style="font-size:8pt;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#8B1A1A;margin-bottom:7px">&#128270;&nbsp; Inspection Findings</div>
-        ${escHtml(inspection).replace(/\n/g,'<br>')}
+    ? `${step('01','What We Found')}
+       <div class="story find">
+        <div class="story-k">Inspection Findings</div>
+        <div class="story-b">${escHtml(inspection).replace(/\n/g,'<br>')}</div>
        </div>` : '';
 
   const resolutionHtml = resolution
-    ? `<div style="margin-top:20px;padding:14px 16px;background:#f0f8f0;border-left:4px solid #2e7d32;border-radius:0 5px 5px 0;font-size:9.5pt;line-height:1.7;color:#333">
-        <div style="font-size:8pt;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#2e7d32;margin-bottom:7px">&#10003;&nbsp; Upon Completion</div>
-        ${escHtml(resolution).replace(/\n/g,'<br>')}
+    ? `${step(inspection?'03':'02','The Result','pine')}
+       <div class="story fix">
+        <div class="story-k"><span class="chk">&#10003;</span>Upon Completion</div>
+        <div class="story-b">${escHtml(resolution).replace(/\n/g,'<br>')}</div>
        </div>` : '';
 
   const notesHtml = notes
-    ? `<div style="margin-top:16px;padding:12px 14px;background:#f9f6f5;border-left:3px solid #8B1A1A;border-radius:0 4px 4px 0;font-size:9.5pt;line-height:1.6;color:#333">
-        <div style="font-size:8pt;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#8B1A1A;margin-bottom:5px">Notes &amp; Scope Exclusions</div>
+    ? `<div class="notes">
+        <div class="notes-k">Notes &amp; Scope Exclusions</div>
         ${escHtml(notes).replace(/\n/g,'<br>')}
        </div>` : '';
 
   const contractLang = `
-    <div style="margin-top:28px;padding:14px 16px;border:1px solid #ddd;border-radius:5px;font-size:8.5pt;line-height:1.65;color:#444;background:#fafafa">
-      <div style="font-size:8pt;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#8B1A1A;margin-bottom:8px">Terms &amp; Conditions</div>
+    <div style="margin-top:28px;padding:14px 16px;border:1px solid #E6DCCF;border-top:3px solid #2A2321;border-radius:5px;font-size:8.5pt;line-height:1.65;color:#4A423D;background:#FBF8F4">
+      <div style="font-size:8pt;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#2A2321;margin-bottom:8px">Terms &amp; Conditions</div>
       <p style="margin-bottom:6px"><strong>Acceptance of Work:</strong> By signing below, the customer agrees to authorize Red Hammer Construction Group LLC ("Contractor") to perform the scope of work described in this estimate at the price stated. Customer acknowledges having read and understood all terms herein.</p>
       <p style="margin-bottom:6px"><strong>Payment Terms:</strong> A deposit of <strong>50% is due at signing</strong> to schedule and procure materials. The remaining balance is due upon substantial completion of the work. Payments not received within 10 days of due date are subject to a 1.5% monthly finance charge.</p>
       <p style="margin-bottom:6px"><strong>Change Orders:</strong> Any changes to the scope of work must be agreed upon in writing and signed by both parties prior to commencement of the changed work. Additional costs resulting from unforeseen conditions discovered during the project (hidden damage, code compliance, etc.) will be communicated to the customer before proceeding.</p>
@@ -3881,26 +4614,58 @@ async function printProposal(){
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
     :root{color-scheme:light}
-    body{font-family:'Inter',sans-serif;font-size:11pt;color:#111;background:#fff}
+    /* Palette: brand red (#8B1A1A) carries identity + the problem; warm charcoal carries structure;
+       brass is the accent thread; pine marks the outcome. Neutrals are warm cream, not pink-grey. */
+    body{font-family:'Inter',sans-serif;font-size:11pt;color:#2A2321;background:#fff}
     .page{max-width:8.5in;margin:0 auto;padding:.65in .7in}
-    .hdr{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #8B1A1A;padding-bottom:14px;margin-bottom:20px}
+    .topbar{height:6px;background:#8B1A1A;border-bottom:2px solid #B8893B;margin-bottom:18px}
+    .hdr{display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:16px;margin-bottom:20px;border-bottom:1px solid #E6DCCF}
     .co-name{font-family:'Playfair Display',serif;font-size:18pt;font-weight:700;color:#8B1A1A;margin-top:4px}
-    .co-info{font-size:8.5pt;color:#555;margin-top:3px}
+    .co-info{font-size:8.5pt;color:#6B625C;margin-top:3px}
     .prop-meta{text-align:right}
-    .prop-title{font-family:'Playfair Display',serif;font-size:22pt;font-weight:700;color:#8B1A1A}
-    .prop-sub{font-size:9pt;color:#666;margin-top:3px}
-    .to-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:22px}
-    .to-box h3{font-size:8pt;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#8B1A1A;margin-bottom:5px;border-bottom:1px solid #e0d0d0;padding-bottom:4px}
-    .to-box p{font-size:9.5pt;line-height:1.7;color:#333}
-    table{width:100%;border-collapse:collapse;margin-top:4px}
-    thead th{background:#8B1A1A;color:#fff;padding:8px 10px;font-size:8.5pt;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+    .prop-title{font-family:'Playfair Display',serif;font-size:24pt;font-weight:700;color:#2A2321;letter-spacing:.04em;line-height:1}
+    .prop-title-rule{width:56px;height:3px;background:#B8893B;margin:8px 0 8px auto}
+    .prop-sub{font-size:9pt;color:#6B625C;margin-top:3px}
+    .prop-sub strong{color:#8B1A1A}
+    .to-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px}
+    .to-box{background:#FBF8F4;border:1px solid #EFE6DA;border-radius:6px;padding:10px 14px}
+    .to-box h3{font-size:7.5pt;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#9A7230;margin-bottom:5px}
+    .to-box p{font-size:9.5pt;line-height:1.65;color:#2A2321}
+
+    .step{display:flex;align-items:center;gap:10px;margin:0 0 9px}
+    .step-n{font-family:'Playfair Display',serif;font-size:13pt;font-weight:700;color:#B8893B;line-height:1}
+    .step-l{font-size:8pt;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#2A2321}
+    .step-rule{flex:1;height:1px;background:#E6DCCF}
+    .step.pine .step-n{color:#3E6B5A}
+    .story{border-radius:6px;padding:13px 16px 14px;font-size:9.5pt;line-height:1.7;margin-bottom:24px}
+    .story-k{font-size:7.5pt;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px}
+    .story.find{background:#FBF1EE;border:1px solid #EBCFC8;border-left:4px solid #8B1A1A}
+    .story.find .story-k{color:#8B1A1A}
+    .story.find .story-b{color:#3A2A27}
+    .story.fix{background:#EEF4F0;border:1px solid #C9DCD1;border-left:4px solid #3E6B5A;margin:0 0 6px}
+    .story.fix .story-k{color:#2F5A4A}
+    .story.fix .story-b{color:#22362E}
+    .chk{display:inline-block;width:14px;height:14px;line-height:14px;text-align:center;border-radius:50%;background:#3E6B5A;color:#fff;font-size:8pt;margin-right:6px;vertical-align:-1px}
+
+    table{width:100%;border-collapse:collapse;margin-top:2px}
+    thead th{background:#2A2321;color:#F6EFE6;padding:8px 10px;text-align:left;font-size:8pt;font-weight:700;letter-spacing:.08em;text-transform:uppercase;border-bottom:2px solid #B8893B}
     thead th:last-child{text-align:right}
-    tbody tr:nth-child(even){background:#f9f6f5}
-    .total-row{display:flex;justify-content:flex-end;margin-top:12px}
-    .total-box{background:#8B1A1A;color:#fff;padding:12px 20px;border-radius:5px;min-width:220px;display:flex;justify-content:space-between;align-items:center}
-    .total-label{font-size:10pt;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
-    .total-amount{font-family:'Playfair Display',serif;font-size:16pt;font-weight:700}
-    .footer{margin-top:24px;font-size:7.5pt;color:#999;text-align:center;border-top:1px solid #eee;padding-top:10px}
+    tr.li td{padding:6px 10px;font-size:9.5pt;border-bottom:1px solid #F1EAE1}
+    tr.li:nth-child(even) td{background:#FCFAF7}
+    tr.li td.qty{color:#6B625C}
+    tr.li td.amt{text-align:right;font-variant-numeric:tabular-nums}
+    .li-note{font-size:8.5pt;font-style:italic;color:#857A72;margin-top:1px}
+    tr.sec-hd td{background:#F5EEE6;color:#8B1A1A;font-weight:700;font-size:8.5pt;letter-spacing:.08em;text-transform:uppercase;padding:7px 10px;border-left:4px solid #8B1A1A}
+    tr.sec-sub td{text-align:right;font-size:9pt;font-weight:600;color:#6B625C;padding:5px 10px;border-top:1px solid #D9CBB8}
+    tr.sec-sub td:last-child{font-weight:700;color:#2A2321;font-variant-numeric:tabular-nums}
+
+    .total-row{display:flex;justify-content:flex-end;margin:14px 0 26px}
+    .total-box{background:#8B1A1A;color:#fff;padding:12px 20px;border-radius:6px;border-top:3px solid #B8893B;min-width:250px;display:flex;justify-content:space-between;align-items:center;gap:22px}
+    .total-label{font-size:8.5pt;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#EBD3A6}
+    .total-amount{font-family:'Playfair Display',serif;font-size:17pt;font-weight:700}
+    .notes{margin-top:16px;padding:12px 14px;background:#FBF8F4;border:1px solid #EFE6DA;border-left:3px solid #B8893B;border-radius:5px;font-size:9.5pt;line-height:1.6;color:#3A332F}
+    .notes-k{font-size:7.5pt;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#9A7230;margin-bottom:5px}
+    .footer{margin-top:26px;font-size:7.5pt;color:#8A8079;text-align:center;border-top:2px solid #8B1A1A;padding-top:10px;letter-spacing:.02em}
     @page{size:letter;margin:.65in .7in}
     @media print{
       .save-bar{display:none!important}
@@ -3918,6 +4683,7 @@ async function printProposal(){
     <button class="save-bar-btn" onclick="savePdf()">&#11015; Save as PDF</button>
   </div>
   <div class="page">
+    <div class="topbar"></div>
     <div class="hdr">
       <div>
         <img src="${LOGO_SRC}" style="height:50px;display:block">
@@ -3927,6 +4693,7 @@ async function printProposal(){
       </div>
       <div class="prop-meta">
         <div class="prop-title">${splitMode==='summary'?'ESTIMATE':'PROPOSAL'}</div>
+        <div class="prop-title-rule"></div>
         ${estnum?`<div class="prop-sub">No.&nbsp;<strong>${escHtml(estnum)}</strong></div>`:''}
         ${dateStr?`<div class="prop-sub">${escHtml(dateStr)}</div>`:''}
       </div>
@@ -3947,23 +4714,8 @@ async function printProposal(){
 
     ${inspectionHtml}
 
-    <table>
-      <thead><tr>
-        <th style="${splitMode==='summary'?'width:80%':'width:60%'}">Scope of Work</th>
-        <th style="${splitMode==='summary'?'width:20%;text-align:right':'width:20%;text-align:center'}">Qty / Unit</th>
-        ${splitMode==='summary'?'':'<th style="width:20%;text-align:right">Amount</th>'}
-      </tr></thead>
-      <tbody>${propRows.join('')}</tbody>
-    </table>
-
-    ${taxPct>0 && splitMode!=='summary'?`<div style="display:flex;justify-content:flex-end;margin-top:6px;font-size:9.5pt;color:#555"><span style="margin-right:30px">Tax (${(taxPct*100).toFixed(1)}%)</span><span>$${fmtMoney(taxMat)}</span></div>`:''}
-
-    <div class="total-row">
-      <div class="total-box">
-        <span class="total-label">Total Investment</span>
-        <span class="total-amount">$${fmtMoney(grand)}</span>
-      </div>
-    </div>
+    ${inspection||resolution?step(inspection?'02':'01','The Plan &amp; Investment'):''}
+    ${tierBlocks}
 
     ${resolutionHtml}
     ${notesHtml}
@@ -4004,9 +4756,12 @@ async function printProposal(){
   <\/script>
   </body></html>`;
 
+  if(opts.returnHtml) return html;
+  rhDocKind = splitMode==='summary' ? 'summary' : 'detailed';
+
   // Store for PDF generation, show preview
   window._proposalHtml = html;
-  window._proposalFname = 'RHC-Proposal-'+(estnum||'proposal').replace(/[^a-zA-Z0-9-]/g,'_')+(name&&name!=='—'?'-'+name.replace(/[^a-zA-Z0-9]/g,'_').slice(0,20):'')+'.pdf';
+  window._proposalFname = rhPdfName(rhDocKind);
   const previewModal = document.getElementById('proposal-preview-modal');
   const previewIframe = document.getElementById('proposal-preview-iframe');
   previewModal.style.display = 'flex';
@@ -4022,26 +4777,26 @@ function closeProposalPreview(){
 async function downloadProposalPdf(){
   const btn = document.getElementById('proposal-pdf-btn');
   if(!window._proposalHtml){ showToast('Open a proposal preview first'); return; }
-  btn.innerHTML='<span>&#8987;</span> Generating…'; btn.disabled=true;
-
-  if(!window._proposalHtml){ showToast('Generate a proposal preview first'); return; }
-  btn.innerHTML='<span>&#8987;</span> Downloading…'; btn.disabled=true;
+  btn.innerHTML='<span>&#8987;</span> Making PDF…'; btn.disabled=true;
   try{
-    const dl = await rhDownloads();
-    if(!dl){ showToast('Download not available'); btn.innerHTML='<span>&#128438;</span> Open &amp; Save as PDF'; btn.disabled=false; return; }
-    const htmlFname = (window._proposalFname||'RHC-Proposal').replace(/\.pdf$/,'')+'.html';
-    await dl.save({ filename: htmlFname, data: window._proposalHtml });
-    btn.innerHTML='<span>&#10003;</span> Downloaded!'; btn.disabled=false;
-    setTimeout(()=>{ btn.innerHTML='<span>&#128438;</span> Open &amp; Save as PDF'; },3000);
+    const blob = await rhHtmlToPdf(window._proposalHtml);
+    rhFinishPdf(blob, window._proposalFname||'RHC-Proposal.pdf');
+    btn.innerHTML='<span>&#10003;</span> Downloaded!';
+    setTimeout(()=>{ btn.innerHTML='<span>&#11015;</span> Download PDF'; },3000);
   }catch(e){
-    if(e?.code==='declined') showToast('Download cancelled');
-    else showToast('Error: '+(e?.message||e));
-    btn.innerHTML='<span>&#128438;</span> Open &amp; Save as PDF'; btn.disabled=false;
+    showToast('PDF failed: '+(e?.message||e));
+    btn.innerHTML='<span>&#11015;</span> Download PDF';
   }
+  btn.disabled=false;
 }
 
 // ─── INSURANCE BID ────────────────────────────────────────────────────────────
 function openInsuranceBid(){
+  ibPrefill();
+  document.getElementById('ins-bid-modal').style.display = 'flex';
+}
+
+function ibPrefill(){
   // Pre-fill claim info from existing estimate fields where available
   const name = document.getElementById('f-name')?.value || '';
   const addr = [document.getElementById('f-addr')?.value, document.getElementById('f-city')?.value, document.getElementById('f-zip')?.value].filter(Boolean).join(', ');
@@ -4050,6 +4805,9 @@ function openInsuranceBid(){
   if(name) document.getElementById('ib-insured').value = name;
   if(addr) document.getElementById('ib-prop').value = addr;
   if(estdate) document.getElementById('ib-estdate').value = estdate;
+  const claimNo = document.getElementById('f-claim')?.value.trim(), adjName = document.getElementById('f-adj')?.value.trim();
+  if(claimNo && !document.getElementById('ib-claim').value) document.getElementById('ib-claim').value = claimNo;
+  if(adjName && !document.getElementById('ib-adj').value) document.getElementById('ib-adj').value = adjName;
 
   // Auto-generate price list name: TXDF8X_MMMYY
   if(!document.getElementById('ib-pricelist').value){
@@ -4068,12 +4826,11 @@ function openInsuranceBid(){
   // O&P: mirror the estimate's current markup — 0 if not set (user must opt in)
   const markupEl = document.getElementById('markup-pct');
   document.getElementById('ib-op').value = markupEl ? (parseFloat(markupEl.value)||0) : 0;
-
-  document.getElementById('ins-bid-modal').style.display = 'flex';
 }
 
 function closeInsuranceBid(){
   document.getElementById('ins-bid-modal').style.display = 'none';
+  if(_dlReturn){ _dlReturn=false; openDownloadPdf('insurance'); }
 }
 
 function ibToggleDep(){
@@ -4081,7 +4838,17 @@ function ibToggleDep(){
   document.getElementById('ib-dep-fields').style.display = on ? 'grid' : 'none';
 }
 
-function printInsuranceBid(){
+function printInsuranceBid(opts={}){
+  const tierSecs=opts._tier?null:rhTierSections();
+  if(tierSecs&&(tierSecs.length>1||tierSecs[0].label)){
+    const pages=tierSecs.map((s,i)=>{
+      const doc=printInsuranceBid({_tier:s,returnHtml:true});
+      const at=doc.indexOf('<div class="page">'), end=doc.lastIndexOf('</body>');
+      return (i===0?doc.slice(0,at):'')+doc.slice(at,end).replace('<div class="page">',`<div class="page"${i?' style="break-before:page"':''}>${rhTierHeading(s.label,'#1e3a8a','#1e3a8a')}`);
+    });
+    return rhFinishInsuranceBid(pages.join('')+'</body></html>',opts);
+  }
+  const bidItems=(opts._tier||tierSecs[0]).items;
   // ── Gather form values ──────────────────────────────────────────────────
   const insured   = document.getElementById('ib-insured').value.trim();
   const prop      = document.getElementById('ib-prop').value.trim();
@@ -4106,14 +4873,14 @@ function printInsuranceBid(){
   const depRate = applyDep ? Math.min(roofAge / roofLife, 0.80) : 0;
 
   // ── Build line rows (group by sections or auto-group by trade) ─────────
-  const items = lineItems.filter(li => li.type !== 'section' && li.qty > 0 && li.price > 0);
-  const hasManualSections = lineItems.some(li => li.type === 'section');
+  const items = bidItems.filter(li => li.type !== 'section' && li.qty > 0 && li.price > 0);
+  const hasManualSections = bidItems.some(li => li.type === 'section');
 
   const groups = [];
   if(hasManualSections){
     // Use manually-added section breaks
     let curGroup = {header: null, items: []};
-    lineItems.forEach(li => {
+    bidItems.forEach(li => {
       if(li.type === 'section'){
         groups.push(curGroup);
         curGroup = {header: li, items: []};
@@ -4371,10 +5138,18 @@ function printInsuranceBid(){
   </div>
   </body></html>`;
 
+  return rhFinishInsuranceBid(html,opts);
+}
+
+function rhFinishInsuranceBid(html,opts){
+  if(opts.returnHtml) return html;
+  rhDocKind='insurance';
+
   const win = window.open('','_blank','width=1100,height=800,scrollbars=yes');
   if(!win){ showToast('Pop-up blocked — please allow pop-ups for this page'); return; }
   win.document.write(html);
   win.document.close();
+  _dlReturn=false;
   closeInsuranceBid();
 }
 
@@ -4439,7 +5214,8 @@ const CREW_PAY = {
 (function init(){
   // Theme
   const savedTheme=localStorage.getItem('rh_theme');
-  if(savedTheme)document.documentElement.setAttribute('data-theme',savedTheme);
+  document.documentElement.setAttribute('data-theme',savedTheme||'light');
+  if(localStorage.getItem('rh_jobpanel')==='closed') toggleSidebar(true);
   document.getElementById('f-date').value=new Date().toISOString().slice(0,10);
   // Initial trade
   renderMeasures(currentTrade);
@@ -4504,7 +5280,7 @@ function rhSetUser(user){
   if(!btn) return;
   btn.classList.toggle('auth-in', !!user);
   btn.title = user ? `Signed in as ${user.email} — click to sign out` : 'Sign in to save and load jobs';
-  document.getElementById('auth-btn-lbl').textContent = user ? (user.email||'Signed in').split('@')[0] : 'Sign in';
+  document.getElementById('auth-btn-lbl').textContent = user ? 'Sign out ('+(user.email||'signed in').split('@')[0]+')' : 'Sign in';
 }
 
 function rhShowLogin(show){
@@ -6148,6 +6924,7 @@ function calcCrewCost(brand, rapidRidge, tradeOverride){
 // ─── MATERIALS MODAL ─────────────────────────────────────────────────────────
 function openMaterials(){
   document.getElementById('mat-modal').classList.add('open');
+  spFillMatPicker();
   const tbody = document.getElementById('mat-tbody');
   const brand = localStorage.getItem('rh_mat_brand')||'oc';
   const rapidRidge = localStorage.getItem('rh_mat_rapid')==='1';
@@ -6159,7 +6936,7 @@ function openMaterials(){
   if(rrChk) rrChk.checked = rapidRidge;
   const trade = document.getElementById('trade-select')?.value||'';
   if(!trade.startsWith('roofing') && !trade.startsWith('metal')){
-    if(tbody) tbody.innerHTML='<tr><td colspan="7" style="padding:18px;text-align:center;color:var(--text-3);font-size:.85rem">Select a roofing trade in the sidebar, then open Materials to generate the order sheet.</td></tr>';
+    if(tbody) tbody.innerHTML='<tr><td colspan="7" style="padding:18px;text-align:center;color:var(--text-3);font-size:.85rem">Select a roofing trade under Job details, then open Materials to generate the order sheet.</td></tr>';
     return;
   }
   // Show/hide brand controls (includes color + ridge)
@@ -7199,8 +7976,13 @@ function xact2Generate(){
     if(ins>0) addItem('Interior','Insulation',ins,'SF','insulation');
   }
 
+  // ── TEMPLATE ROWS (only the ones with a quantity) ──
+  xactTplRows.forEach(r=>{
+    if(r.qty>0) items.push({cat:r.cat, desc:r.desc, qty:r.qty, unit:r.unit, unitPrice:r.price});
+  });
+
   if(!items.length){
-    showToast('Select at least one scope and enter measurements','warn');
+    showToast('Select at least one scope and enter measurements, or fill in template quantities','warn');
     return;
   }
 
@@ -7217,7 +7999,8 @@ function xact2Generate(){
 
   let html2 = `
 <div class="xact2-action-bar">
-  <button class="xact2-btn primary" onclick="xact2Print()">&#128438; Print / Save PDF</button>
+  <button class="xact2-btn primary" onclick="openDownloadPdf('xactimate')">&#11015; Download PDF</button>
+  <button class="xact2-btn" onclick="xact2Print()">&#128438; Print</button>
   <button class="xact2-btn" onclick="xact2ImportToEstimator()">&#128197; Import to Estimator</button>
   <button class="xact2-btn" onclick="xact2Clear()">&#10006; Clear</button>
 </div>
@@ -7287,13 +8070,23 @@ function xact2Generate(){
   doc.style.display='block';
   doc.innerHTML=html2;
   window._xact2Items = items;
+  if(xactTplRows.length) doc.scrollIntoView({block:'start'});
 }
 
 function xact2Print(){
-  const printable = document.getElementById('xact2-printable');
-  if(!printable){showToast('Generate an estimate first','warn');return;}
+  const html = xact2Html();
+  if(!html){showToast('Generate an estimate first','warn');return;}
+  rhDocKind='xactimate';
   const w=window.open('','_blank','width=900,height=700');
-  w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Insurance Estimate — Red Hammer</title>
+  w.document.write(html);
+  w.document.close();
+  setTimeout(()=>{w.print();},400);
+}
+
+function xact2Html(){
+  const printable = document.getElementById('xact2-printable');
+  if(!printable) return '';
+  return `<!doctype html><html><head><meta charset="utf-8"><title>Insurance Estimate — Red Hammer</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:Arial,sans-serif;font-size:11px;color:#111;background:#fff;padding:24px}
@@ -7321,9 +8114,7 @@ td:first-child{text-align:left}
 .xact2-tot-val{font-weight:700}
 .xact2-tot-val.green{color:#16a34a}
 .xact2-tot-val.red{color:#dc2626}
-</style></head><body>${printable.innerHTML}</body></html>`);
-  w.document.close();
-  setTimeout(()=>{w.print();},400);
+</style></head><body>${printable.innerHTML}</body></html>`;
 }
 
 function xact2ImportToEstimator(){
@@ -7332,17 +8123,17 @@ function xact2ImportToEstimator(){
   items.forEach(i=>{
     lineItems.push({
       id:'xi_'+(Date.now()+Math.random()),
-      label:i.desc,
-      desc:'Insurance estimate — '+i.cat,
+      desc:i.desc,
       qty:i.qty,
       unit:i.unit,
       price:i.unitPrice,
-      trade:'insurance',
+      pinned:false,
+      _manualPrice:true,
+      _trade:currentTrade,
       custom:true
     });
   });
   switchSection('estimator');
-  renderLineItems();
   recalc();
   showToast(items.length+' items imported to Estimator');
 }
@@ -7350,7 +8141,7 @@ function xact2ImportToEstimator(){
 function xact2Clear(){
   document.getElementById('xact2-doc').style.display='none';
   document.getElementById('xact2-doc').innerHTML='';
-  document.getElementById('xact2-empty-state').style.display='flex';
+  document.getElementById('xact2-empty-state').style.display=xactTplRows.length?'none':'flex';
   window._xact2Items=[];
 }
 
@@ -7365,7 +8156,7 @@ function openSettingsTab(tab){
   if(tab==='labor')     renderLaborRates();
   if(tab==='xact')      renderXactPriceList();
   if(tab==='prices')   {renderSettingsPrices();renderItemCatalog();}
-  if(tab==='materials') renderMaterials();
+  if(tab==='materials') spRender();
 }
 
 // Labor Rates
@@ -7452,69 +8243,236 @@ const MAT_DEFAULTS = [
 function getMaterials(){
   try{return JSON.parse(localStorage.getItem('rh_materials')||'null')||MAT_DEFAULTS;}catch{return MAT_DEFAULTS;}
 }
-function _saveMaterials(data){localStorage.setItem('rh_materials',JSON.stringify(data));}
-let _matEdits={};
-function updateMaterialField(id,field,val){
-  if(!_matEdits[id])_matEdits[id]={};
-  _matEdits[id][field]=field==='cost'?parseFloat(val)||0:val;
+// ─── SUPPLIER PRICING ───────────────────────────────────────────
+// rh_suppliers: [{id,name}]
+// rh_supplier_pricing: [{id,category,item,brand,unit,costs:{suppId:price},preferred:suppId}]
+// rh_price_lists: [{id,name,itemIds:[]}], named subsets of rh_supplier_pricing
+// The first load copies rh_materials into a renameable "My Cost" column and leaves rh_materials in place.
+const SP_CATS=['All','Roofing','Gutters','Siding','Interior','Fasteners'];
+const SP_UNITS=['SQ','LF','SF','SY','EA','HR','LS','BDL','BOX','GAL'];
+let spCat='All', spListId='';
+function spRead(k){ try{ return JSON.parse(localStorage.getItem(k)||'null'); }catch(e){ return null; } }
+function spWrite(k,v){
+  try{ localStorage.setItem(k,JSON.stringify(v)); return true; }
+  catch(e){ showToast('Could not save on this device: '+(e?.message||e)); return false; }
 }
-function saveMaterialEdits(){
-  const items=getMaterials();
-  items.forEach(item=>{if(_matEdits[item.id])Object.assign(item,_matEdits[item.id]);});
-  _matEdits={};
-  _saveMaterials(items);
-  _refreshMatDatalist();
-  showToast('Materials saved ✓');
+function spNewId(prefix){ return prefix+Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
+function spMigrate(){
+  if(Array.isArray(spRead('rh_suppliers'))&&Array.isArray(spRead('rh_supplier_pricing'))) return;
+  const sid='sup_mycost';
+  spWrite('rh_supplier_pricing',getMaterials().map(m=>({
+    id:m.id, category:m.cat||'Other', item:m.desc||'', brand:'', unit:m.unit||'EA',
+    costs:{[sid]:parseFloat(m.cost)||0}, preferred:sid
+  })));
+  spWrite('rh_suppliers',[{id:sid,name:'My Cost'}]);
 }
-function deleteMaterial(id){
-  if(!confirm('Remove this material?'))return;
-  _saveMaterials(getMaterials().filter(i=>i.id!==id));
-  renderMaterials();
+function spSuppliers(){ spMigrate(); return spRead('rh_suppliers')||[]; }
+function spPricing(){ spMigrate(); return spRead('rh_supplier_pricing')||[]; }
+function spLists(){ return spRead('rh_price_lists')||[]; }
+// The cost that fills in on estimates: the starred supplier's price for this item
+function spPreferredCost(row){
+  const c=row&&row.preferred ? row.costs?.[row.preferred] : undefined;
+  return typeof c==='number' ? c : null;
 }
-function addMaterial(){
-  const desc=(document.getElementById('mat-add-desc')?.value||'').trim();
-  const unit=document.getElementById('mat-add-unit')?.value||'EA';
-  const cost=parseFloat(document.getElementById('mat-add-cost')?.value)||0;
-  const cat=(document.getElementById('mat-add-cat')?.value||'').trim()||'Other';
-  if(!desc){showToast('Enter a material name');return;}
-  const items=getMaterials();
-  items.push({id:'mat_'+Date.now(),desc,unit,cost,cat});
-  _saveMaterials(items);
-  document.getElementById('mat-add-desc').value='';
-  document.getElementById('mat-add-cost').value='';
-  renderMaterials();
-  _refreshMatDatalist();
-  showToast('Material added ✓');
+function spUpdateRow(id,fn){
+  const rows=spPricing(), r=rows.find(x=>x.id===id);
+  if(!r) return null;
+  fn(r); spWrite('rh_supplier_pricing',rows);
+  return r;
 }
-function renderMaterials(){
-  const el=document.getElementById('materials-list-body');
-  if(!el)return;
-  const all=getMaterials();
-  const q=(document.getElementById('mat-search')?.value||'').toLowerCase();
-  const catF=(document.getElementById('mat-cat-filter')?.value||'');
-  let items=all;
-  if(q)items=items.filter(i=>i.desc.toLowerCase().includes(q)||(i.cat||'').toLowerCase().includes(q));
-  if(catF)items=items.filter(i=>(i.cat||'')==catF);
-  if(!items.length){el.innerHTML='<div style="padding:14px;text-align:center;color:var(--text-3);font-size:.8rem">No materials match</div>';return;}
-  el.innerHTML=items.map(it=>`
-  <div class="cat-lib-row" data-mid="${it.id}">
-    <input class="cat-lib-input" value="${_esc(it.desc)}" oninput="updateMaterialField('${it.id}','desc',this.value)">
-    <select class="cat-lib-input" onchange="updateMaterialField('${it.id}','unit',this.value)">${['SQ','LF','SF','SY','EA','HR','LS','BDL','BOX','GAL'].map(u=>`<option${u===it.unit?' selected':''}>${u}</option>`).join('')}</select>
-    <input class="cat-lib-input" type="number" value="${it.cost}" min="0" step="0.01" oninput="updateMaterialField('${it.id}','cost',this.value)" style="text-align:right">
-    <input class="cat-lib-input" value="${_esc(it.cat||'')}" list="mat-cats" placeholder="Category" oninput="updateMaterialField('${it.id}','cat',this.value)">
-    <button class="cat-lib-del" onclick="deleteMaterial('${it.id}')" title="Remove">✕</button>
-  </div>`).join('');
-  _refreshMatDatalist();
+function spSetField(input,field){
+  spUpdateRow(input.dataset.row,r=>{ r[field]=input.value.trim(); });
+  if(field==='category'&&spCat!=='All') setTimeout(spRenderTable); // the row may leave this tab; wait until focus has moved
 }
-function _refreshMatDatalist(){
-  const dl=document.getElementById('mat-cats');
-  const sel=document.getElementById('mat-cat-filter');
-  const cats=[...new Set(getMaterials().map(i=>i.cat||'Other'))].sort();
-  if(dl)dl.innerHTML=cats.map(c=>`<option value="${_esc(c)}">`).join('');
-  if(sel){
-    const cur=sel.value;
-    sel.innerHTML='<option value="">All Categories</option>'+cats.map(c=>`<option value="${_esc(c)}"${c===cur?' selected':''}>${_esc(c)}</option>`).join('');
+// Cost edits repaint only their row, so tabbing between cells keeps the cursor and a click on a star still lands
+function spPaintRow(id){
+  const r=spPricing().find(x=>x.id===id);
+  if(!r) return;
+  document.querySelectorAll(`#sp-table-wrap .sp-star[data-row="${CSS.escape(id)}"]`).forEach(b=>{
+    const on=r.preferred===b.dataset.sup;
+    b.classList.toggle('on',on);
+    b.setAttribute('aria-pressed',String(on));
+    b.title=on?'Preferred supplier':'Make preferred';
+    b.innerHTML=on?'&#9733;':'&#9734;';
+    b.parentElement.classList.toggle('on',on);
+  });
+}
+function spSetCost(input){
+  const v=parseFloat(input.value), sup=input.dataset.sup;
+  spUpdateRow(input.dataset.row,r=>{
+    r.costs=r.costs||{};
+    if(input.value===''||isNaN(v)){
+      delete r.costs[sup];
+      if(r.preferred===sup) r.preferred=null;
+    } else {
+      r.costs[sup]=Math.max(0,v);
+      if(!r.preferred) r.preferred=sup;
+    }
+  });
+  spPaintRow(input.dataset.row);
+}
+function spStar(btn){
+  const {row,sup}=btn.dataset;
+  const r=spPricing().find(x=>x.id===row);
+  if(typeof r?.costs?.[sup]!=='number'){ showToast('Enter a cost for this supplier first'); return; }
+  spUpdateRow(row,x=>{ x.preferred=sup; });
+  spRenderTable();
+}
+function spAddSupplier(){
+  rhPrompt({title:'Add Supplier',label:'Supplier name',ok:'Add'},name=>{
+    const sups=spSuppliers();
+    if(sups.some(s=>s.name.toLowerCase()===name.toLowerCase())){ showToast(`"${name}" is already in the table`); return; }
+    sups.push({id:spNewId('sup_'),name});
+    spWrite('rh_suppliers',sups);
+    spRenderTable();
+  });
+}
+function spRenameSupplier(input){
+  const name=input.value.trim(), sups=spSuppliers(), s=sups.find(x=>x.id===input.dataset.sup);
+  if(!s) return;
+  if(!name||sups.some(x=>x!==s&&x.name.toLowerCase()===name.toLowerCase())){
+    if(name) showToast(`"${name}" is already in the table`);
+    input.value=s.name; return;
   }
+  s.name=name; spWrite('rh_suppliers',sups);
+}
+function spDeleteSupplier(id){
+  const s=spSuppliers().find(x=>x.id===id);
+  if(!s) return;
+  rhConfirm({title:`Delete "${s.name}"?`,msg:'Its cost column will be removed from every item. Items starred to this supplier move to their lowest remaining cost.'},()=>{
+    spWrite('rh_suppliers',spSuppliers().filter(x=>x.id!==id));
+    const rows=spPricing();
+    rows.forEach(r=>{
+      if(r.costs) delete r.costs[id];
+      if(r.preferred===id){
+        const left=Object.entries(r.costs||{}).sort((a,b)=>a[1]-b[1]);
+        r.preferred=left.length?left[0][0]:null;
+      }
+    });
+    spWrite('rh_supplier_pricing',rows);
+    spRenderTable();
+  });
+}
+function spAddItem(){
+  const rows=spPricing(), id=spNewId('mat_');
+  rows.push({id,category:spCat==='All'?'Roofing':spCat,item:'',brand:'',unit:'EA',costs:{},preferred:null});
+  spWrite('rh_supplier_pricing',rows);
+  if(spListId) spChangeList(l=>{ l.itemIds.push(id); });
+  const s=document.getElementById('sp-search'); if(s) s.value='';
+  spRenderTable();
+  document.querySelector(`#sp-table-wrap input[data-row="${id}"]`)?.focus();
+}
+function spRemoveItem(id){
+  const r=spPricing().find(x=>x.id===id);
+  if(!r) return;
+  if(spListId){ spChangeList(l=>{ l.itemIds=l.itemIds.filter(x=>x!==id); }); spRender(); return; }
+  rhConfirm({title:`Delete "${r.item||'this item'}"?`,msg:'It will be removed from every price list.'},()=>{
+    spWrite('rh_supplier_pricing',spPricing().filter(x=>x.id!==id));
+    const lists=spLists(); lists.forEach(l=>{ l.itemIds=l.itemIds.filter(x=>x!==id); });
+    spWrite('rh_price_lists',lists);
+    spRender();
+  });
+}
+function spChangeList(fn){
+  const lists=spLists(), l=lists.find(x=>x.id===spListId);
+  if(l){ fn(l); spWrite('rh_price_lists',lists); }
+}
+function spNewList(){
+  rhPrompt({title:'New Price List',label:'List name',ok:'Create',select:{label:'Start with',options:['No items','All materials',...SP_CATS.slice(1)]}},(name,start)=>{
+    const rows=spPricing();
+    const itemIds=start==='No items'?[]:rows.filter(r=>start==='All materials'||r.category===start).map(r=>r.id);
+    const lists=spLists(), id=spNewId('pl_');
+    lists.push({id,name,itemIds});
+    spWrite('rh_price_lists',lists);
+    spListId=id; spCat='All';
+    spRender();
+  });
+}
+function spRenameList(){
+  const l=spLists().find(x=>x.id===spListId);
+  if(!l) return;
+  rhPrompt({title:'Rename Price List',label:'List name',value:l.name},name=>{ spChangeList(x=>{ x.name=name; }); spRender(); });
+}
+function spDeleteList(){
+  const l=spLists().find(x=>x.id===spListId);
+  if(!l) return;
+  rhConfirm({title:`Delete "${l.name}"?`,msg:'Only the list is deleted. Its items and costs stay in All Materials.'},()=>{
+    spWrite('rh_price_lists',spLists().filter(x=>x.id!==spListId));
+    spListId=''; spRender();
+  });
+}
+function spPickList(v){ spListId=v; spRender(); }
+function spPickCat(c){ spCat=c; spRender(); }
+function spAddExisting(sel){
+  if(sel.value) spChangeList(l=>{ if(!l.itemIds.includes(sel.value)) l.itemIds.push(sel.value); });
+  spRender();
+}
+function spRender(){
+  const lists=spLists();
+  if(spListId&&!lists.some(l=>l.id===spListId)) spListId='';
+  const sel=document.getElementById('sp-list');
+  if(!sel) return;
+  sel.innerHTML=`<option value="">All Materials</option>`+lists.map(l=>`<option value="${_esc(l.id)}"${l.id===spListId?' selected':''}>${_esc(l.name)}</option>`).join('');
+  document.getElementById('sp-list-rename').hidden=!spListId;
+  document.getElementById('sp-list-delete').hidden=!spListId;
+  document.getElementById('sp-cats').innerHTML=SP_CATS.map(c=>`<button class="rh-tab${c===spCat?' on':''}" onclick="spPickCat('${c}')">${c}</button>`).join('');
+  const add=document.getElementById('sp-add-existing');
+  add.hidden=!spListId;
+  if(spListId){
+    const inList=new Set(lists.find(l=>l.id===spListId).itemIds);
+    add.innerHTML='<option value="">Add an existing item…</option>'+spPricing().filter(r=>!inList.has(r.id)).map(r=>`<option value="${_esc(r.id)}">${_esc(r.item||'(unnamed)')}</option>`).join('');
+  }
+  spRenderTable();
+}
+function spRenderTable(){
+  const wrap=document.getElementById('sp-table-wrap');
+  if(!wrap) return;
+  const sups=spSuppliers();
+  let rows=spPricing();
+  const list=spLists().find(l=>l.id===spListId);
+  if(list){ const ids=new Set(list.itemIds); rows=rows.filter(r=>ids.has(r.id)); }
+  if(spCat!=='All') rows=rows.filter(r=>r.category===spCat);
+  const q=(document.getElementById('sp-search')?.value||'').toLowerCase();
+  if(q) rows=rows.filter(r=>[r.item,r.brand,r.category].some(v=>(v||'').toLowerCase().includes(q)));
+  const dl=document.getElementById('sp-cat-options');
+  if(dl) dl.innerHTML=[...new Set([...SP_CATS.slice(1),...spPricing().map(r=>r.category||'Other')])].map(c=>`<option value="${_esc(c)}">`).join('');
+  const head=sups.map(s=>`<th><div class="sp-sup-head"><input class="sp-sup-name" aria-label="Supplier name" value="${_esc(s.name)}" data-sup="${_esc(s.id)}" onchange="spRenameSupplier(this)"><button class="sp-x" title="Delete supplier" aria-label="Delete ${_esc(s.name)}" data-sup="${_esc(s.id)}" onclick="spDeleteSupplier(this.dataset.sup)">&#10005;</button></div></th>`).join('');
+  const costCell=(r,s)=>{
+    const c=r.costs?.[s.id], on=r.preferred===s.id;
+    return `<td><div class="sp-cost${on?' on':''}"><button class="sp-star${on?' on':''}" aria-pressed="${on}" aria-label="Use ${_esc(s.name)} as preferred" title="${on?'Preferred supplier':'Make preferred'}" data-row="${_esc(r.id)}" data-sup="${_esc(s.id)}" onclick="spStar(this)">${on?'&#9733;':'&#9734;'}</button><input type="number" min="0" step="0.01" aria-label="${_esc(s.name)} cost" value="${typeof c==='number'?c:''}" data-row="${_esc(r.id)}" data-sup="${_esc(s.id)}" onchange="spSetCost(this)"></div></td>`;
+  };
+  const body=rows.map(r=>`<tr>
+    <td style="min-width:210px"><input aria-label="Item" placeholder="Item name" value="${_esc(r.item||'')}" data-row="${_esc(r.id)}" onchange="spSetField(this,'item')"></td>
+    <td style="min-width:90px"><input aria-label="Brand" value="${_esc(r.brand||'')}" data-row="${_esc(r.id)}" onchange="spSetField(this,'brand')"></td>
+    <td style="width:70px"><select aria-label="Unit" data-row="${_esc(r.id)}" onchange="spSetField(this,'unit')">${[...new Set([...SP_UNITS,r.unit||'EA'])].map(u=>`<option${u===r.unit?' selected':''}>${_esc(u)}</option>`).join('')}</select></td>
+    <td style="min-width:90px"><input aria-label="Category" list="sp-cat-options" value="${_esc(r.category||'')}" data-row="${_esc(r.id)}" onchange="spSetField(this,'category')"></td>
+    ${sups.map(s=>costCell(r,s)).join('')}
+    <td style="width:32px;text-align:center"><button class="sp-x" title="${spListId?'Remove from this list':'Delete item'}" aria-label="${spListId?'Remove from this list':'Delete item'}" data-row="${_esc(r.id)}" onclick="spRemoveItem(this.dataset.row)">&#10005;</button></td>
+  </tr>`).join('');
+  wrap.innerHTML=(sups.length?'':'<div class="sp-empty">Add a supplier to start entering costs.</div>')
+    +(rows.length?`<table class="sp-table"><thead><tr><th>Item</th><th>Brand</th><th>Unit</th><th>Category</th>${head}<th></th></tr></thead><tbody>${body}</tbody></table>`
+      :'<div class="sp-empty">No items here yet.</div>');
+}
+// Materials order sheet: add an item at its preferred supplier's cost.
+// Supplier order emails stay quantities and item names only (see buildOrderText).
+function spFillMatPicker(){
+  const sel=document.getElementById('mat-from-list');
+  if(!sel) return;
+  const rows=spPricing().filter(r=>r.item);
+  const cats=[...new Set(rows.map(r=>r.category||'Other'))];
+  sel.innerHTML='<option value="">+ Add from price list (preferred supplier cost)…</option>'+cats.map(c=>`<optgroup label="${_esc(c)}">${rows.filter(r=>(r.category||'Other')===c).map(r=>{
+    const cost=spPreferredCost(r);
+    return `<option value="${_esc(r.id)}">${_esc(r.item)}${cost===null?' (no cost yet)':' · $'+fmtMoney(cost)+'/'+_esc(r.unit||'EA')}</option>`;
+  }).join('')}</optgroup>`).join('');
+}
+function spAddToOrder(sel){
+  const r=spPricing().find(x=>x.id===sel.value);
+  sel.value='';
+  if(!r) return;
+  const row={sku:'LIST',name:(r.brand?r.brand+' ':'')+r.item,qty:1,unit:r.unit||'EA',uprice:spPreferredCost(r)||0,_trade:'list'};
+  const d=matRows.findIndex(x=>x.sku==='DELIVERY');
+  if(d>=0) matRows.splice(d,0,row); else matRows.push(row);
+  refreshMatTable();
 }
 
 // ─── ITEM CATALOG ───────────────────────────────────────────────
@@ -7784,11 +8742,11 @@ function ai2Import(dest){
   if(!items.length){showToast('Select at least one item','warn');return;}
   if(dest==='estimator'){
     items.forEach(it=>{
-      lineItems.push({id:'ai_'+(Date.now()+Math.random()),label:it.desc||'AI Item',desc:it.category||'AI Scan',qty:parseFloat(it.qty)||1,unit:it.unit||'EA',price:parseFloat(it.price)||0,trade:'other',custom:true});
+      lineItems.push({id:'ai_'+(Date.now()+Math.random()),desc:it.desc||'AI Item',qty:parseFloat(it.qty)||1,unit:it.unit||'EA',price:parseFloat(it.price)||0,pinned:false,_manualPrice:true,_trade:currentTrade,custom:true});
     });
     closeSettings();
     switchSection('estimator');
-    renderLineItems(); recalc();
+    recalc();
   } else {
     // Import to Xactimate as custom items
     if(!window._xact2Items) window._xact2Items=[];
