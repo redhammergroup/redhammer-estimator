@@ -800,6 +800,15 @@ tbody td{padding:7px 10px}
 .pr-tray-hd{display:flex;justify-content:space-between;align-items:center;font-size:.72rem;font-weight:600;color:var(--text-2);margin-bottom:6px;gap:6px}
 .pr-tray-hd label{font-weight:500;display:flex;gap:4px;align-items:center}
 .pr-tray-tools{display:flex;gap:10px;align-items:center}
+.ai-btn{position:absolute;z-index:40;display:none;align-items:center;gap:4px;padding:3px 8px;font:500 .7rem/1.4 inherit;font-family:inherit;color:var(--text-2);background:var(--surface);border:1px solid var(--border);border-radius:12px;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.ai-btn:hover{color:var(--brand);border-color:var(--brand)}
+.ai-btn.show{display:inline-flex}
+.ai-btn.busy{pointer-events:none;opacity:.75}
+.ai-sugg{margin:6px 0 4px;padding:9px 11px;border:1px solid var(--border);border-left:3px solid var(--brand);background:var(--surface-2);font-size:.8rem;color:var(--text-1);display:flex;flex-direction:column;gap:8px}
+.ai-sugg-text{white-space:pre-wrap;line-height:1.5}
+.ai-sugg-hd{font-size:.68rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--text-2)}
+.ai-sugg-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.ai-sugg.err{border-left-color:#b42318}
 .pr-up-link{background:none;border:0;padding:0;font:inherit;font-weight:500;color:var(--text-2);cursor:pointer;text-decoration:underline;text-underline-offset:2px}
 .pr-up-link:hover{color:var(--brand)}
 .pr-up-mark{position:absolute;left:2px;bottom:2px;background:rgba(0,0,0,.55);color:#fff;font-size:.58rem;border-radius:2px;padding:0 3px;line-height:1.5}
@@ -1182,7 +1191,7 @@ tbody td{padding:7px 10px}
 
     <div class="card-main">
       <div class="ip-step"><span class="ip-n">01</span><span class="main-section-title">Inspection findings</span><span class="pr-sub">The opening paragraph of What We Found.</span></div>
-      <textarea class="ip-ta" id="f-inspection" rows="3"
+      <textarea class="ip-ta" id="f-inspection" rows="3" data-ai="findings"
         placeholder="Upon inspection of the property, our team identified the following damage / issues that require attention…"></textarea>
     </div>
 
@@ -1200,10 +1209,10 @@ tbody td{padding:7px 10px}
 
     <div class="card-main">
       <div class="ip-step"><span class="ip-n">04</span><span class="main-section-title">Resolution &amp; outcome</span><span class="pr-sub">The Result: what the customer gets when the work is done.</span></div>
-      <textarea class="ip-ta" id="f-resolution" rows="4"
+      <textarea class="ip-ta" id="f-resolution" rows="4" data-ai="resolution"
         placeholder="Upon completion, your property will be fully restored. Red Hammer Construction Group warranties all labor and workmanship…"></textarea>
       <div class="ip-step" style="margin-top:14px"><span class="main-section-title">Notes &amp; scope exclusions</span></div>
-      <textarea class="ip-ta" id="f-notes" rows="3"
+      <textarea class="ip-ta" id="f-notes" rows="3" data-ai="notes"
         placeholder="e.g. Does not include: interior water damage, structural repairs. Work area must be accessible day of…"></textarea>
     </div>
 </div>
@@ -3588,7 +3597,7 @@ function renderPhotoReport(){
         <button type="button" class="pr-icon" title="Move area down" onclick="prMoveArea(${i},1)" ${i<r.areas.length-1?'':'disabled'}>&#8595;</button>
         <button type="button" class="pr-icon" title="Remove area" onclick="prRemoveArea(${i})">&#10005;</button>
       </div>
-      <textarea class="pr-ta" rows="2" placeholder="What you found in this area…" oninput="rhReport.areas[${i}].notes=this.value">${escHtml(a.notes)}</textarea>
+      <textarea class="pr-ta" rows="2" data-ai="area" placeholder="What you found in this area…" oninput="rhReport.areas[${i}].notes=this.value">${escHtml(a.notes)}</textarea>
       <div class="pr-drop${tfPicked?' can-tap':''}" ondragover="prDragOver(event)" ondragleave="if(!this.contains(event.relatedTarget))this.classList.remove('over')" ondrop="prDrop(event,${i})" onclick="prTapDrop(event,${i})">${tiles||`<div class="pr-drop-empty">${tfPicked?'Tap here to add the selected photo':'Drag photos here'}</div>`}</div>
     </div>`;
   }).join('');
@@ -3602,7 +3611,7 @@ function renderPhotoReport(){
     </div>
     <div class="pr-cover">
       <label class="po-lbl">Overall condition ${ratingSel(r.overall,'rhReport.overall=this.value')}</label>
-      <label class="po-lbl">Summary for the cover page<textarea class="pr-ta" rows="2" placeholder="e.g. The roof has hail damage on every slope and needs to be replaced." oninput="rhReport.summary=this.value">${escHtml(r.summary)}</textarea></label>
+      <label class="po-lbl">Summary for the cover page<textarea class="pr-ta" rows="2" data-ai="summary" placeholder="e.g. The roof has hail damage on every slope and needs to be replaced." oninput="rhReport.summary=this.value">${escHtml(r.summary)}</textarea></label>
     </div>
     <div class="pr-grid">
       <div class="pr-tray" ondragover="prDragOver(event)" ondrop="prDrop(event,-1)">
@@ -3728,6 +3737,87 @@ function prAddArea(k){
   renderPhotoReport();
   if(k<0){ const ins=document.querySelectorAll('.pr-area-hd .pr-input'); ins[ins.length-1]?.focus(); }
 }
+
+// ─── AI POLISH: rewrites the Inspection & Proposal text so it reads well for the customer ───
+// Runs through the Supabase Edge Function "polish" (the Anthropic key lives there, never on this page).
+// One floating button follows whichever tagged box (textarea[data-ai]) has focus.
+let aiBtn=null, aiTarget=null, aiHideT=0;
+function aiInitPolish(){
+  if(aiBtn) return;
+  aiBtn=document.createElement('button');
+  aiBtn.type='button'; aiBtn.className='ai-btn'; aiBtn.title='Rewrite this so it reads clearly for the customer';
+  aiBtn.innerHTML='&#10024; Polish';
+  aiBtn.addEventListener('mousedown',e=>e.preventDefault()); // keep the box focused
+  aiBtn.addEventListener('click',()=>{ if(aiTarget) aiPolish(aiTarget); });
+  document.body.appendChild(aiBtn);
+  document.addEventListener('focusin',e=>{ const t=e.target.closest?.('textarea[data-ai]'); if(t){ clearTimeout(aiHideT); aiTarget=t; aiPlace(); } });
+  document.addEventListener('focusout',e=>{ if(e.target===aiTarget) aiHideT=setTimeout(()=>{ if(!aiBtn.classList.contains('busy')){ aiBtn.classList.remove('show'); aiTarget=null; } },150); });
+  document.addEventListener('input',e=>{ if(e.target===aiTarget) aiPlace(); });
+  window.addEventListener('resize',aiPlace);
+  document.addEventListener('mouseup',()=>{ if(aiTarget) setTimeout(aiPlace,0); }); // textarea resize handle
+}
+// Only offered once there's something worth rewriting (more than a bare bullet).
+function aiHasText(t){ return t.value.replace(/[•\s-]/g,'').length>=3; }
+function aiPlace(){
+  if(!aiBtn) return;
+  const t=aiTarget;
+  if(!t||!document.body.contains(t)||!t.offsetParent||!aiHasText(t)){ if(!aiBtn.classList.contains('busy')) aiBtn.classList.remove('show'); return; }
+  const r=t.getBoundingClientRect();
+  aiBtn.classList.add('show');
+  const w=aiBtn.offsetWidth||70, h=aiBtn.offsetHeight||22;
+  aiBtn.style.left=(window.scrollX+r.right-w-8)+'px';
+  aiBtn.style.top=(window.scrollY+r.bottom-h-8)+'px';
+}
+// Short context for the AI, e.g. the area or option name.
+function aiLabel(t){
+  const kind=t.dataset.ai;
+  if(kind==='area') return t.closest('.pr-area')?.querySelector('.pr-area-hd .pr-input')?.value||'';
+  if(kind==='option'){ const c=t.closest('.po-opt'); return [c?.querySelector('.po-k span')?.textContent,c?.querySelector('input.pr-input')?.value].filter(Boolean).join(' – '); }
+  return '';
+}
+function aiBox(t){
+  let box=t.nextElementSibling;
+  if(!box||!box.classList.contains('ai-sugg')){ box=document.createElement('div'); box.className='ai-sugg'; t.insertAdjacentElement('afterend',box); }
+  return box;
+}
+async function aiPolish(t){
+  if(!aiHasText(t)) return;
+  if(!(await prSignedIn())){ showToast('Sign in to use Polish'); return; }
+  const before=t.value;
+  aiBtn.classList.add('busy'); aiBtn.innerHTML='&#10024; Polishing…';
+  let text='', err='';
+  try{
+    const {data,error}=await db.functions.invoke('polish',{body:{kind:t.dataset.ai,text:before,label:aiLabel(t)}});
+    if(error){
+      let msg=''; try{ msg=(await error.context?.json?.())?.error||''; }catch(_){}
+      const st=error.context?.status;
+      err=msg||(st===404||/Failed to send|not found/i.test(error.message||'')?"AI polish isn't set up yet.":'AI polish failed. Try again.');
+    }else text=String(data?.text||'').trim();
+    if(!err&&!text) err='The AI sent back nothing. Try again.';
+  }catch(e){ err="AI polish isn't set up yet."; }
+  aiBtn.classList.remove('busy'); aiBtn.innerHTML='&#10024; Polish';
+  if(!document.body.contains(t)) return; // the panel was redrawn meanwhile
+  const box=aiBox(t);
+  if(err){
+    box.className='ai-sugg err';
+    box.innerHTML=`<div class="ai-sugg-text">${escHtml(err)}</div><div class="ai-sugg-row"><button type="button" class="link-btn">Close</button></div>`;
+    box.querySelector('button').onclick=()=>box.remove();
+    return;
+  }
+  box.className='ai-sugg';
+  box.innerHTML=`<div class="ai-sugg-hd">Suggested wording</div><div class="ai-sugg-text">${escHtml(text)}</div>
+    <div class="ai-sugg-row"><button type="button" class="tpl-btn" data-a="use">Use it</button><button type="button" class="link-btn" data-a="keep">Keep mine</button></div>`;
+  box.querySelector('[data-a=keep]').onclick=()=>box.remove();
+  box.querySelector('[data-a=use]').onclick=()=>{
+    aiSet(t,text);
+    box.innerHTML='<div class="ai-sugg-row"><span class="pr-sub">Replaced with the suggestion.</span><button type="button" class="link-btn" data-a="undo">Undo</button><button type="button" class="link-btn" data-a="ok">OK</button></div>';
+    box.querySelector('[data-a=undo]').onclick=()=>{ aiSet(t,before); box.remove(); };
+    box.querySelector('[data-a=ok]').onclick=()=>box.remove();
+  };
+}
+// Writes the text and lets the box's own oninput save it into the report / options.
+function aiSet(t,v){ t.value=v; t.dispatchEvent(new Event('input',{bubbles:true})); }
+if(document.body) aiInitPolish(); else document.addEventListener("DOMContentLoaded",aiInitPolish);
 
 // ─── Uploaded photos (for photos that aren't in TrueFrame) ───
 // Kept in the private Supabase bucket "report-photos"; the estimate saves only id, path and caption.
@@ -3945,6 +4035,13 @@ async function poSaveToLib(k){
   save({tier:k,name:c.name.trim(),trade:currentTrade||'',bullets:poBullets(c.bullets),note:c.note.trim()});
 }
 
+// After the saved options load, fill in just the dropdowns so a box being typed in keeps its focus.
+function poRefreshLibSelects(){
+  const body=document.getElementById('po-body'); if(!body) return;
+  if(!body.contains(document.activeElement)){ renderProposalOptions(); return; }
+  RH_OPT_KEYS.forEach(k=>{ const s=body.querySelector(`select[aria-label="Saved ${RH_TIER_LABELS[k]} options"]`); if(s) s.innerHTML=poLibChoices(k); });
+  const inc=body.querySelector('select[aria-label="Saved included lists"]'); if(inc) inc.innerHTML=poIncludedChoices();
+}
 function renderProposalOptions(){
   const el=document.getElementById('po-body'); if(!el) return;
   const o=rhOpts;
@@ -3952,14 +4049,14 @@ function renderProposalOptions(){
     el.innerHTML=`<div class="po-row"><span class="pr-sub" style="flex:1;min-width:200px">The proposal shows one scope of work and total. Turn on options to let the customer choose Good, Better or Best.</span><button type="button" class="tpl-btn" onclick="poToggle(true)">+ Give 3 options</button></div>`;
     return;
   }
-  if(!rhOptLibLoaded&&!_rhOptLibLoading) poLoadLib().then(()=>{ if(rhOpts.on) renderProposalOptions(); });
+  if(!rhOptLibLoaded&&!_rhOptLibLoading) poLoadLib().then(()=>{ if(rhOpts.on) poRefreshLibSelects(); });
   const card=k=>{
     const c=o.cards[k], p=poPrice(k);
     return `<div class="po-opt${o.badge.tier===k?' badged':''}">
       <div class="po-k"><span>Option ${RH_OPT_KEYS.indexOf(k)+1} &middot; ${RH_TIER_LABELS[k]}</span><label><input type="radio" name="po-badge" ${o.badge.tier===k?'checked':''} onchange="rhOpts.badge.tier='${k}';renderProposalOptions()">Badge</label></div>
       <select class="pr-sel" aria-label="Saved ${RH_TIER_LABELS[k]} options" onchange="poFromLib('${k}',this.value);this.value=''">${poLibChoices(k)}</select>
       <input class="pr-input" placeholder="Product or package name" value="${escHtml(c.name)}" oninput="rhOpts.cards.${k}.name=this.value">
-      <textarea class="pr-ta" rows="5" placeholder="• What's included" oninput="rhOpts.cards.${k}.bullets=this.value" onkeydown="poBulletKey(event)">${escHtml(c.bullets)}</textarea>
+      <textarea class="pr-ta" rows="5" data-ai="option" placeholder="• What's included" oninput="rhOpts.cards.${k}.bullets=this.value" onkeydown="poBulletKey(event)">${escHtml(c.bullets)}</textarea>
       <div class="po-price">${p.from==='items'
         ? `<span>From the ${RH_TIER_LABELS[k]} line items: <b>$${fmtMoney(p.amt)}</b></span>`
         : `<label class="po-row"><span class="po-lbl" style="flex-direction:row">Price $</span><input class="pr-input" style="width:120px" inputmode="decimal" placeholder="0.00" value="${escHtml(c.price)}" oninput="rhOpts.cards.${k}.price=this.value"></label><span class="pr-sub">Or price it with line items on the ${RH_TIER_LABELS[k]} tier in the Estimator.</span>`}</div>
@@ -3978,7 +4075,7 @@ function renderProposalOptions(){
     <div class="po-row" style="justify-content:space-between"><span class="pr-sub">Leave an option empty to leave it out. Press Enter in a list for a new bullet.</span><button type="button" class="link-btn link-danger" onclick="poToggle(false)">Turn off options</button></div>
     <div class="po-lbl" style="margin-top:10px">
       <div class="po-row" style="justify-content:space-between"><span>Included in every option</span><span class="po-row"><select class="pr-sel" aria-label="Saved included lists" onchange="poIncludedFromLib(this.value);this.value=''">${poIncludedChoices()}</select><button type="button" class="link-btn" onclick="poSaveToLib('included')">Save this list</button></span></div>
-      <textarea class="pr-ta" rows="3" aria-label="Included in every option" oninput="rhOpts.included=this.value" onkeydown="poBulletKey(event)">${escHtml(o.included)}</textarea>
+      <textarea class="pr-ta" rows="3" data-ai="included" aria-label="Included in every option" oninput="rhOpts.included=this.value" onkeydown="poBulletKey(event)">${escHtml(o.included)}</textarea>
     </div>
     <div class="po-cards">${RH_OPT_KEYS.map(card).join('')}</div>
     <div class="po-row"><span class="po-lbl" style="flex-direction:row">Badge text</span><input class="pr-input" style="width:180px" value="${escHtml(o.badge.text)}" oninput="rhOpts.badge.text=this.value"><label class="po-row" style="gap:4px"><input type="radio" name="po-badge" ${o.badge.tier?'':'checked'} onchange="rhOpts.badge.tier='';renderProposalOptions()"><span class="pr-sub">No badge</span></label></div>
