@@ -241,6 +241,8 @@ tbody tr:hover .pin-btn:not(.pinned){opacity:.8}
 .dl-claim button{background:none;border:none;color:var(--brand-ink);font-weight:700;font-size:.78rem;cursor:pointer;padding:0;text-decoration:underline}
 .dl-field{display:block;font-size:.78rem;color:var(--text-2);margin-bottom:12px}
 .dl-field .modal-input{margin:4px 0 0}
+.dl-kind{width:100%;font-weight:600}
+.dl-desc{display:block;margin-top:4px;font-size:.76rem;color:var(--text-3)}
 .dl-how{font-size:.78rem;color:var(--text-2);background:var(--surface-2);border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:16px;line-height:1.5}
 .dl-how b{color:var(--text-1)}
 .dl-box .modal-actions{flex-wrap:wrap}
@@ -1955,6 +1957,7 @@ tbody td{padding:7px 10px}
       <button id="proposal-pdf-btn" onclick="downloadProposalPdf()" style="background:#8B1A1A;color:#fff;border:none;border-radius:6px;padding:8px 18px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px">
         <span>&#128438;</span> Open &amp; Save as PDF
       </button>
+      <button onclick="rhPreviewPrint()" style="background:#333;color:#ddd;border:none;border-radius:6px;padding:8px 14px;font-size:13px;cursor:pointer;line-height:1">&#128438; Print</button>
       <button onclick="closeProposalPreview()" style="background:#333;color:#aaa;border:none;border-radius:6px;padding:8px 14px;font-size:13px;cursor:pointer;line-height:1">&#10005; Close</button>
     </div>
   </div>
@@ -1966,9 +1969,11 @@ tbody td{padding:7px 10px}
 <!-- ── DOWNLOAD PDF MODAL ── -->
 <div id="dl-modal" class="modal-overlay" onclick="if(event.target===this)closeDownloadPdf()">
   <div class="modal-box dl-box" role="dialog" aria-modal="true" aria-labelledby="dl-title">
-    <div class="modal-title" id="dl-title">Download estimate</div>
-    <div class="modal-msg" style="margin-bottom:0">Pick the version to save.</div>
-    <div class="dl-opts" id="dl-opts"></div>
+    <div class="modal-title" id="dl-title">Preview &amp; download</div>
+    <label class="dl-field" style="margin-top:12px">Document
+      <select class="modal-input dl-kind" id="dl-kind" onchange="dlKindChanged()"></select>
+      <span class="dl-desc" id="dl-desc"></span>
+    </label>
     <div class="dl-claim" id="dl-claim" hidden><span id="dl-claim-txt"></span><button type="button" onclick="dlEditClaim()">Edit claim info</button></div>
     <label class="dl-claim" id="dl-ppp" hidden>Photos per page
       <select class="pr-sel" id="dl-ppp-sel" onchange="rhReport.perPage=+this.value"><option value="1">1 (large)</option><option value="2">2</option><option value="4">4 (grid)</option></select>
@@ -1978,14 +1983,10 @@ tbody td{padding:7px 10px}
       <input class="pr-input cn-pay-amt" id="dl-pay-amt" type="text" inputmode="decimal" placeholder="50% or 2500" oninput="cnPayAmt(this.value)" aria-label="Amount due up front">
     </div>
     <label class="dl-field">File name<input class="modal-input" id="dl-fname" type="text" autocomplete="off"></label>
-    <div class="dl-how">
-      <b>Download PDF</b> saves the file to your Downloads folder. On a phone, open it from the notification to text or email it.<br>
-      <b>Print / Save as PDF</b> opens the print window. Pick <b>Save as PDF</b> as the printer to choose the folder yourself.
-    </div>
+    <div class="dl-how">Check it in the preview, then <b>Download PDF</b> saves the file to your Downloads folder (on a phone, open it from the notification to text or email it), or <b>Print</b> opens the print window.</div>
     <div class="modal-actions">
       <button class="modal-cancel" onclick="closeDownloadPdf()">Cancel</button>
-      <button class="modal-cancel" onclick="dlPrint()">Print / Save as PDF</button>
-      <button class="dl-go" id="dl-go" onclick="dlDownload()">Download PDF</button>
+      <button class="dl-go" id="dl-go" onclick="dlPreview()">Preview</button>
     </div>
   </div>
 </div>
@@ -3917,18 +3918,7 @@ function cnSet(k,v){
 // Customer details live in the Estimator's fields, so every document shares them
 function cnCust(id,val){ const el=document.getElementById(id); if(el){ el.value=val; el.dispatchEvent(new Event('input',{bubbles:true})); } cnHeader(); }
 // Shows the contract as it will print; Generate PDF saves that exact page
-function cnPreview(){
-  const ins=rhContract.type==='insurance', kind=ins?'contract_ins':'contract_cash';
-  const html=cnHtml(rhContract.type);
-  window._proposalHtml=html; window._proposalFname=rhPdfName(kind); rhDocKind=kind;
-  document.getElementById('proposal-preview-title').innerHTML=`&#128196;&nbsp; ${ins?'Insurance':'Cash'} Contract Preview`;
-  const fr=document.getElementById('proposal-preview-iframe');
-  fr.onload=()=>{ try{ fr.style.height=(fr.contentDocument.documentElement.scrollHeight+20)+'px'; }catch(_){} };
-  fr.srcdoc=html;
-  document.getElementById('proposal-preview-modal').style.display='flex';
-  const b=document.getElementById('proposal-pdf-btn');
-  if(b){ b.innerHTML='<span>&#11015;</span> Generate PDF'; b.disabled=false; }
-}
+function cnPreview(){ const kind=rhContract.type==='insurance'?'contract_ins':'contract_cash'; return rhPreview(kind,rhPdfName(kind)); }
 function cnSetType(t){ rhContract.type=t; cnRender(); }
 function cnSetPick(v){ rhContract.pick=v; cnAutofill(); cnRender(); }
 function cnHeader(){
@@ -5493,16 +5483,17 @@ function openDownloadPdf(kind){
   const hasXact=!!document.getElementById('xact2-printable');
   kind=kind||rhDocKind||(prHasContent()||rhOpts.on?'inspection':splitMode==='summary'?'summary':'detailed');
   if(kind==='xactimate'&&!hasXact) kind='detailed';
-  document.getElementById('dl-opts').innerHTML=Object.entries(RH_DOC_KINDS)
+  document.getElementById('dl-kind').innerHTML=Object.entries(RH_DOC_KINDS)
     .filter(([k])=>k!=='xactimate'||hasXact)
-    .map(([k,d])=>`<label class="dl-opt"><input type="radio" name="dl-kind" value="${k}" ${k===kind?'checked':''} onchange="dlKindChanged()"><div><b>${d.label}</b><span>${d.desc}</span></div></label>`).join('');
+    .map(([k,d])=>`<option value="${k}"${k===kind?' selected':''}>${escHtml(d.label)}</option>`).join('');
   dlKindChanged();
   document.getElementById('dl-modal').classList.add('open');
 }
 function closeDownloadPdf(){ document.getElementById('dl-modal').classList.remove('open'); }
-function dlKind(){ return document.querySelector('input[name="dl-kind"]:checked')?.value||'detailed'; }
+function dlKind(){ return document.getElementById('dl-kind')?.value||'detailed'; }
 function dlKindChanged(){
   const kind=dlKind();
+  document.getElementById('dl-desc').textContent=RH_DOC_KINDS[kind]?.desc||'';
   document.getElementById('dl-fname').value=rhPdfName(kind);
   const claimBox=document.getElementById('dl-claim');
   claimBox.hidden=kind!=='insurance';
@@ -5528,6 +5519,42 @@ function rhDocReady(kind){
   if(kind==='xactimate'||kind==='contract_cash'||kind==='contract_ins') return true;
   if(kind==='inspection') return prHasContent()||rhAnyTierItems()||(rhOpts.on&&RH_OPT_KEYS.some(poFilled));
   return rhAnyTierItems();
+}
+async function dlPreview(){
+  const kind=dlKind();
+  if(!rhDocReady(kind)){ showToast(kind==='inspection'?'Add findings, photos or options first':'Add line items first'); return; }
+  let fname=document.getElementById('dl-fname').value.trim()||rhPdfName(kind);
+  if(!/\.pdf$/i.test(fname)) fname+='.pdf';
+  closeDownloadPdf();
+  await rhPreview(kind,fname);
+}
+// Shows a document exactly as it will be saved; Download PDF and Print work from here
+async function rhPreview(kind,fname){
+  const d=RH_DOC_KINDS[kind]||{}, modal=document.getElementById('proposal-preview-modal'), fr=document.getElementById('proposal-preview-iframe');
+  document.getElementById('proposal-preview-title').innerHTML=`&#128196;&nbsp; ${escHtml(d.label||'Document')} &mdash; Preview`;
+  const btn=document.getElementById('proposal-pdf-btn');
+  if(btn){ btn.innerHTML='<span>&#11015;</span> Download PDF'; btn.disabled=true; }
+  fr.style.width=d.landscape?'11in':'8.5in'; fr.style.height='';
+  fr.onload=null;
+  fr.srcdoc='<p style="font:15px system-ui,sans-serif;color:#555;padding:40px;text-align:center">Preparing preview…</p>';
+  modal.style.display='flex';
+  let html='';
+  try{ html=await rhDocHtml(kind); }catch(e){ html=''; }
+  if(!html){ showToast('Nothing to preview yet'); closeProposalPreview(); return; }
+  window._proposalHtml=html; window._proposalFname=fname||rhPdfName(kind); window._previewKind=kind; rhDocKind=kind;
+  // The page's own "Save as PDF" bar is hidden here; the preview's buttons do that job
+  // (scripts stay out of the preview: the internal estimate would open the print window on its own)
+  const shown=html.replace(/<script[\s\S]*?<\/script>/gi,'').replace(/<\/head>/i,'<style>.save-bar{display:none!important}body{padding-top:0!important}</style></head>');
+  fr.onload=()=>{ try{ fr.style.height=(fr.contentDocument.documentElement.scrollHeight+24)+'px'; }catch(_){} };
+  fr.srcdoc=shown;
+  if(btn) btn.disabled=false;
+}
+function rhPreviewPrint(){
+  if(!window._proposalHtml){ showToast('Nothing to print yet'); return; }
+  const w=window.open('','_blank','width=1000,height=800,scrollbars=yes');
+  if(!w){ showToast('Pop-up blocked — please allow pop-ups for this page'); return; }
+  w.document.write(window._proposalHtml); w.document.close();
+  if(window._previewKind!=='internal') setTimeout(()=>{ try{ w.focus(); w.print(); }catch(e){} },600); // internal prints itself
 }
 async function dlDownload(){
   const kind=dlKind();
@@ -6257,11 +6284,12 @@ async function printProposal(opts={}){
   // Store for PDF generation, show preview
   window._proposalHtml = html;
   window._proposalFname = rhPdfName(rhDocKind);
+  window._previewKind = rhDocKind;
   const previewModal = document.getElementById('proposal-preview-modal');
   const previewIframe = document.getElementById('proposal-preview-iframe');
   previewModal.style.display = 'flex';
   document.getElementById('proposal-preview-title').innerHTML='&#128196;&nbsp; Proposal Preview';
-  previewIframe.onload=null; previewIframe.style.height='';
+  previewIframe.onload=null; previewIframe.style.height=''; previewIframe.style.width='8.5in';
   previewIframe.srcdoc = html;
   const pdfBtn = document.getElementById('proposal-pdf-btn');
   if(pdfBtn){ pdfBtn.innerHTML='<span>&#11015;</span> Download PDF'; pdfBtn.disabled=false; }
@@ -6276,11 +6304,12 @@ async function downloadProposalPdf(){
   if(!window._proposalHtml){ showToast('Open a proposal preview first'); return; }
   btn.innerHTML='<span>&#8987;</span> Making PDF…'; btn.disabled=true;
   try{
-    const blob = await rhHtmlToPdf(window._proposalHtml);
+    const kind=window._previewKind, d=RH_DOC_KINDS[kind]||{};
+    const blob = await rhHtmlToPdf(window._proposalHtml,{landscape:!!d.landscape,hiRes:!!d.hiRes,
+      footer:kind==='inspection'?'Red Hammer Construction Group LLC  ·  325-428-7085  ·  redhammergroup.com':''});
     rhFinishPdf(blob, window._proposalFname||'RHC-Proposal.pdf');
     btn.innerHTML='<span>&#10003;</span> Downloaded!';
-    const lbl=/^contract/.test(rhDocKind||'')?'Generate PDF':'Download PDF';
-    setTimeout(()=>{ btn.innerHTML='<span>&#11015;</span> '+lbl; },3000);
+    setTimeout(()=>{ btn.innerHTML='<span>&#11015;</span> Download PDF'; },3000);
   }catch(e){
     showToast('PDF failed: '+(e?.message||e));
     btn.innerHTML='<span>&#11015;</span> Download PDF';
