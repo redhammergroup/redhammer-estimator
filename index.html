@@ -852,6 +852,9 @@ tbody td{padding:7px 10px}
 .pr-est-l li span:last-child{color:var(--text-2);white-space:nowrap;font-variant-numeric:tabular-nums}
 .po-est-banner{position:sticky;top:0;z-index:30;display:flex;align-items:center;justify-content:space-between;gap:10px 16px;flex-wrap:wrap;margin:0 0 12px;padding:10px 16px;background:var(--brand-lt);border:1px solid var(--brand);border-radius:var(--radius-sm);font-size:.84rem;color:var(--text-1)}
 .po-est-banner[hidden]{display:none}
+.po-mode{gap:8px}
+.po-mode .pr-sel{min-width:260px}
+.po-est-st{display:flex;align-items:center;gap:6px 16px;flex-wrap:wrap;margin-top:10px;padding:10px 12px;border-left:3px solid var(--brand);background:var(--surface-2);font-size:.82rem;color:var(--text-1)}
 .pr-icon{background:none;border:1px solid transparent;border-radius:4px;color:var(--text-3);cursor:pointer;padding:3px 7px;font-size:.8rem;line-height:1.2;font-family:inherit}
 .pr-icon:hover:not(:disabled){border-color:var(--border-strong);color:var(--text-1)}
 .pr-icon:disabled{opacity:.35;cursor:default}
@@ -3523,7 +3526,7 @@ function prNormalize(r){
   const b=prBlank();
   if(!r||typeof r!=='object') return b;
   const areas=Array.isArray(r.areas)?r.areas.map(a=>({
-    ...(a.kind==='est'&&RH_OPT_KEYS.includes(a.tier)?{kind:'est',tier:a.tier}:{}),
+    ...(a.kind==='est'&&RH_TIER_KEYS.includes(a.tier)?{kind:'est',tier:a.tier}:{}),
     key:a.key||prKey(), name:String(a.name||''), rating:prRating(a.rating), notes:String(a.notes||''),
     photos:Array.isArray(a.photos)?a.photos.filter(p=>p&&prId(p.id)).map(p=>({id:prId(p.id),caption:String(p.caption||'')})):[]
   })):b.areas;
@@ -3676,11 +3679,11 @@ function renderPhotoReport(){
 }
 // An option's estimate as a block in the report: moves and removes like an area
 function prEstCard(a,i){
-  const k=a.tier, items=rhTierItems(k).filter(li=>li.type!=='section'), p=poPrice(k), nm=rhOpts.cards[k].name.trim();
+  const k=a.tier, std=k==='standard', items=rhTierItems(k).filter(li=>li.type!=='section'), p=std?{from:items.length?'items':'',amt:poStdTotal()}:poPrice(k), nm=std?'':rhOpts.cards[k].name.trim();
   const last=rhReport.areas.length-1;
   return `<div class="pr-area pr-est">
     <div class="pr-area-hd">
-      <span class="pr-est-t">&#128203; ${escHtml(poOptLabel(k))} estimate${nm?` <span class="pr-sub">${escHtml(nm)}</span>`:''}</span>
+      <span class="pr-est-t">&#128203; ${std?'Estimate':escHtml(poOptLabel(k))+' estimate'}${nm?` <span class="pr-sub">${escHtml(nm)}</span>`:''}</span>
       <button type="button" class="pr-icon" title="Move up" onclick="prMoveArea(${i},-1)" ${i?'':'disabled'}>&#8593;</button>
       <button type="button" class="pr-icon" title="Move down" onclick="prMoveArea(${i},1)" ${i<last?'':'disabled'}>&#8595;</button>
       <button type="button" class="pr-icon" title="Take out of the report" onclick="prRemoveArea(${i})">&#10005;</button>
@@ -3688,6 +3691,7 @@ function prEstCard(a,i){
     ${items.length
       ? `<ul class="pr-est-l">${items.slice(0,6).map(li=>`<li><span>${escHtml(li.desc||'')}</span><span>${fmtNum(li.qty)} ${escHtml(li.unit||'')}</span></li>`).join('')}</ul>${items.length>6?`<div class="pr-sub">+${items.length-6} more line items</div>`:''}`
       : '<div class="pr-sub">No line items yet. It prints once the estimate has line items.</div>'}
+    ${std&&rhOpts.on?'<div class="pr-sub" style="color:var(--danger)">Not printed while the proposal uses three options.</div>':''}
     <div class="po-row" style="justify-content:space-between;margin-top:6px"><span class="pr-sub">Prints here as the scope of work${p.from==='items'?`, total <b>$${fmtMoney(p.amt)}</b>`:''}</span><button type="button" class="link-btn" onclick="poOpenEstimator('${k}')">Edit in estimator</button></div>
   </div>`;
 }
@@ -4369,6 +4373,7 @@ let poEstFor='';
 function prEstIdx(k){ return rhReport.areas.findIndex(a=>a.kind==='est'&&a.tier===k); }
 function prAddEstBlock(k){ if(prEstIdx(k)<0) rhReport.areas.push({kind:'est',tier:k,key:prKey(),name:'',rating:'',notes:'',photos:[]}); }
 function poOptLabel(k){
+  if(k==='standard') return 'Estimate';
   const filled=RH_OPT_KEYS.filter(poFilled), n=filled.indexOf(k);
   return `Option ${(n<0?RH_OPT_KEYS.indexOf(k):n)+1} · ${RH_TIER_LABELS[k]}`;
 }
@@ -4379,9 +4384,8 @@ function poSetSrc(k,v){
   poOpenEstimator(k);
 }
 function poOpenEstimator(k){
-  rhOpts.cards[k].src='est';
+  if(k!=='standard'){ rhOpts.cards[k].src='est'; if(!rhTiersOn) rhEnableTiers(); }
   prAddEstBlock(k);
-  if(!rhTiersOn) rhEnableTiers();
   rhSetTier(k); renderTierBar();
   poEstFor=k;
   switchSection('estimator');
@@ -4393,10 +4397,26 @@ function poEstBanner(){
   const k=poEstFor;
   b.hidden=!k;
   if(!k) return;
-  const nm=rhOpts.cards[k].name.trim();
+  const nm=k==='standard'?'':rhOpts.cards[k].name.trim();
+  if(k==='standard'){ b.querySelector('.po-est-txt').innerHTML=`<b>Building the estimate for the Inspection &amp; Proposal.</b> ${rhActiveTier===k?'Enter measurements and line items; they load into the photo report.':`You're on the ${RH_TIER_LABELS[rhActiveTier]} tab. Switch back to Standard to keep building this estimate.`}`; return; }
   b.querySelector('.po-est-txt').innerHTML=`<b>Pricing ${escHtml(poOptLabel(k))}${nm?' – '+escHtml(nm):''} for the proposal.</b> ${rhActiveTier===k?'Measurements and line items here go on that option.':`You're on the ${RH_TIER_LABELS[rhActiveTier]} tab. Switch back to ${RH_TIER_LABELS[k]} to keep pricing this option.`}`;
 }
 function poEstDone(){ poEstFor=''; poEstBanner(); switchSection('inspection'); window.scrollTo(0,document.getElementById('po-card')?.offsetTop-80||0); }
+function poModePick(cur){
+  return `<label class="po-row po-mode"><span class="po-lbl" style="flex-direction:row">Pricing</span><select class="pr-sel" onchange="poMode(this.value)">
+    ${cur?'':'<option value="" selected>Choose how to price this proposal…</option>'}
+    <option value="opts"${cur==='opts'?' selected':''}>Three options (Good / Better / Best)</option>
+    <option value="est"${cur==='est'?' selected':''}>One estimate from the estimator</option>
+  </select></label>`;
+}
+// Three options, or one estimate built in the estimator that sits in the photo report
+function poMode(v){
+  const drop=keep=>{ rhReport.areas=rhReport.areas.filter(a=>a.kind!=='est'||keep(a.tier)); };
+  if(v==='opts'){ drop(t=>t!=='standard'); poToggle(true); renderPhotoReport(); return; }
+  if(v==='est'){ rhOpts.on=false; drop(t=>t==='standard'); poOpenEstimator('standard'); }
+}
+// Same total the customer proposal prints for the Standard line items
+function poStdTotal(){ return cnItemsTotal(rhTierItems('standard')); }
 function poToggle(on){ rhOpts.on=on; renderProposalOptions(); }
 function poAddRow(){ rhOpts.compare.push({feature:'',sub:'',good:'',better:'',best:''}); renderProposalOptions(); }
 
@@ -4491,7 +4511,13 @@ function renderProposalOptions(){
   const el=document.getElementById('po-body'); if(!el) return;
   const o=rhOpts;
   if(!o.on){
-    el.innerHTML=`<div class="po-row"><span class="pr-sub" style="flex:1;min-width:200px">The proposal shows one scope of work and total. Turn on options to let the customer choose Good, Better or Best.</span><button type="button" class="tpl-btn" onclick="poToggle(true)">+ Give 3 options</button></div>`;
+    const has=prEstIdx('standard')>=0, n=rhTierItems('standard').filter(li=>li.type!=='section').length;
+    el.innerHTML=`${poModePick(has?'est':'')}
+      ${has
+        ? `<div class="po-est-st">${n?`<span>Estimate: <b>${n} line item${n>1?'s':''}</b>, total <b>$${fmtMoney(poStdTotal())}</b></span>`:'<span class="pr-sub">No line items yet.</span>'}
+            <span class="pr-sub">It's in the photo report above. Move it where you want it in the PDF.</span>
+            <button type="button" class="link-btn" onclick="poOpenEstimator('standard')">${n?'Edit in estimator':'Open the estimator'}</button></div>`
+        : '<div class="pr-sub" style="margin-top:6px">Pick <b>Three options</b> to let the customer choose Good, Better or Best, or <b>One estimate</b> to build the price in the estimator. Until you pick, the PDF prints the line items from the Estimator section.</div>'}`;
     return;
   }
   if(!rhOptLibLoaded&&!_rhOptLibLoading) poLoadLib().then(()=>{ if(rhOpts.on) poRefreshLibSelects(); });
@@ -4520,7 +4546,8 @@ function renderProposalOptions(){
        <div class="pr-sub" style="margin-top:4px">Type ✓ for included and — for not included. Fill in only Good to stretch one answer across all three.</div>`
     : `<div class="pr-sub">Leave it empty to leave it out of the PDF.</div>`;
   el.innerHTML=`
-    <div class="po-row" style="justify-content:space-between"><span class="pr-sub">Leave an option empty to leave it out. Press Enter in a list for a new bullet.</span><button type="button" class="link-btn link-danger" onclick="poToggle(false)">Turn off options</button></div>
+    ${poModePick('opts')}
+    <div class="po-row" style="justify-content:space-between;margin-top:8px"><span class="pr-sub">Leave an option empty to leave it out. Press Enter in a list for a new bullet.</span><button type="button" class="link-btn link-danger" onclick="poToggle(false)">Turn off options</button></div>
     <div class="po-lbl" style="margin-top:10px">
       <div class="po-row" style="justify-content:space-between"><span>Included in every option</span><span class="po-row"><select class="pr-sel" aria-label="Saved included lists" onchange="poIncludedFromLib(this.value);this.value=''">${poIncludedChoices()}</select><button type="button" class="link-btn" onclick="poSaveToLib('included')">Save this list</button></span></div>
       <textarea class="pr-ta" rows="3" data-ai="included" aria-label="Included in every option" oninput="rhOpts.included=this.value" onkeydown="poBulletKey(event)">${escHtml(o.included)}</textarea>
@@ -5858,7 +5885,9 @@ const RH_INSP_CSS=`
 `;
 async function printInspectionProposal(){
   const r=rhReport, o=rhOpts, per=[1,2,4].includes(+r.perPage)?+r.perPage:2;
-  const areas=r.areas.filter(a=>a.kind==='est'?(o.on&&o.cards[a.tier].src!=='typed'&&rhTierHasItems(a.tier)):(a.notes.trim()||a.rating||a.photos.length));
+  const estOk=a=>a.tier==='standard'?(!o.on&&rhTierHasItems('standard')):(o.on&&o.cards[a.tier].src!=='typed'&&rhTierHasItems(a.tier));
+  const areas=r.areas.filter(a=>a.kind==='est'?estOk(a):(a.notes.trim()||a.rating||a.photos.length));
+  const stdInReport=areas.some(a=>a.kind==='est'&&a.tier==='standard');
   const coverId=r.coverId||areas.flatMap(a=>a.photos)[0]?.id||'';
   const {map:img,failed}=await tfPrepareImages([coverId,...areas.flatMap(a=>a.photos.map(p=>p.id))]);
   if(failed) showToast(`${failed} photo${failed>1?'s':''} could not be loaded from TrueFrame and ${failed>1?'were':'was'} left out`);
@@ -5885,14 +5914,14 @@ async function printInspectionProposal(){
   };
   // An option's estimate: scope of work with quantities (no unit prices) and the option total
   const estHtml=a=>{
-    const k=a.tier, nm=o.cards[k].name.trim(), rows=[];
+    const k=a.tier, std=k==='standard', nm=std?'':o.cards[k].name.trim(), rows=[];
     rhTierItems(k).forEach(li=>{
       if(li.type==='section'){ if(String(li.name||'').trim()) rows.push(`<tr class="sec-hd"><td colspan="2">${escHtml(li.name)}</td></tr>`); return; }
       rows.push(`<tr class="li"><td>${escHtml(li.desc||'')}${li.note?`<div class="li-note">${escHtml(li.note)}</div>`:''}</td><td class="qty" style="text-align:right">${fmtNum(li.qty)} ${escHtml(li.unit||'')}</td></tr>`);
     });
-    return `<div class="area-hd"><h2>${escHtml(poOptLabel(k))} — Scope of Work</h2></div>${nm?`<div class="area-notes">${escHtml(nm)}</div>`:''}
+    return `<div class="area-hd"><h2>${std?'Scope of Work':escHtml(poOptLabel(k))+' — Scope of Work'}</h2></div>${nm?`<div class="area-notes">${escHtml(nm)}</div>`:''}
       <table><thead><tr><th style="width:78%">Scope of Work</th><th style="width:22%;text-align:right">Qty / Unit</th></tr></thead><tbody>${rows.join('')}</tbody></table>
-      <div class="total-row"><div class="total-box"><span class="total-label">Option Total</span><span class="total-amount">${money(poPrice(k).amt)}</span></div></div>`;
+      <div class="total-row"><div class="total-box"><span class="total-label">${std?'Total Investment':'Option Total'}</span><span class="total-amount">$${fmtMoney(std?poStdTotal():poPrice(k).amt)}</span></div></div>`;
   };
   const areaHtml=areas.map((a,i)=>{
     if(a.kind==='est') return `${i?'<div class="pdf-break"></div>':''}<div class="keep">${estHtml(a)}</div>`;
@@ -5936,8 +5965,8 @@ async function printInspectionProposal(){
     plan=`${incl.length?`<div class="incl keep"><div class="incl-k">Included in every option</div><ul class="incl-l">${incl.map(x=>`<li>${escHtml(x)}</li>`).join('')}</ul></div>`:''}
       <div class="opts keep" style="grid-template-columns:repeat(${Math.max(keys.length,2)},minmax(0,1fr))">${cards}</div>${cmp}`;
     if(keys.length>1) optionSelect=`<div class="optsel keep"><b>Option selected:</b>${keys.map(k=>`<span><i></i>${RH_TIER_LABELS[k]}${price(k)!=null?' — '+money(price(k)):''}</span>`).join('')}</div>`;
-  } else if(!rhAnyTierItems()){
-    plan='<!-- no pricing yet -->'; planLabel='';
+  } else if(stdInReport||!rhAnyTierItems()){
+    plan='<!-- priced in the report, or no pricing yet -->'; planLabel='';
   }
   return printProposal({returnHtml:true,inspection:{cover,findings,plan,planLabel,optionSelect,css:RH_INSP_CSS}});
 }
