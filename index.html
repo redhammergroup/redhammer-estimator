@@ -845,6 +845,13 @@ tbody td{padding:7px 10px}
 .pr-area{border:1px solid var(--border);background:var(--surface);padding:10px}
 .pr-area-hd{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:6px}
 .pr-area-hd .pr-input{flex:1;min-width:140px;font-weight:600}
+.pr-est{border-left:3px solid var(--brand);background:var(--surface-2)}
+.pr-est-t{flex:1;min-width:140px;font-weight:700;font-size:.84rem;color:var(--text-1)}
+.pr-est-l{list-style:none;margin:0;padding:0;font-size:.78rem;color:var(--text-1)}
+.pr-est-l li{display:flex;justify-content:space-between;gap:10px;padding:3px 0;border-bottom:1px solid var(--border)}
+.pr-est-l li span:last-child{color:var(--text-2);white-space:nowrap;font-variant-numeric:tabular-nums}
+.po-est-banner{position:sticky;top:0;z-index:30;display:flex;align-items:center;justify-content:space-between;gap:10px 16px;flex-wrap:wrap;margin:0 0 12px;padding:10px 16px;background:var(--brand-lt);border:1px solid var(--brand);border-radius:var(--radius-sm);font-size:.84rem;color:var(--text-1)}
+.po-est-banner[hidden]{display:none}
 .pr-icon{background:none;border:1px solid transparent;border-radius:4px;color:var(--text-3);cursor:pointer;padding:3px 7px;font-size:.8rem;line-height:1.2;font-family:inherit}
 .pr-icon:hover:not(:disabled){border-color:var(--border-strong);color:var(--text-1)}
 .pr-icon:disabled{opacity:.35;cursor:default}
@@ -957,6 +964,7 @@ tbody td{padding:7px 10px}
 </nav>
 
 <div id="section-estimator" class="app-section sec-active">
+<div id="po-est-banner" class="po-est-banner" hidden><span class="po-est-txt"></span><button type="button" class="dl-go" onclick="poEstDone()">Done &mdash; back to proposal</button></div>
 
 <div class="layout">
 
@@ -3433,6 +3441,7 @@ function rhSetTier(k){
   rhActiveTier=k;
   lineItems=rhTiers[k];
   renderTable(); recalcSummary();
+  if(poEstFor) poEstBanner();
 }
 function rhEnableTiers(){ rhTiersOn=true; renderTierBar(); }
 function rhCopyTier(from,to){
@@ -3514,6 +3523,7 @@ function prNormalize(r){
   const b=prBlank();
   if(!r||typeof r!=='object') return b;
   const areas=Array.isArray(r.areas)?r.areas.map(a=>({
+    ...(a.kind==='est'&&RH_OPT_KEYS.includes(a.tier)?{kind:'est',tier:a.tier}:{}),
     key:a.key||prKey(), name:String(a.name||''), rating:prRating(a.rating), notes:String(a.notes||''),
     photos:Array.isArray(a.photos)?a.photos.filter(p=>p&&prId(p.id)).map(p=>({id:prId(p.id),caption:String(p.caption||'')})):[]
   })):b.areas;
@@ -3612,6 +3622,7 @@ function renderPhotoReport(){
     : `<div class="pr-drop-empty" style="padding:18px 6px">Paste a TrueFrame share link above, or upload photos.</div>`;
   let n=0;
   const areas=r.areas.map((a,i)=>{
+    if(a.kind==='est') return prEstCard(a,i);
     const tiles=a.photos.map((p,j)=>{
       n++;
       const src=tfById.get(p.id);
@@ -3662,6 +3673,23 @@ function renderPhotoReport(){
         <div class="pr-add">Add area: ${chips}<button type="button" class="pr-chip" onclick="prAddArea(-1)">+ Other area…</button></div>
       </div>
     </div>`;
+}
+// An option's estimate as a block in the report: moves and removes like an area
+function prEstCard(a,i){
+  const k=a.tier, items=rhTierItems(k).filter(li=>li.type!=='section'), p=poPrice(k), nm=rhOpts.cards[k].name.trim();
+  const last=rhReport.areas.length-1;
+  return `<div class="pr-area pr-est">
+    <div class="pr-area-hd">
+      <span class="pr-est-t">&#128203; ${escHtml(poOptLabel(k))} estimate${nm?` <span class="pr-sub">${escHtml(nm)}</span>`:''}</span>
+      <button type="button" class="pr-icon" title="Move up" onclick="prMoveArea(${i},-1)" ${i?'':'disabled'}>&#8593;</button>
+      <button type="button" class="pr-icon" title="Move down" onclick="prMoveArea(${i},1)" ${i<last?'':'disabled'}>&#8595;</button>
+      <button type="button" class="pr-icon" title="Take out of the report" onclick="prRemoveArea(${i})">&#10005;</button>
+    </div>
+    ${items.length
+      ? `<ul class="pr-est-l">${items.slice(0,6).map(li=>`<li><span>${escHtml(li.desc||'')}</span><span>${fmtNum(li.qty)} ${escHtml(li.unit||'')}</span></li>`).join('')}</ul>${items.length>6?`<div class="pr-sub">+${items.length-6} more line items</div>`:''}`
+      : '<div class="pr-sub">No line items yet. It prints once the estimate has line items.</div>'}
+    <div class="po-row" style="justify-content:space-between;margin-top:6px"><span class="pr-sub">Prints here as the scope of work${p.from==='items'?`, total <b>$${fmtMoney(p.amt)}</b>`:''}</span><button type="button" class="link-btn" onclick="poOpenEstimator('${k}')">Edit in estimator</button></div>
+  </div>`;
 }
 function prPick(id){ tfPicked=tfPicked===id?null:id; renderPhotoReport(); }
 function prAddPhoto(i,id,at){
@@ -4307,12 +4335,12 @@ async function tfPrepareImages(ids){
 
 // ─── PROPOSAL OPTIONS (Good / Better / Best cards) ───
 const RH_OPT_KEYS=['good','better','best'];
-function poCard(){ return {name:'',bullets:'• ',price:'',note:''}; }
+function poCard(){ return {name:'',bullets:'• ',price:'',note:'',src:''}; }
 function poBlank(){ return {on:false,included:'• ',cards:{good:poCard(),better:poCard(),best:poCard()},badge:{tier:'better',text:'Most Popular'},compare:[]}; }
 let rhOpts=poBlank();
 function poNormalize(o){
   const b=poBlank(); if(!o||typeof o!=='object') return b;
-  const card=c=>({name:String(c?.name||''),bullets:c?.bullets!=null?String(c.bullets):'• ',price:String(c?.price??''),note:String(c?.note||'')});
+  const card=c=>({name:String(c?.name||''),bullets:c?.bullets!=null?String(c.bullets):'• ',price:String(c?.price??''),note:String(c?.note||''),src:['typed','est'].includes(c?.src)?c.src:''});
   return {on:!!o.on, included:o.included!=null?String(o.included):'• ',
     cards:{good:card(o.cards?.good),better:card(o.cards?.better),best:card(o.cards?.best)},
     badge:{tier:['good','better','best',''].includes(o.badge?.tier)?o.badge.tier:'better',text:String(o.badge?.text??'Most Popular')},
@@ -4321,7 +4349,7 @@ function poNormalize(o){
 function poBullets(s){ return String(s||'').split('\n').map(l=>l.replace(/^\s*[•\-\*·]\s*/,'').trim()).filter(Boolean); }
 // The tier's line items set the price when it has any; otherwise the typed price.
 function poPrice(k){
-  if(rhTierHasItems(k)) return {amt:rhTotalsFor(rhTierItems(k)).grand,from:'items'};
+  if(rhOpts.cards[k].src!=='typed'&&rhTierHasItems(k)) return {amt:rhTotalsFor(rhTierItems(k)).grand,from:'items'};
   const v=parseFloat(String(rhOpts.cards[k].price).replace(/[^0-9.]/g,''));
   return {amt:isFinite(v)&&v>0?v:null,from:'typed'};
 }
@@ -4334,6 +4362,41 @@ function poBulletKey(e){
   t.selectionStart=t.selectionEnd=s+3;
   t.dispatchEvent(new Event('input'));
 }
+// ── Pricing an option with the estimator ──
+// The estimator opens on the option's tier; a banner there brings you back. The option's estimate
+// becomes a block in the photo report that moves like an area and prints its scope of work.
+let poEstFor='';
+function prEstIdx(k){ return rhReport.areas.findIndex(a=>a.kind==='est'&&a.tier===k); }
+function prAddEstBlock(k){ if(prEstIdx(k)<0) rhReport.areas.push({kind:'est',tier:k,key:prKey(),name:'',rating:'',notes:'',photos:[]}); }
+function poOptLabel(k){
+  const filled=RH_OPT_KEYS.filter(poFilled), n=filled.indexOf(k);
+  return `Option ${(n<0?RH_OPT_KEYS.indexOf(k):n)+1} · ${RH_TIER_LABELS[k]}`;
+}
+function poSetSrc(k,v){
+  rhOpts.cards[k].src=v;
+  if(v==='typed'){ const i=prEstIdx(k); if(i>=0) rhReport.areas.splice(i,1); renderProposalOptions(); renderPhotoReport(); return; }
+  if(rhTierHasItems(k)){ prAddEstBlock(k); renderProposalOptions(); renderPhotoReport(); return; }
+  poOpenEstimator(k);
+}
+function poOpenEstimator(k){
+  rhOpts.cards[k].src='est';
+  prAddEstBlock(k);
+  if(!rhTiersOn) rhEnableTiers();
+  rhSetTier(k); renderTierBar();
+  poEstFor=k;
+  switchSection('estimator');
+  poEstBanner();
+  window.scrollTo(0,0);
+}
+function poEstBanner(){
+  const b=document.getElementById('po-est-banner'); if(!b) return;
+  const k=poEstFor;
+  b.hidden=!k;
+  if(!k) return;
+  const nm=rhOpts.cards[k].name.trim();
+  b.querySelector('.po-est-txt').innerHTML=`<b>Pricing ${escHtml(poOptLabel(k))}${nm?' – '+escHtml(nm):''} for the proposal.</b> ${rhActiveTier===k?'Measurements and line items here go on that option.':`You're on the ${RH_TIER_LABELS[rhActiveTier]} tab. Switch back to ${RH_TIER_LABELS[k]} to keep pricing this option.`}`;
+}
+function poEstDone(){ poEstFor=''; poEstBanner(); switchSection('inspection'); window.scrollTo(0,document.getElementById('po-card')?.offsetTop-80||0); }
 function poToggle(on){ rhOpts.on=on; renderProposalOptions(); }
 function poAddRow(){ rhOpts.compare.push({feature:'',sub:'',good:'',better:'',best:''}); renderProposalOptions(); }
 
@@ -4439,9 +4502,12 @@ function renderProposalOptions(){
       <select class="pr-sel" aria-label="Saved ${RH_TIER_LABELS[k]} options" onchange="poFromLib('${k}',this.value);this.value=''">${poLibChoices(k)}</select>
       <input class="pr-input" placeholder="Product or package name" value="${escHtml(c.name)}" oninput="rhOpts.cards.${k}.name=this.value">
       <textarea class="pr-ta" rows="5" data-ai="option" placeholder="• What's included" oninput="rhOpts.cards.${k}.bullets=this.value" onkeydown="poBulletKey(event)">${escHtml(c.bullets)}</textarea>
+      <label class="po-row" style="gap:6px"><span class="po-lbl" style="flex-direction:row">Price with</span><select class="pr-sel" onchange="poSetSrc('${k}',this.value)"><option value="typed"${p.from==='items'?'':' selected'}>Type a price</option><option value="est"${p.from==='items'?' selected':''}>Use the estimator</option></select></label>
       <div class="po-price">${p.from==='items'
-        ? `<span>From the ${RH_TIER_LABELS[k]} line items: <b>$${fmtMoney(p.amt)}</b></span>`
-        : `<label class="po-row"><span class="po-lbl" style="flex-direction:row">Price $</span><input class="pr-input" style="width:120px" inputmode="decimal" placeholder="0.00" value="${escHtml(c.price)}" oninput="rhOpts.cards.${k}.price=this.value"></label><span class="pr-sub">Or price it with line items on the ${RH_TIER_LABELS[k]} tier in the Estimator.</span>`}</div>
+        ? `<span>From the ${RH_TIER_LABELS[k]} estimate: <b>$${fmtMoney(p.amt)}</b></span><span class="po-row" style="gap:12px"><button type="button" class="link-btn" onclick="poOpenEstimator('${k}')">Edit in estimator</button>${prEstIdx(k)<0?`<button type="button" class="link-btn" onclick="prAddEstBlock('${k}');renderPhotoReport();showToast('Added to the photo report')">Show in report</button>`:'<span class="pr-sub">In the photo report</span>'}</span>`
+        : c.src==='est'
+        ? `<span class="pr-sub">No line items yet.</span><button type="button" class="tpl-btn" style="align-self:flex-start" onclick="poOpenEstimator('${k}')">Open the estimator</button>`
+        : `<label class="po-row"><span class="po-lbl" style="flex-direction:row">Price $</span><input class="pr-input" style="width:120px" inputmode="decimal" placeholder="0.00" value="${escHtml(c.price)}" oninput="rhOpts.cards.${k}.price=this.value"></label>`}</div>
       <input class="pr-input" placeholder="Line under the price, e.g. ≈ $6.77 / sq ft installed" value="${escHtml(c.note)}" oninput="rhOpts.cards.${k}.note=this.value">
       <button type="button" class="link-btn" style="align-self:flex-start" onclick="poSaveToLib('${k}')">Save as a ${RH_TIER_LABELS[k]} option</button>
     </div>`;
@@ -5792,7 +5858,7 @@ const RH_INSP_CSS=`
 `;
 async function printInspectionProposal(){
   const r=rhReport, o=rhOpts, per=[1,2,4].includes(+r.perPage)?+r.perPage:2;
-  const areas=r.areas.filter(a=>a.notes.trim()||a.rating||a.photos.length);
+  const areas=r.areas.filter(a=>a.kind==='est'?(o.on&&o.cards[a.tier].src!=='typed'&&rhTierHasItems(a.tier)):(a.notes.trim()||a.rating||a.photos.length));
   const coverId=r.coverId||areas.flatMap(a=>a.photos)[0]?.id||'';
   const {map:img,failed}=await tfPrepareImages([coverId,...areas.flatMap(a=>a.photos.map(p=>p.id))]);
   if(failed) showToast(`${failed} photo${failed>1?'s':''} could not be loaded from TrueFrame and ${failed>1?'were':'was'} left out`);
@@ -5817,7 +5883,19 @@ async function printInspectionProposal(){
     n++;
     return `<div class="ph keep" style="height:${boxH}px"><div class="ph-img">${fit(im,boxW-16,boxH-50)}<span class="ph-n">${n}</span></div>${p.caption.trim()?`<div class="ph-cap">${escHtml(p.caption.trim())}</div>`:''}</div>`;
   };
+  // An option's estimate: scope of work with quantities (no unit prices) and the option total
+  const estHtml=a=>{
+    const k=a.tier, nm=o.cards[k].name.trim(), rows=[];
+    rhTierItems(k).forEach(li=>{
+      if(li.type==='section'){ if(String(li.name||'').trim()) rows.push(`<tr class="sec-hd"><td colspan="2">${escHtml(li.name)}</td></tr>`); return; }
+      rows.push(`<tr class="li"><td>${escHtml(li.desc||'')}${li.note?`<div class="li-note">${escHtml(li.note)}</div>`:''}</td><td class="qty" style="text-align:right">${fmtNum(li.qty)} ${escHtml(li.unit||'')}</td></tr>`);
+    });
+    return `<div class="area-hd"><h2>${escHtml(poOptLabel(k))} — Scope of Work</h2></div>${nm?`<div class="area-notes">${escHtml(nm)}</div>`:''}
+      <table><thead><tr><th style="width:78%">Scope of Work</th><th style="width:22%;text-align:right">Qty / Unit</th></tr></thead><tbody>${rows.join('')}</tbody></table>
+      <div class="total-row"><div class="total-box"><span class="total-label">Option Total</span><span class="total-amount">${money(poPrice(k).amt)}</span></div></div>`;
+  };
   const areaHtml=areas.map((a,i)=>{
+    if(a.kind==='est') return `${i?'<div class="pdf-break"></div>':''}<div class="keep">${estHtml(a)}</div>`;
     const boxes=a.photos.map(phBox).filter(Boolean);
     const first=boxes.slice(0,cols), rest=boxes.slice(cols);
     const hd=`<div class="area-hd"><h2>${escHtml(a.name.trim()||'Other')}</h2>${cond(a.rating)}</div>${a.notes.trim()?`<div class="area-notes">${para(a.notes)}</div>`:''}`;
@@ -8789,6 +8867,7 @@ function switchSection(id){
   sec.classList.add('sec-active');
   const pick = document.getElementById('section-select');
   if(pick && pick.value!==id) pick.value=id;
+  if(id!=='estimator'&&poEstFor){ poEstFor=''; poEstBanner(); }
   if(id==='inspection') ipRefresh();
   if(id==='contract') cnRender();
   if(id==='countertops' && typeof ctInit==='function') ctInit();
