@@ -1,8 +1,8 @@
 // Red Hammer Estimator service worker: makes the app installable and lets it open without signal.
 // The app page always comes from the network first, so updates show up right away;
 // the saved copy is only used when there's no connection. Supabase (sign-in, jobs, AI) is never cached.
-const CACHE = 'rh-estimator-v1';
-const SHELL = ['./', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png', './icons/favicon-32.png'];
+const CACHE = 'rh-estimator-v2';
+const SHELL = ['./', './manifest.webmanifest', './icons/app-192.png', './icons/app-512.png', './icons/app-apple-180.png', './icons/app-favicon-32.png'];
 const CDN = /^https:\/\/(cdnjs\.cloudflare\.com|cdn\.jsdelivr\.net|fonts\.googleapis\.com|fonts\.gstatic\.com)\//;
 
 self.addEventListener('install', e => {
