@@ -1247,7 +1247,7 @@ tbody td{padding:7px 10px}
 <div class="main">
     <div class="ip-head">
       <div><h2 id="cn-title">Create Contract</h2><span class="pr-sub" id="cn-sub">Uses the customer and line items from the Estimator section.</span></div>
-      <button class="hdr-primary" onclick="openDownloadPdf(rhContract.type==='insurance'?'contract_ins':'contract_cash')">Download PDF</button>
+      <button class="hdr-primary" onclick="cnPreview()">Preview contract</button>
     </div>
     <div id="cn-body"></div>
 </div>
@@ -1939,7 +1939,7 @@ tbody td{padding:7px 10px}
 <!-- ── PROPOSAL PREVIEW MODAL ── -->
 <div id="proposal-preview-modal" style="display:none;position:fixed;inset:0;z-index:3500;flex-direction:column;background:#1a1a1a">
   <div style="background:#111;border-bottom:1px solid #2a2a2a;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:12px">
-    <span style="color:#ccc;font-size:13px;font-weight:600">&#128196;&nbsp; Proposal Preview</span>
+    <span id="proposal-preview-title" style="color:#ccc;font-size:13px;font-weight:600">&#128196;&nbsp; Proposal Preview</span>
     <div style="display:flex;align-items:center;gap:10px">
       <button id="proposal-pdf-btn" onclick="downloadProposalPdf()" style="background:#8B1A1A;color:#fff;border:none;border-radius:6px;padding:8px 18px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px">
         <span>&#128438;</span> Open &amp; Save as PDF
@@ -3882,6 +3882,21 @@ function cnSet(k,v){
   if(k==='rep'||k==='repCell'){ try{ localStorage.setItem('rh_cn_rep',JSON.stringify({name:rhContract.rep,cell:rhContract.repCell})); }catch(_){} }
   cnSum();
 }
+// Customer details live in the Estimator's fields, so every document shares them
+function cnCust(id,val){ const el=document.getElementById(id); if(el){ el.value=val; el.dispatchEvent(new Event('input',{bubbles:true})); } cnHeader(); }
+// Shows the contract as it will print; Generate PDF saves that exact page
+function cnPreview(){
+  const ins=rhContract.type==='insurance', kind=ins?'contract_ins':'contract_cash';
+  const html=cnHtml(rhContract.type);
+  window._proposalHtml=html; window._proposalFname=rhPdfName(kind); rhDocKind=kind;
+  document.getElementById('proposal-preview-title').innerHTML=`&#128196;&nbsp; ${ins?'Insurance':'Cash'} Contract Preview`;
+  const fr=document.getElementById('proposal-preview-iframe');
+  fr.onload=()=>{ try{ fr.style.height=(fr.contentDocument.documentElement.scrollHeight+20)+'px'; }catch(_){} };
+  fr.srcdoc=html;
+  document.getElementById('proposal-preview-modal').style.display='flex';
+  const b=document.getElementById('proposal-pdf-btn');
+  if(b){ b.innerHTML='<span>&#11015;</span> Generate PDF'; b.disabled=false; }
+}
 function cnSetType(t){ rhContract.type=t; cnRender(); }
 function cnSetPick(v){ rhContract.pick=v; cnAutofill(); cnRender(); }
 function cnHeader(){
@@ -3916,6 +3931,7 @@ function cnRender(){
   cnHeader(); cnAutofill();
   const c=rhContract, ins=c.type==='insurance', v=id=>escHtml(document.getElementById(id)?.value||'');
   const picks=cnPicks(), pk=cnPick();
+  const cust=(id,label,ph,type='text')=>`<label class="cn-f">${label}<input class="pr-input" type="${type}" value="${v(id)}" placeholder="${ph}" oninput="cnCust('${id}',this.value)"></label>`;
   const inp=(k,label,ph='',extra='')=>`<label class="cn-f">${label}<input class="pr-input" type="text" value="${escHtml(c[k])}" placeholder="${ph}" oninput="cnSet('${k}',this.value)" ${extra}></label>`;
   const money=(k,label,sub)=>`<label class="cn-f">${label} <span class="pr-sub">${sub}</span><input class="pr-input" type="text" inputmode="decimal" value="${escHtml(c[k])}" placeholder="0.00" oninput="cnSet('${k}',this.value)"></label>`;
   const list=(k,label,ai,refill)=>`<div><div class="cn-lbl">${label}${refill?`<button type="button" class="link-btn" onclick="cnRefill('${k}')">Fill from estimate</button>`:''}</div>
@@ -3928,9 +3944,14 @@ function cnRender(){
 
     <div class="card-main">
       <div class="ip-step"><span class="ip-n">01</span><span class="main-section-title">Contract details</span></div>
-      <div class="cn-cust"><b>${v('f-name')||'No customer yet'}</b>${[v('f-addr'),[v('f-city'),v('f-zip')].filter(Boolean).join(' ')].filter(Boolean).map(x=>' · '+x).join('')}${v('f-phone')?' · '+v('f-phone'):''}
-        <button type="button" class="link-btn" style="margin-left:6px" onclick="switchSection('estimator')">Edit customer</button></div>
-      <div class="cn-grid">
+      <div class="cn-grid cn-cust-grid">
+        ${cust('f-name','Property owner','Customer name')}
+        ${cust('f-phone','Cellphone','325-…','tel')}
+        ${cust('f-email','Email','name@email.com','email')}
+        ${cust('f-date','Date','','date')}
+        ${cust('f-addr','Address','123 Main St')}
+        ${cust('f-city','City, State','City, TX')}
+        ${cust('f-zip','Zip','7XXXX')}
         ${inp('rep','Contractor name','Your name')}
         ${inp('repCell','Contractor cell #','325-…')}
         ${ins?inp('carrier','Insurance carrier','e.g. State Farm'):''}
@@ -3964,6 +3985,10 @@ function cnRender(){
     <div class="card-main">
       <div class="ip-step"><span class="ip-n">04</span><span class="main-section-title">Additional contract terms</span><span class="pr-sub">Printed on the contract above the signatures. Leave blank to print an empty box to write in.</span></div>
       <textarea class="ip-ta" rows="4" data-ai="terms" placeholder="e.g. Customer to remove vehicles from the driveway on install day. Satellite dish to be reset, not realigned." oninput="cnSet('terms',this.value)">${escHtml(c.terms)}</textarea>
+    </div>
+    <div class="dl-bar" style="margin-top:0">
+      <div class="dl-bar-txt"><b>${ins?'Insurance':'Cash'} contract ready?</b><span>Preview it first, then generate the PDF from the preview.</span></div>
+      <button type="button" class="dl-go" onclick="cnPreview()">Preview contract</button>
     </div>`;
   cnSum();
 }
@@ -3980,7 +4005,7 @@ function cnHtml(type){
   const box=(t,due,x)=>`<td><div class="pt">${t}</div><div class="pd">${due}</div><div class="pa">$ ${amt(x)}</div></td>`;
   const terms=c.terms.trim()?`<div class="terms">${e(c.terms.trim()).replace(/\n/g,'<br>')}</div>`:'<div class="terms empty"></div>';
   const ADDR='910 Washington Blvd, Abilene, TX 79601';
-  const dep=m.deposit;
+  const dep=m.deposit, depOn=!!rhPayParse();
 
   const info=`<table class="info">
     <tr>${cell('Property Owner',v('f-name'),2)}${cell('Cellphone',v('f-phone'))}${cell('Date',date)}</tr>
@@ -4001,15 +4026,15 @@ function cnHtml(type){
 
   const pay=ins
     ? `<table class="pay">
-        ${dep!=null?`<tr>${box('Materials Deposit','DUE UPON SIGNING · APPLIED TO THE FIRST PAYMENT',dep)}<td class="blank"></td></tr>`:''}
+        ${depOn?`<tr>${box('Materials Deposit','DUE UPON SIGNING · APPLIED TO THE FIRST PAYMENT',dep)}<td class="blank"></td></tr>`:''}
         <tr>${box('First Payment from Insurance (ACV)','DUE UPON ROOF COMPLETION',m.acv)}${box('Upgrades','DUE UPON ROOF COMPLETION',m.upg)}</tr>
         <tr>${box('Deductible','DUE UPON ROOF COMPLETION',m.ded)}<td class="blank"></td></tr>
         <tr>${box('Second Payment (Depreciation)','DUE UPON INSURANCE RELEASE OF FUNDS',m.depr)}${box('Total Contract Price','PLUS SUPPLEMENTS PAID BY CARRIER',m.total)}</tr>
         <tr><td colspan="2" class="band">Customer understands that any additional supplements paid for by the insurance carrier are due to Red Hammer Construction Group.</td></tr>
       </table>`
     : `<table class="pay">
-        <tr>${dep!=null?box('Deposit','DUE UPON SIGNING',dep):''}${box('Balance Due','DUE UPON COMPLETION',m.balance)}${box('Total Contract Price','&nbsp;',m.total)}</tr>
-        <tr><td colspan="${dep!=null?3:2}" class="band">By signing below, the customer agrees to have Red Hammer Construction Group perform the work described above.<br>Work will be completed as listed herein; any change orders may result in a new or amended contract.</td></tr>
+        <tr>${depOn?box('Deposit','DUE UPON SIGNING',dep):''}${box('Balance Due','DUE UPON COMPLETION',m.balance)}${box('Total Contract Price','&nbsp;',m.total)}</tr>
+        <tr><td colspan="${depOn?3:2}" class="band">By signing below, the customer agrees to have Red Hammer Construction Group perform the work described above.<br>Work will be completed as listed herein; any change orders may result in a new or amended contract.</td></tr>
       </table>`;
 
   const insTerms=ins?`<div class="fine">
@@ -6121,6 +6146,8 @@ async function printProposal(opts={}){
   const previewModal = document.getElementById('proposal-preview-modal');
   const previewIframe = document.getElementById('proposal-preview-iframe');
   previewModal.style.display = 'flex';
+  document.getElementById('proposal-preview-title').innerHTML='&#128196;&nbsp; Proposal Preview';
+  previewIframe.onload=null; previewIframe.style.height='';
   previewIframe.srcdoc = html;
   const pdfBtn = document.getElementById('proposal-pdf-btn');
   if(pdfBtn){ pdfBtn.innerHTML='<span>&#11015;</span> Download PDF'; pdfBtn.disabled=false; }
@@ -6138,7 +6165,8 @@ async function downloadProposalPdf(){
     const blob = await rhHtmlToPdf(window._proposalHtml);
     rhFinishPdf(blob, window._proposalFname||'RHC-Proposal.pdf');
     btn.innerHTML='<span>&#10003;</span> Downloaded!';
-    setTimeout(()=>{ btn.innerHTML='<span>&#11015;</span> Download PDF'; },3000);
+    const lbl=/^contract/.test(rhDocKind||'')?'Generate PDF':'Download PDF';
+    setTimeout(()=>{ btn.innerHTML='<span>&#11015;</span> '+lbl; },3000);
   }catch(e){
     showToast('PDF failed: '+(e?.message||e));
     btn.innerHTML='<span>&#11015;</span> Download PDF';
