@@ -809,6 +809,28 @@ tbody td{padding:7px 10px}
 .ai-sugg-hd{font-size:.68rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--text-2)}
 .ai-sugg-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .ai-sugg.err{border-left-color:#b42318}
+#cn-body{display:flex;flex-direction:column;gap:16px;margin-top:16px}
+.cn-types{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cn-type{display:flex;flex-direction:column;gap:3px;text-align:left;background:var(--surface);border:1px solid var(--border-strong);border-radius:var(--radius-sm);padding:12px 14px;cursor:pointer;font-family:inherit;color:var(--text-1)}
+.cn-type b{font-size:.9rem}
+.cn-type span{font-size:.76rem;color:var(--text-2)}
+.cn-type.on{border-color:var(--brand);background:var(--brand-lt);box-shadow:inset 0 0 0 1px var(--brand)}
+.cn-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px 14px}
+.cn-f{display:flex;flex-direction:column;gap:4px;font-size:.76rem;color:var(--text-2);min-width:0}
+.cn-f .pr-input,.cn-f .pr-sel{width:100%}
+.cn-cust{font-size:.82rem;color:var(--text-1);background:var(--surface-2);border-radius:var(--radius-sm);padding:9px 12px;margin-bottom:12px;line-height:1.5}
+.cn-lists{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px 16px}
+.cn-lists .ip-ta{margin-top:4px}
+.cn-lbl{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:.78rem;font-weight:600;color:var(--text-1)}
+.cn-pay{display:flex;align-items:center;gap:10px 14px;flex-wrap:wrap;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:12px}
+.cn-pay-on{display:inline-flex;align-items:center;gap:7px;font-size:.82rem;font-weight:600;color:var(--text-1);cursor:pointer}
+.cn-pay-on input{width:16px;height:16px;accent-color:var(--brand)}
+.cn-pay-amt{width:120px}
+.cn-pay-amt:disabled{opacity:.5}
+.cn-sum{display:flex;gap:8px 22px;flex-wrap:wrap;margin-top:12px;font-size:.82rem;color:var(--text-2)}
+.cn-sum b{color:var(--text-1);font-variant-numeric:tabular-nums}
+.cn-sum .cn-tot b{color:var(--brand-ink)}
+@media (max-width:560px){.cn-types{grid-template-columns:1fr}}
 .pr-up-link{background:none;border:0;padding:0;font:inherit;font-weight:500;color:var(--text-2);cursor:pointer;text-decoration:underline;text-underline-offset:2px}
 .pr-up-link:hover{color:var(--brand)}
 .pr-up-mark{position:absolute;left:2px;bottom:2px;background:rgba(0,0,0,.55);color:#fff;font-size:.58rem;border-radius:2px;padding:0 3px;line-height:1.5}
@@ -890,6 +912,7 @@ tbody td{padding:7px 10px}
         <div class="ovf-sep"></div>
         <button class="ovf-item" role="menuitem" onclick="openMaterials()">Materials order sheet</button>
         <button class="ovf-item" role="menuitem" onclick="switchSection('inspection')">Inspection &amp; proposal</button>
+        <button class="ovf-item" role="menuitem" onclick="switchSection('contract')">Create contract</button>
         <button class="ovf-item" role="menuitem" onclick="printProposal()">Customer proposal</button>
         <button class="ovf-item" role="menuitem" onclick="openInsuranceBid()">Insurance bid</button>
         <button class="ovf-item" role="menuitem" onclick="printEstimate()">Internal estimate</button>
@@ -926,6 +949,7 @@ tbody td{padding:7px 10px}
     <select class="sec-select" id="section-select" onchange="switchSection(this.value)">
       <option value="estimator">Estimator</option>
       <option value="inspection">Inspection &amp; Proposal</option>
+      <option value="contract">Create Contract</option>
       <option value="countertops">Countertops</option>
       <option value="xactimate">Insurance / Xactimate</option>
     </select>
@@ -1217,6 +1241,17 @@ tbody td{padding:7px 10px}
     </div>
 </div>
 </div><!-- /section-inspection -->
+
+<!-- CREATE CONTRACT: cash or insurance work order (filled by cnRender) -->
+<div id="section-contract" class="app-section">
+<div class="main">
+    <div class="ip-head">
+      <div><h2 id="cn-title">Create Contract</h2><span class="pr-sub" id="cn-sub">Uses the customer and line items from the Estimator section.</span></div>
+      <button class="hdr-primary" onclick="openDownloadPdf(rhContract.type==='insurance'?'contract_ins':'contract_cash')">Download PDF</button>
+    </div>
+    <div id="cn-body"></div>
+</div>
+</div><!-- /section-contract -->
 
 <!-- COUNTERTOP SECTION -->
 <div id="section-countertops" class="app-section">
@@ -1927,6 +1962,10 @@ tbody td{padding:7px 10px}
     <label class="dl-claim" id="dl-ppp" hidden>Photos per page
       <select class="pr-sel" id="dl-ppp-sel" onchange="rhReport.perPage=+this.value"><option value="1">1 (large)</option><option value="2">2</option><option value="4">4 (grid)</option></select>
     </label>
+    <div class="dl-claim" id="dl-pay" hidden>
+      <label class="cn-pay-on"><input type="checkbox" id="dl-pay-on" onchange="cnPayOn(this.checked)"> Money due up front for materials</label>
+      <input class="pr-input cn-pay-amt" id="dl-pay-amt" type="text" inputmode="decimal" placeholder="50% or 2500" oninput="cnPayAmt(this.value)" aria-label="Amount due up front">
+    </div>
     <label class="dl-field">File name<input class="modal-input" id="dl-fname" type="text" autocomplete="off"></label>
     <div class="dl-how">
       <b>Download PDF</b> saves the file to your Downloads folder. On a phone, open it from the notification to text or email it.<br>
@@ -3738,6 +3777,317 @@ function prAddArea(k){
   if(k<0){ const ins=document.querySelectorAll('.pr-area-hd .pr-input'); ins[ins.length-1]?.focus(); }
 }
 
+// ─── CREATE CONTRACT: cash or insurance work order agreement ───
+// Laid out like Red Hammer's paper work orders; the payment boxes and the wording above the
+// signatures follow those forms. Customer details come from the Estimator section.
+function cnBlank(){ return {type:'cash',pick:'',rep:'',repCell:'',carrier:'',scope:'',scopeAuto:'',trades:'',tradesAuto:'',notTrades:'',upgrades:'',price:'',acv:'',ded:'',depr:'',upg:'',terms:''}; }
+function cnNormalize(o){
+  const b=cnBlank(); if(!o||typeof o!=='object') return b;
+  Object.keys(b).forEach(k=>{ if(o[k]!=null) b[k]=String(o[k]); });
+  b.type=o.type==='insurance'?'insurance':'cash';
+  return b;
+}
+let rhContract=cnBlank();
+// Money due up front for materials. One setting for every proposal and contract; saved with the job,
+// and the last choice is the starting point for new jobs.
+function rhPayDefault(){ try{ const v=JSON.parse(localStorage.getItem('rh_pay_default')||'null'); if(v&&typeof v==='object') return {on:!!v.on,amt:String(v.amt??'50%')}; }catch(_){} return {on:true,amt:'50%'}; }
+let rhPay=rhPayDefault();
+function rhPaySaveDefault(){ try{ localStorage.setItem('rh_pay_default',JSON.stringify(rhPay)); }catch(_){} }
+// null when nothing is due up front; otherwise {pct} or {amt}
+function rhPayParse(){
+  const t=String(rhPay.amt||'').trim(), n=parseFloat(t.replace(/[^0-9.]/g,''));
+  if(!rhPay.on||!isFinite(n)||n<=0) return null;
+  return /%/.test(t)?{pct:Math.min(n,100)}:{amt:n};
+}
+function rhPayTerms(){
+  const d=rhPayParse();
+  if(!d) return 'No deposit is due at signing. The full balance is due upon substantial completion of the work.';
+  return `A deposit of <strong>${d.pct!=null?d.pct+'%':'$'+fmtMoney(d.amt)} is due at signing</strong> to schedule and procure materials. The remaining balance is due upon substantial completion of the work.`;
+}
+function cnDeposit(total){ const d=rhPayParse(); if(!d) return null; if(d.amt!=null) return d.amt; return total?Math.round(total*d.pct)/100:null; }
+function cnPayOn(on){ rhPay.on=!!on; rhPaySaveDefault(); cnPaySync(); }
+function cnPayAmt(v){ rhPay.amt=String(v); rhPaySaveDefault(); cnPaySync(); }
+function cnPaySync(){
+  ['cn','dl'].forEach(x=>{
+    const on=document.getElementById(x+'-pay-on'), amt=document.getElementById(x+'-pay-amt');
+    if(on) on.checked=rhPay.on;
+    if(amt){ amt.disabled=!rhPay.on; if(document.activeElement!==amt) amt.value=rhPay.amt; }
+  });
+  cnSum();
+}
+function cnReset(data){
+  rhContract=cnNormalize(data&&data.contract);
+  rhPay=data&&data.pay&&typeof data.pay==='object'?{on:!!data.pay.on,amt:String(data.pay.amt??'')}:rhPayDefault();
+  if(document.getElementById('section-contract')?.classList.contains('sec-active')) cnRender();
+}
+const cnNum=v=>{ const n=parseFloat(String(v||'').replace(/[^0-9.\-]/g,'')); return isFinite(n)?n:null; };
+const cnLines=t=>poBullets(t);
+
+// Which option or tier the contract is for, when the estimate has more than one
+function cnPicks(){
+  if(rhOpts.on){
+    const keys=RH_OPT_KEYS.filter(poFilled);
+    if(keys.length) return keys.map((k,i)=>{ const pr=poPrice(k).amt, nm=rhOpts.cards[k].name.trim();
+      return {key:'opt:'+k,label:`Option ${i+1} · ${RH_TIER_LABELS[k]}${nm?' – '+nm:''}${pr?' — $'+fmtMoney(pr):''}`}; });
+  }
+  const secs=rhTierSections();
+  if(secs.length>1) return secs.map(sx=>({key:'tier:'+sx.key,label:`${sx.label} — $${fmtMoney(cnItemsTotal(sx.items))}`}));
+  return [];
+}
+function cnPick(){ const ps=cnPicks(); return ps.find(x=>x.key===rhContract.pick)?.key||ps[0]?.key||''; }
+// Same total the customer proposal prints for these line items
+function cnItemsTotal(items){
+  const markup=(parseFloat(document.getElementById('markup-pct')?.value)||0)/100, tax=(parseFloat(document.getElementById('tax-pct')?.value)||0)/100;
+  let sub=0; items.forEach(li=>{ if(li.type!=='section') sub+=li.qty*li.price; });
+  return sub*(1+markup+tax);
+}
+function cnAutoPrice(){
+  const pk=cnPick();
+  if(pk.startsWith('opt:')) return poPrice(pk.slice(4)).amt;
+  if(pk.startsWith('tier:')) return cnItemsTotal(rhTierItems(pk.slice(5)));
+  const items=rhTierSections()[0].items, t=cnItemsTotal(items);
+  return t>0?t:null;
+}
+// Scope lines from the estimate: the option's bullets, or the line items' section names (or descriptions)
+function cnScopeFromEstimate(){
+  const pk=cnPick();
+  let lines=[];
+  if(pk.startsWith('opt:')){
+    const c=rhOpts.cards[pk.slice(4)];
+    lines=[c.name.trim(),...poBullets(c.bullets),...poBullets(rhOpts.included)].filter(Boolean);
+  } else {
+    const items=pk.startsWith('tier:')?rhTierItems(pk.slice(5)):rhTierSections()[0].items;
+    const secs=items.filter(li=>li.type==='section'&&String(li.name||'').trim()).map(li=>li.name.trim());
+    lines=secs.length?secs:items.filter(li=>li.type!=='section'&&String(li.desc||'').trim()).map(li=>li.desc.trim());
+  }
+  return [...new Set(lines)].map(l=>'• '+l).join('\n');
+}
+// Fills a scope box from the estimate while it is empty or still holds the last automatic fill
+function cnAutofill(){
+  const c=rhContract, auto=cnScopeFromEstimate();
+  if(!c.scope.trim()||c.scope===c.scopeAuto){ c.scope=auto; c.scopeAuto=auto; }
+  if(!c.trades.trim()||c.trades===c.tradesAuto){ c.trades=auto; c.tradesAuto=auto; }
+  if(!c.carrier) c.carrier=document.getElementById('ib-carrier')?.value.trim()||'';
+  if(!c.ded){ const d=cnNum(document.getElementById('ib-deduct')?.value); if(d) c.ded=String(d); }
+  try{ const r=JSON.parse(localStorage.getItem('rh_cn_rep')||'{}'); if(!c.rep) c.rep=r.name||''; if(!c.repCell) c.repCell=r.cell||''; }catch(_){}
+}
+function cnRefill(which){
+  const auto=cnScopeFromEstimate();
+  if(!auto){ showToast('No line items or options in the estimate yet'); return; }
+  if(which==='scope'){ rhContract.scope=auto; rhContract.scopeAuto=auto; } else { rhContract.trades=auto; rhContract.tradesAuto=auto; }
+  cnRender();
+}
+function cnSet(k,v){
+  rhContract[k]=v;
+  if(k==='rep'||k==='repCell'){ try{ localStorage.setItem('rh_cn_rep',JSON.stringify({name:rhContract.rep,cell:rhContract.repCell})); }catch(_){} }
+  cnSum();
+}
+function cnSetType(t){ rhContract.type=t; cnRender(); }
+function cnSetPick(v){ rhContract.pick=v; cnAutofill(); cnRender(); }
+function cnHeader(){
+  const v=id=>(document.getElementById(id)?.value||'').trim();
+  const t=document.getElementById('cn-title'), sub=document.getElementById('cn-sub');
+  if(t) t.textContent=v('f-name')?`Create Contract · ${v('f-name')}`:'Create Contract';
+  if(sub) sub.textContent=[[v('f-addr'),v('f-city')].filter(Boolean).join(', '),v('f-estnum')].filter(Boolean).join(' · ')||'Uses the customer and line items from the Estimator section.';
+}
+// The money boxes, as they will print
+function cnMoney(){
+  const c=rhContract;
+  if(c.type==='insurance'){
+    const acv=cnNum(c.acv), ded=cnNum(c.ded), depr=cnNum(c.depr), upg=cnNum(c.upg);
+    const any=[acv,ded,depr,upg].some(x=>x!=null);
+    const total=any?(acv||0)+(ded||0)+(depr||0)+(upg||0):null;
+    return {acv,ded,depr,upg,total,deposit:cnDeposit(total)};
+  }
+  const total=cnNum(c.price)??cnAutoPrice();
+  const deposit=cnDeposit(total);
+  return {total,deposit,balance:total!=null?total-(deposit||0):null};
+}
+function cnSum(){
+  const el=document.getElementById('cn-sum'); if(!el) return;
+  const m=cnMoney(), f=v=>v==null?'—':'$'+fmtMoney(v);
+  el.innerHTML=rhContract.type==='insurance'
+    ? `${m.deposit!=null?`<span>Up front for materials <b>${f(m.deposit)}</b></span>`:''}<span class="cn-tot">Total contract price <b>${f(m.total)}</b> + supplements</span>`
+    : `${m.deposit!=null?`<span>Deposit at signing <b>${f(m.deposit)}</b></span>`:''}<span>Balance at completion <b>${f(m.balance)}</b></span><span class="cn-tot">Total contract price <b>${f(m.total)}</b></span>`;
+  const pl=document.getElementById('cn-price'); if(pl) pl.placeholder=cnAutoPrice()!=null?fmtMoney(cnAutoPrice()):'0.00';
+}
+function cnRender(){
+  const b=document.getElementById('cn-body'); if(!b) return;
+  cnHeader(); cnAutofill();
+  const c=rhContract, ins=c.type==='insurance', v=id=>escHtml(document.getElementById(id)?.value||'');
+  const picks=cnPicks(), pk=cnPick();
+  const inp=(k,label,ph='',extra='')=>`<label class="cn-f">${label}<input class="pr-input" type="text" value="${escHtml(c[k])}" placeholder="${ph}" oninput="cnSet('${k}',this.value)" ${extra}></label>`;
+  const money=(k,label,sub)=>`<label class="cn-f">${label} <span class="pr-sub">${sub}</span><input class="pr-input" type="text" inputmode="decimal" value="${escHtml(c[k])}" placeholder="0.00" oninput="cnSet('${k}',this.value)"></label>`;
+  const list=(k,label,ai,refill)=>`<div><div class="cn-lbl">${label}${refill?`<button type="button" class="link-btn" onclick="cnRefill('${k}')">Fill from estimate</button>`:''}</div>
+      <textarea class="ip-ta" rows="5" data-ai="${ai}" placeholder="• One item per line" onkeydown="poBulletKey(event)" oninput="cnSet('${k}',this.value)">${escHtml(c[k])}</textarea></div>`;
+  b.innerHTML=`
+    <div class="cn-types" role="radiogroup" aria-label="Contract type">
+      <button type="button" role="radio" aria-checked="${!ins}" class="cn-type${ins?'':' on'}" onclick="cnSetType('cash')"><b>Cash contract</b><span>Scope of work, deposit and balance due</span></button>
+      <button type="button" role="radio" aria-checked="${ins}" class="cn-type${ins?' on':''}" onclick="cnSetType('insurance')"><b>Insurance contract</b><span>Adjuster scope, insurance payments and supplements</span></button>
+    </div>
+
+    <div class="card-main">
+      <div class="ip-step"><span class="ip-n">01</span><span class="main-section-title">Contract details</span></div>
+      <div class="cn-cust"><b>${v('f-name')||'No customer yet'}</b>${[v('f-addr'),[v('f-city'),v('f-zip')].filter(Boolean).join(' ')].filter(Boolean).map(x=>' · '+x).join('')}${v('f-phone')?' · '+v('f-phone'):''}
+        <button type="button" class="link-btn" style="margin-left:6px" onclick="switchSection('estimator')">Edit customer</button></div>
+      <div class="cn-grid">
+        ${inp('rep','Contractor name','Your name')}
+        ${inp('repCell','Contractor cell #','325-…')}
+        ${ins?inp('carrier','Insurance carrier','e.g. State Farm'):''}
+        ${ins?`<label class="cn-f">Claim #<input class="pr-input" type="text" value="${v('f-claim')}" placeholder="Claim number" oninput="document.getElementById('f-claim').value=this.value"></label>`:''}
+      </div>
+    </div>
+
+    <div class="card-main">
+      <div class="ip-step"><span class="ip-n">02</span><span class="main-section-title">${ins?'Trades on adjuster report':'Trades / scope of work'}</span></div>
+      ${picks.length>1?`<label class="cn-f" style="max-width:420px;margin-bottom:12px">Contract is for<select class="pr-sel" onchange="cnSetPick(this.value)">${picks.map(x=>`<option value="${x.key}"${x.key===pk?' selected':''}>${escHtml(x.label)}</option>`).join('')}</select></label>`:''}
+      ${ins
+        ? `<div class="cn-lists">${list('trades','Being performed','scope',true)}${list('notTrades','NOT being performed','scope',false)}${list('upgrades','Upgrades','scope',false)}</div>`
+        : list('scope','Being performed','scope',true)}
+    </div>
+
+    <div class="card-main">
+      <div class="ip-step"><span class="ip-n">03</span><span class="main-section-title">Payment</span></div>
+      <div class="cn-pay">
+        <label class="cn-pay-on"><input type="checkbox" id="cn-pay-on" ${rhPay.on?'checked':''} onchange="cnPayOn(this.checked)"> Money due up front for materials</label>
+        <input class="pr-input cn-pay-amt" id="cn-pay-amt" type="text" inputmode="decimal" value="${escHtml(rhPay.amt)}" placeholder="50% or 2500" oninput="cnPayAmt(this.value)" ${rhPay.on?'':'disabled'} aria-label="Amount due up front">
+        <span class="pr-sub">Type a % or a dollar amount. This also changes the payment terms on every proposal.</span>
+      </div>
+      <div class="cn-grid">
+        ${ins
+          ? money('acv','First payment (ACV)','due at roof completion')+money('ded','Deductible','due at roof completion')+money('depr','Second payment (depreciation)','due when insurance releases funds')+money('upg','Upgrades','due at roof completion')
+          : `<label class="cn-f">Total contract price <span class="pr-sub">blank = estimate total</span><input class="pr-input" id="cn-price" type="text" inputmode="decimal" value="${escHtml(c.price)}" oninput="cnSet('price',this.value)"></label>`}
+      </div>
+      <div class="cn-sum" id="cn-sum"></div>
+    </div>
+
+    <div class="card-main">
+      <div class="ip-step"><span class="ip-n">04</span><span class="main-section-title">Additional contract terms</span><span class="pr-sub">Printed on the contract above the signatures. Leave blank to print an empty box to write in.</span></div>
+      <textarea class="ip-ta" rows="4" data-ai="terms" placeholder="e.g. Customer to remove vehicles from the driveway on install day. Satellite dish to be reset, not realigned." oninput="cnSet('terms',this.value)">${escHtml(c.terms)}</textarea>
+    </div>`;
+  cnSum();
+}
+
+// The contract PDF
+function cnHtml(type){
+  cnAutofill();
+  const c=rhContract, ins=type==='insurance', m=(()=>{ const keep=c.type; c.type=type; try{ return cnMoney(); } finally{ c.type=keep; } })();
+  const v=id=>(document.getElementById(id)?.value||'').trim(), e=escHtml;
+  const date=v('f-date')?new Date(v('f-date')+'T12:00:00').toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}):'';
+  const cell=(label,val,span=1)=>`<td colspan="${span}"><span class="k">${label}:</span> <span class="val">${e(val||'')}</span></td>`;
+  const lines=(arr,min)=>{ const L=[...arr]; while(L.length<min) L.push(''); return L.map(l=>`<div class="ln"><i class="bx">${l?'&#10003;':''}</i><span>${e(l)}</span></div>`).join(''); };
+  const amt=x=>`<span class="amt">${x!=null?fmtMoney(x):''}</span>`;
+  const box=(t,due,x)=>`<td><div class="pt">${t}</div><div class="pd">${due}</div><div class="pa">$ ${amt(x)}</div></td>`;
+  const terms=c.terms.trim()?`<div class="terms">${e(c.terms.trim()).replace(/\n/g,'<br>')}</div>`:'<div class="terms empty"></div>';
+  const ADDR='910 Washington Blvd, Abilene, TX 79601';
+  const dep=m.deposit;
+
+  const info=`<table class="info">
+    <tr>${cell('Property Owner',v('f-name'),2)}${cell('Cellphone',v('f-phone'))}${cell('Date',date)}</tr>
+    <tr>${cell('Address',v('f-addr'),2)}${cell('Email',v('f-email'),2)}</tr>
+    ${ins
+      ? `<tr>${cell('City, State, and Zip',[v('f-city'),v('f-zip')].filter(Boolean).join(' '),2)}${cell('Insurance Carrier',c.carrier,2)}</tr>
+         <tr>${cell('Contractor Name',c.rep)}${cell('Contractor Cell #',c.repCell)}${cell('Claim #',v('f-claim'),2)}</tr>`
+      : `<tr>${cell('City, State, and Zip',[v('f-city'),v('f-zip')].filter(Boolean).join(' '),2)}${cell('Contractor Name',c.rep)}${cell('Contractor Cell #',c.repCell)}</tr>`}
+  </table>`;
+
+  const scope=ins
+    ? `<div class="two">
+        <div><h3>Trades on Adjuster Report BEING Performed</h3>${lines(cnLines(c.trades),8)}</div>
+        <div><h3>Trades on Adjuster Report NOT Being Performed</h3>${lines(cnLines(c.notTrades),3)}
+             <h3 style="margin-top:14px">Upgrades</h3>${lines(cnLines(c.upgrades),3)}</div>
+      </div>`
+    : `<h3>Trades / Scope of Work Being Performed</h3>${lines(cnLines(c.scope),8)}`;
+
+  const pay=ins
+    ? `<table class="pay">
+        ${dep!=null?`<tr>${box('Materials Deposit','DUE UPON SIGNING · APPLIED TO THE FIRST PAYMENT',dep)}<td class="blank"></td></tr>`:''}
+        <tr>${box('First Payment from Insurance (ACV)','DUE UPON ROOF COMPLETION',m.acv)}${box('Upgrades','DUE UPON ROOF COMPLETION',m.upg)}</tr>
+        <tr>${box('Deductible','DUE UPON ROOF COMPLETION',m.ded)}<td class="blank"></td></tr>
+        <tr>${box('Second Payment (Depreciation)','DUE UPON INSURANCE RELEASE OF FUNDS',m.depr)}${box('Total Contract Price','PLUS SUPPLEMENTS PAID BY CARRIER',m.total)}</tr>
+        <tr><td colspan="2" class="band">Customer understands that any additional supplements paid for by the insurance carrier are due to Red Hammer Construction Group.</td></tr>
+      </table>`
+    : `<table class="pay">
+        <tr>${dep!=null?box('Deposit','DUE UPON SIGNING',dep):''}${box('Balance Due','DUE UPON COMPLETION',m.balance)}${box('Total Contract Price','&nbsp;',m.total)}</tr>
+        <tr><td colspan="${dep!=null?3:2}" class="band">By signing below, the customer agrees to have Red Hammer Construction Group perform the work described above.<br>Work will be completed as listed herein; any change orders may result in a new or amended contract.</td></tr>
+      </table>`;
+
+  const insTerms=ins?`<div class="fine">
+      <p><b>Supplements.</b> Red Hammer Construction Group may submit supplements to the insurance carrier for items missing from the adjuster's report or found during the work, such as code-required items, additional materials or hidden damage. Any supplement approved and paid by the carrier is added to the Total Contract Price.</p>
+      <p><b>Insurance payments.</b> Customer agrees to pay Red Hammer Construction Group all insurance proceeds issued for the work in this agreement, including recoverable depreciation and approved supplements, as they are received. Upgrades are paid by the customer.</p>
+      <p><b>Deductible.</b> The deductible is the customer's responsibility and will not be waived, rebated or paid by Red Hammer Construction Group.</p>
+    </div>`:'';
+
+  return `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="color-scheme" content="light">
+  <title>${ins?'Insurance Work Order Agreement':'Cash Work Order Agreement'} ${e(v('f-estnum'))} — Red Hammer Construction Group</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Inter',sans-serif;font-size:10pt;color:#2A2321;background:#fff}
+    .page{max-width:8.5in;margin:0 auto;padding:.6in .65in}
+    .topbar{height:6px;background:#8B1A1A;border-bottom:2px solid #B8893B;margin-bottom:16px}
+    .hdr{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;padding-bottom:12px;margin-bottom:16px;border-bottom:1px solid #E6DCCF}
+    .title{font-family:'Playfair Display',serif;font-size:22pt;font-weight:700;color:#2A2321;line-height:1.05}
+    .subtitle{font-size:10pt;font-weight:700;color:#8B1A1A;margin-top:5px}
+    .co{font-size:8pt;color:#6B625C;margin-top:5px}
+    .hdr img{height:46px;display:block}
+    .meta{text-align:right;font-size:8.5pt;color:#6B625C}
+    .meta strong{color:#8B1A1A}
+    table{width:100%;border-collapse:collapse}
+    table.info{table-layout:fixed;border:1px solid #D9CBB8;margin-bottom:18px}
+    table.info td{border:1px solid #E6DCCF;padding:8px 10px;font-size:9pt;vertical-align:top}
+    table.info .k{font-weight:700;font-size:8pt;color:#2A2321}
+    table.info .val{color:#2A2321}
+    h3{font-size:10pt;font-weight:700;color:#2A2321;margin:0 0 8px}
+    .two{display:grid;grid-template-columns:1fr 1fr;gap:26px}
+    .ln{display:flex;align-items:flex-end;gap:9px;min-height:22px;margin-bottom:5px}
+    .bx{flex:none;width:13px;height:13px;border:1.5px solid #6B625C;border-radius:2px;font-style:normal;font-size:9pt;line-height:11px;text-align:center;color:#8B1A1A;font-weight:700;margin-bottom:3px}
+    .ln span{flex:1;border-bottom:1px solid #D9CBB8;padding:0 2px 2px;font-size:9.5pt;min-height:18px}
+    .sec{margin-top:18px}
+    .terms{border:1px solid #D9CBB8;border-left:3px solid #B8893B;background:#FBF8F4;border-radius:4px;padding:10px 12px;font-size:9pt;line-height:1.6;min-height:46px}
+    .terms.empty{min-height:80px}
+    .fine{margin-top:12px;font-size:8pt;line-height:1.55;color:#4A423D}
+    .fine p{margin-bottom:4px}
+    table.pay{margin-top:18px;border:1px solid #D9CBB8;table-layout:fixed}
+    table.pay td{border:1px solid #E6DCCF;padding:9px 12px;vertical-align:top}
+    table.pay td.blank{background:#fff}
+    .pt{font-size:10pt;font-weight:700;color:#2A2321}
+    .pd{font-size:6.8pt;font-weight:700;color:#8B1A1A;letter-spacing:.03em;margin-top:1px}
+    .pa{display:flex;align-items:flex-end;gap:6px;margin-top:6px;font-size:10pt}
+    .amt{flex:1;border-bottom:1px solid #2A2321;min-height:17px;padding:0 4px 1px;font-weight:700;font-variant-numeric:tabular-nums;text-align:right}
+    td.band{background:#F5ECE8;color:#8B1A1A;font-weight:700;font-size:8.5pt;text-align:center;line-height:1.55;padding:10px 14px}
+    .sig{display:grid;grid-template-columns:1.6fr 1fr 1.6fr 1fr;gap:18px;margin-top:34px}
+    .sig div{border-top:1px solid #2A2321;padding-top:5px;font-size:7.5pt;letter-spacing:.06em;color:#6B625C;text-align:center}
+    .sig .who{display:block;font-size:8pt;color:#2A2321;letter-spacing:0;margin-top:2px}
+    .footer{margin-top:28px;border-top:2px solid #8B1A1A;padding-top:8px;font-size:7.5pt;color:#8A8079;text-align:center}
+    .keep{break-inside:avoid}
+    @page{size:letter;margin:.6in .65in}
+    @media print{.save-bar{display:none!important}body{padding-top:0}.page{padding:0;max-width:100%}*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}}
+  </style></head><body>
+  <div class="page">
+    <div class="topbar"></div>
+    <div class="hdr">
+      <div>
+        <div class="title">${ins?'Work Order Agreement':'Cash Work Order Agreement'}</div>
+        <div class="subtitle">${ins?'Insurance Restoration — Scope &amp; Supplement Agreement':'Cash Contract — Scope of Work Agreement'}</div>
+        <div class="co">Red Hammer Construction Group &nbsp;&bull;&nbsp; ${ADDR} &nbsp;&bull;&nbsp; 325-428-7085 &nbsp;&bull;&nbsp; gabriel@redhammergroup.com</div>
+      </div>
+      <div class="meta"><img src="${LOGO_SRC}" alt="">${v('f-estnum')?`<div style="margin-top:6px">No.&nbsp;<strong>${e(v('f-estnum'))}</strong></div>`:''}</div>
+    </div>
+    ${info}
+    <div class="keep">${scope}</div>
+    <div class="sec keep"><h3>Additional Contract Terms</h3>${terms}${insTerms}</div>
+    <div class="keep">${pay}
+      <div class="sig">
+        <div>CUSTOMER SIGNATURE<span class="who">${e(v('f-name'))}</span></div><div>DATE</div>
+        <div>CONTRACTOR SIGNATURE<span class="who">${e(c.rep||'Red Hammer Construction Group')}</span></div><div>DATE</div>
+      </div>
+    </div>
+    <div class="footer">Red Hammer Construction Group LLC &nbsp;&bull;&nbsp; ${ADDR} &nbsp;&bull;&nbsp; 325-428-7085 &nbsp;&bull;&nbsp; redhammergroup.com</div>
+  </div>
+  </body></html>`;
+}
+
 // ─── AI POLISH: rewrites the Inspection & Proposal text so it reads well for the customer ───
 // Runs through the Supabase Edge Function "polish" (the Anthropic key lives there, never on this page).
 // One floating button follows whichever tagged box (textarea[data-ai]) has focus.
@@ -4628,7 +4978,9 @@ function collectEstimateData(){
     split_mode: splitMode,
     sketch: skSerialize(),
     report: JSON.parse(JSON.stringify(rhReport)),
-    options: JSON.parse(JSON.stringify(rhOpts))
+    options: JSON.parse(JSON.stringify(rhOpts)),
+    contract: JSON.parse(JSON.stringify(rhContract)),
+    pay: {...rhPay}
   };
 }
 
@@ -4679,6 +5031,7 @@ function restoreEstimateData(data){
   skLoad(data.sketch||null);
   // Photo report and Good / Better / Best options (older jobs have none)
   prResetAll(data);
+  cnReset(data);
   renderTable(); recalcSummary();
 }
 
@@ -4792,6 +5145,7 @@ function clearEstimate(){
   lineItems=[];
   skLoad(null);
   prResetAll(null);
+  cnReset(null);
   ['f-name','f-addr','f-city','f-zip','f-phone','f-email','f-claim','f-adj','f-notes','f-inspection','f-resolution'].forEach(id=>{
     const el=document.getElementById(id);if(el)el.value='';
   });
@@ -4872,6 +5226,8 @@ const RH_DOC_KINDS = {
   summary:   {label:'Customer Estimate — Summary',  desc:'Scope of work and total, no line prices', file:'Estimate'},
   insurance: {label:'Insurance Estimate',           desc:'RCV, depreciation and ACV with claim info', file:'Insurance-Estimate', landscape:true},
   xactimate: {label:'Insurance Sheet',              desc:'From the Insurance / Xactimate tab', file:'Insurance-Sheet'},
+  contract_cash:{label:'Cash Contract',             desc:'Work order with scope, deposit and balance due', file:'Cash-Contract'},
+  contract_ins: {label:'Insurance Contract',        desc:'Work order with adjuster scope, payments and supplements', file:'Insurance-Contract'},
   internal:  {label:'Internal Estimate',            desc:'Unit prices and totals for your records', file:'Internal-Estimate'},
 };
 
@@ -5004,6 +5360,7 @@ async function rhDocHtml(kind){
   if(kind==='insurance'){ ibPrefill(); return printInsuranceBid({returnHtml:true}); }
   if(kind==='internal') return printEstimate({returnHtml:true});
   if(kind==='xactimate') return xact2Html();
+  if(kind==='contract_cash'||kind==='contract_ins') return cnHtml(kind==='contract_ins'?'insurance':'cash');
   return '';
 }
 
@@ -5025,6 +5382,10 @@ function dlKindChanged(){
   const claimBox=document.getElementById('dl-claim');
   claimBox.hidden=kind!=='insurance';
   document.getElementById('dl-ppp').hidden=kind!=='inspection';
+  document.getElementById('dl-pay').hidden=!['inspection','detailed','summary','contract_cash','contract_ins'].includes(kind);
+  document.getElementById('dl-pay-on').checked=rhPay.on;
+  document.getElementById('dl-pay-amt').value=rhPay.amt;
+  document.getElementById('dl-pay-amt').disabled=!rhPay.on;
   document.getElementById('dl-ppp-sel').value=String(rhReport.perPage||2);
   if(kind==='insurance'){
     ibPrefill();
@@ -5039,7 +5400,7 @@ function dlEditClaim(){
 
 // The inspection report can go out with findings or typed option prices and no line items.
 function rhDocReady(kind){
-  if(kind==='xactimate') return true;
+  if(kind==='xactimate'||kind==='contract_cash'||kind==='contract_ins') return true;
   if(kind==='inspection') return prHasContent()||rhAnyTierItems()||(rhOpts.on&&RH_OPT_KEYS.some(poFilled));
   return rhAnyTierItems();
 }
@@ -5574,7 +5935,7 @@ async function printProposal(opts={}){
       <p style="margin-bottom:6px"><strong>Acceptance of Work:</strong> ${ins&&ins.optionSelect
         ? 'By selecting an option and signing below, the customer authorizes Red Hammer Construction Group LLC ("Contractor") to perform the scope of work for the selected option at the price stated.'
         : 'By signing below, the customer agrees to authorize Red Hammer Construction Group LLC ("Contractor") to perform the scope of work described in this estimate at the price stated.'} Customer acknowledges having read and understood all terms herein.</p>
-      <p style="margin-bottom:6px"><strong>Payment Terms:</strong> A deposit of <strong>50% is due at signing</strong> to schedule and procure materials. The remaining balance is due upon substantial completion of the work. Payments not received within 10 days of due date are subject to a 1.5% monthly finance charge.</p>
+      <p style="margin-bottom:6px"><strong>Payment Terms:</strong> ${rhPayTerms()} Payments not received within 10 days of due date are subject to a 1.5% monthly finance charge.</p>
       <p style="margin-bottom:6px"><strong>Change Orders:</strong> Any changes to the scope of work must be agreed upon in writing and signed by both parties prior to commencement of the changed work. Additional costs resulting from unforeseen conditions discovered during the project (hidden damage, code compliance, etc.) will be communicated to the customer before proceeding.</p>
 <p style="margin-bottom:6px"><strong>Mechanic's Lien Notice:</strong> Texas law gives persons who perform work or furnish materials the right to file a lien against your property if they are not paid. This estimate, if accepted, constitutes notice of this right.</p>
       <p><strong>Proposal Validity:</strong> This proposal is valid for 30 days from the date issued${validUntil?' (expires '+validUntil+')':''}. Pricing is subject to change due to material cost fluctuations if not accepted within this period.</p>
@@ -8394,6 +8755,7 @@ function switchSection(id){
   const pick = document.getElementById('section-select');
   if(pick && pick.value!==id) pick.value=id;
   if(id==='inspection') ipRefresh();
+  if(id==='contract') cnRender();
   if(id==='countertops' && typeof ctInit==='function') ctInit();
   if(id==='xactimate' && typeof xactInit==='function') xactInit();
   if(id==='ai-scan' && typeof aiInit==='function') aiInit();
