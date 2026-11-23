@@ -4,3 +4,7 @@
 !index.html
 !.nojekyll
 !.gitignore
+!manifest.webmanifest
+!sw.js
+!icons/
+!icons/*.png

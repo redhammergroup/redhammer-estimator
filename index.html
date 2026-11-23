@@ -1,4 +1,14 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="theme-color" content="#FFFFFF">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="RH Estimator">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="format-detection" content="telephone=no">
+</head><body>
 <title>Red Hammer Estimator</title>
 <meta name="robots" content="noindex, nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -242,6 +252,14 @@ tbody tr:hover .pin-btn:not(.pinned){opacity:.8}
 .dl-field{display:block;font-size:.78rem;color:var(--text-2);margin-bottom:12px}
 .dl-field .modal-input{margin:4px 0 0}
 .dl-kind{width:100%;font-weight:600}
+.inst-steps ol{margin:12px 0 4px;padding-left:20px;font-size:.88rem;line-height:1.55;color:var(--text-1)}
+.inst-steps li{margin-bottom:6px}
+@media(max-width:600px){
+  .pp-bar{flex-wrap:wrap;padding-left:12px!important;padding-right:12px!important}
+  .pp-bar>span{flex:1 1 100%;font-size:12px!important}
+  .pp-bar>div{flex:1 1 100%;gap:8px!important}
+  .pp-bar>div>button{flex:1;justify-content:center;padding:10px 8px!important}
+}
 .dl-desc{display:block;margin-top:4px;font-size:.76rem;color:var(--text-3)}
 .dl-how{font-size:.78rem;color:var(--text-2);background:var(--surface-2);border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:16px;line-height:1.5}
 .dl-how b{color:var(--text-1)}
@@ -931,6 +949,7 @@ tbody td{padding:7px 10px}
         <div class="ovf-sep"></div>
         <button class="ovf-item" role="menuitem" onclick="openSettings()">Pricing settings</button>
         <button class="ovf-item" role="menuitem" onclick="toggleTheme()">Light / dark theme</button>
+        <button class="ovf-item" role="menuitem" id="install-btn" onclick="rhInstall()">Install app</button>
         <button class="ovf-item hdr-auth" role="menuitem" id="auth-btn" onclick="rhAuthButton()" title="Sign in to save and load jobs"><span id="auth-btn-lbl">Sign in</span></button>
       </div>
     </div>
@@ -1951,7 +1970,7 @@ tbody td{padding:7px 10px}
 
 <!-- ── PROPOSAL PREVIEW MODAL ── -->
 <div id="proposal-preview-modal" style="display:none;position:fixed;inset:0;z-index:3500;flex-direction:column;background:#1a1a1a">
-  <div style="background:#111;border-bottom:1px solid #2a2a2a;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:12px">
+  <div class="pp-bar" style="background:#111;border-bottom:1px solid #2a2a2a;padding:10px 16px;padding-top:max(10px,env(safe-area-inset-top));display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:12px">
     <span id="proposal-preview-title" style="color:#ccc;font-size:13px;font-weight:600">&#128196;&nbsp; Proposal Preview</span>
     <div style="display:flex;align-items:center;gap:10px">
       <button id="proposal-pdf-btn" onclick="downloadProposalPdf()" style="background:#8B1A1A;color:#fff;border:none;border-radius:6px;padding:8px 18px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px">
@@ -1961,12 +1980,22 @@ tbody td{padding:7px 10px}
       <button onclick="closeProposalPreview()" style="background:#333;color:#aaa;border:none;border-radius:6px;padding:8px 14px;font-size:13px;cursor:pointer;line-height:1">&#10005; Close</button>
     </div>
   </div>
-  <div style="flex:1;overflow:auto;background:#666;padding:20px 0">
-    <iframe id="proposal-preview-iframe" style="display:block;width:8.5in;min-height:11in;margin:0 auto;border:none;background:#fff;box-shadow:0 4px 32px rgba(0,0,0,.4)"></iframe>
+  <div id="pp-scroll" style="flex:1;overflow:auto;-webkit-overflow-scrolling:touch;background:#666;padding:20px 0">
+    <div id="pp-fit" style="margin:0 auto;overflow:hidden">
+      <iframe id="proposal-preview-iframe" style="display:block;width:8.5in;min-height:11in;margin:0 auto;border:none;background:#fff;box-shadow:0 4px 32px rgba(0,0,0,.4);transform-origin:0 0"></iframe>
+    </div>
   </div>
 </div>
 
 <!-- ── DOWNLOAD PDF MODAL ── -->
+<div id="install-modal" class="modal-overlay" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="install-title">
+    <div class="modal-title" id="install-title">Install Red Hammer Estimator</div>
+    <div class="modal-msg">It goes on your home screen like any other app and opens full screen.</div>
+    <div class="inst-steps" id="install-steps"></div>
+    <div class="modal-actions"><button class="dl-go" onclick="document.getElementById('install-modal').classList.remove('open')">Got it</button></div>
+  </div>
+</div>
 <div id="dl-modal" class="modal-overlay" onclick="if(event.target===this)closeDownloadPdf()">
   <div class="modal-box dl-box" role="dialog" aria-modal="true" aria-labelledby="dl-title">
     <div class="modal-title" id="dl-title">Preview &amp; download</div>
@@ -4223,6 +4252,29 @@ async function aiPolish(t){
 function aiSet(t,v){ t.value=v; t.dispatchEvent(new Event('input',{bubbles:true})); }
 if(document.body) aiInitPolish(); else document.addEventListener("DOMContentLoaded",aiInitPolish);
 
+// ── Install as an app ──
+// Chrome/Edge/Android offer a one-tap install; iPhone and others get the steps.
+let rhInstallEvt=null;
+const rhIsApp=()=>matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
+function rhInstallBtn(){ const b=document.getElementById('install-btn'); if(b) b.hidden=rhIsApp(); }
+window.addEventListener('beforeinstallprompt',e=>{ e.preventDefault(); rhInstallEvt=e; rhInstallBtn(); });
+window.addEventListener('appinstalled',()=>{ rhInstallEvt=null; rhInstallBtn(); showToast('Installed. Open it from your home screen or apps.'); });
+async function rhInstall(){
+  if(rhInstallEvt){ const e=rhInstallEvt; rhInstallEvt=null; e.prompt(); try{ await e.userChoice; }catch(_){} return; }
+  const ua=navigator.userAgent, ios=/iPhone|iPad|iPod/.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+  const and=/Android/.test(ua);
+  document.getElementById('install-steps').innerHTML=ios
+    ? `<ol><li>Open this page in <b>Safari</b>.</li><li>Tap the <b>Share</b> button (the square with the arrow).</li><li>Scroll down and tap <b>Add to Home Screen</b>, then <b>Add</b>.</li></ol>`
+    : and
+    ? `<ol><li>Open this page in <b>Chrome</b>.</li><li>Tap the <b>&#8942;</b> menu at the top right.</li><li>Tap <b>Install app</b> (or <b>Add to Home screen</b>), then <b>Install</b>.</li></ol>`
+    : `<ol><li>Open this page in <b>Chrome</b> or <b>Edge</b>.</li><li>Click the <b>install</b> icon at the right end of the address bar (a screen with a down arrow).</li><li>Click <b>Install</b>. It gets its own window and a desktop / Start menu shortcut.</li></ol>`;
+  document.getElementById('install-modal').classList.add('open');
+}
+rhInstallBtn();
+if('serviceWorker' in navigator && (location.protocol==='https:'||location.hostname==='localhost')){
+  window.addEventListener('load',()=>{ navigator.serviceWorker.register('sw.js').catch(()=>{}); });
+}
+
 // ─── Uploaded photos (for photos that aren't in TrueFrame) ───
 // Kept in the private Supabase bucket "report-photos"; the estimate saves only id, path and caption.
 const RH_UP_BUCKET='report-photos';
@@ -5537,7 +5589,7 @@ async function rhPreview(kind,fname){
   fr.style.width=d.landscape?'11in':'8.5in'; fr.style.height='';
   fr.onload=null;
   fr.srcdoc='<p style="font:15px system-ui,sans-serif;color:#555;padding:40px;text-align:center">Preparing preview…</p>';
-  modal.style.display='flex';
+  modal.style.display='flex'; rhPreviewFit();
   let html='';
   try{ html=await rhDocHtml(kind); }catch(e){ html=''; }
   if(!html){ showToast('Nothing to preview yet'); closeProposalPreview(); return; }
@@ -5545,7 +5597,7 @@ async function rhPreview(kind,fname){
   // The page's own "Save as PDF" bar is hidden here; the preview's buttons do that job
   // (scripts stay out of the preview: the internal estimate would open the print window on its own)
   const shown=html.replace(/<script[\s\S]*?<\/script>/gi,'').replace(/<\/head>/i,'<style>.save-bar{display:none!important}body{padding-top:0!important}</style></head>');
-  fr.onload=()=>{ try{ fr.style.height=(fr.contentDocument.documentElement.scrollHeight+24)+'px'; }catch(_){} };
+  fr.onload=()=>rhPreviewSize(fr);
   fr.srcdoc=shown;
   if(btn) btn.disabled=false;
 }
@@ -6289,12 +6341,23 @@ async function printProposal(opts={}){
   const previewIframe = document.getElementById('proposal-preview-iframe');
   previewModal.style.display = 'flex';
   document.getElementById('proposal-preview-title').innerHTML='&#128196;&nbsp; Proposal Preview';
-  previewIframe.onload=null; previewIframe.style.height=''; previewIframe.style.width='8.5in';
-  previewIframe.srcdoc = html;
+  previewIframe.onload=()=>rhPreviewSize(previewIframe); previewIframe.style.height=''; previewIframe.style.width='8.5in';
+  previewIframe.srcdoc = html; rhPreviewFit();
   const pdfBtn = document.getElementById('proposal-pdf-btn');
   if(pdfBtn){ pdfBtn.innerHTML='<span>&#11015;</span> Download PDF'; pdfBtn.disabled=false; }
 }
 
+// The preview page is 8.5in (11in sideways) wide; on a phone it's scaled down to fit the screen
+function rhPreviewSize(fr){ try{ fr.style.height=(fr.contentDocument.documentElement.scrollHeight+24)+'px'; }catch(_){} rhPreviewFit(); }
+function rhPreviewFit(){
+  const fr=document.getElementById('proposal-preview-iframe'), box=document.getElementById('pp-fit'), sc=document.getElementById('pp-scroll');
+  if(!fr||!box||!sc||!sc.clientWidth) return;
+  fr.style.transform=''; box.style.width=''; box.style.height='';
+  const w=fr.offsetWidth, h=fr.offsetHeight, k=Math.min(1,(sc.clientWidth-16)/w);
+  if(k>=1) return;
+  fr.style.transform=`scale(${k})`; box.style.width=(w*k)+'px'; box.style.height=(h*k)+'px';
+}
+window.addEventListener('resize',()=>{ if(document.getElementById('proposal-preview-modal')?.style.display==='flex') rhPreviewFit(); });
 function closeProposalPreview(){
   document.getElementById('proposal-preview-modal').style.display='none';
 }
